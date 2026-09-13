@@ -1,0 +1,30 @@
+{
+  "name": "notekeeping",
+  "owner": {
+    "name": "Sachin Gulati",
+    "url": "https://github.com/dexterslaboratories"
+  },
+  "description": "Notekeeping - engineering knowledge that crosses the repository boundary.",
+  "plugins": [
+    {
+      "name": "nk",
+      "source": "./",
+      "displayName": "Notekeeping",
+      "description": "What one repository learns cannot reach the next. Notekeeping promotes knowledge across that boundary: work items get a folder that accumulates, and what outlives the task becomes project, workspace or global knowledge.",
+      "author": {
+        "name": "Sachin Gulati"
+      },
+      "homepage": "https://github.com/dexterslaboratories/notekeeping",
+      "repository": "https://github.com/dexterslaboratories/notekeeping",
+      "license": "MIT",
+      "category": "productivity",
+      "keywords": [
+        "notes",
+        "knowledge",
+        "handover",
+        "context",
+        "work-items"
+      ]
+    }
+  ]
+}

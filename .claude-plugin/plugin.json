@@ -1,0 +1,19 @@
+{
+  "name": "nk",
+  "displayName": "Notekeeping",
+  "description": "What one repository learns cannot reach the next. Notekeeping promotes knowledge across that boundary: work items get a folder that accumulates, and what outlives the task becomes project, workspace or global knowledge. Markdown in a directory you own - no database, no hooks, no background capture.",
+  "author": {
+    "name": "Sachin Gulati"
+  },
+  "version": "0.1.0",
+  "license": "MIT",
+  "homepage": "https://github.com/dexterslaboratories/notekeeping",
+  "repository": "https://github.com/dexterslaboratories/notekeeping",
+  "keywords": [
+    "notes",
+    "knowledge",
+    "handover",
+    "context",
+    "work-items"
+  ]
+}
