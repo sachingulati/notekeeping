@@ -1,6 +1,7 @@
 ---
 file:        process.md
 scope:       workspace
+schema:      1
 enabled:     true
 tier:        extended
 shape:       register

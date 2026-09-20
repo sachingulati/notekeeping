@@ -6,9 +6,7 @@ allowed-tools: Read, Glob, Grep, Write, Edit
 
 Fill in `how.md` for a work item. Writes inside the store only.
 
-**Called by a tool?** If `--caller <name>` is present, follow
-`${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`: never ask - refuse naming the argument
-that would satisfy it - and end with the outcome line.
+**`--caller <name>`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
 
 Resolve the `how.md` definition per `${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md` - the
 user's overlay wins over the shipped default - and honour its admission and exclusion tests.
@@ -26,8 +24,10 @@ Bold claim first, then the mechanism, naming the identifier or path that shows i
 
 ## What does not
 
-What was asked -> `requirements.md`. What you did -> `dev.md`. A construction approach the whole
+What was asked -> `requirements.md`. What you did -> `session.md`. A construction approach the whole
 project should inherit -> offer to promote it to `patterns.md` rather than leaving it here.
 
 Write nothing rather than something thin. The value of this file is that it teaches; a paragraph that
 restates the ticket teaches nothing.
+
+**`--dry-run`** prints what would be written and writes nothing.

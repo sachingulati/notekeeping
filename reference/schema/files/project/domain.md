@@ -1,6 +1,7 @@
 ---
 file:        domain.md
 scope:       project
+schema:      1
 enabled:     true
 tier:        core
 shape:       register

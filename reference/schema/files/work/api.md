@@ -1,15 +1,16 @@
 ---
-file:         api.md
-scope:        work
-enabled:      false
+file:        api.md
+scope:       work
+schema:      1
+enabled:     false
 tier:        example
-shape:        register
-owner:        nk:api
-trigger:      a contract appears - new, changed, or consumed
-authority:    original
-budget:       none
-env_axis:     optional
-promotes_to:  interfaces.md
+shape:       register
+owner:       nk:api
+trigger:     a contract appears - new, changed, or consumed
+authority:   original
+budget:      none
+env_axis:    optional
+promotes_to: interfaces.md
 promote_when: the contract stops changing across two consecutive saves, or the item closes
 ---
 

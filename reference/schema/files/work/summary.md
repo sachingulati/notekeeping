@@ -1,6 +1,7 @@
 ---
 file:        summary.md
 scope:       work
+schema:      1
 enabled:     true
 tier:        core
 shape:       document

@@ -1,9 +1,10 @@
 ---
 file:        plan.md
 scope:       work
+schema:      1
 enabled:     true
 tier:        extended
-shape:       document, then frozen
+shape:       document+append
 owner:       nk:plan
 trigger:     there is a design decision worth freezing before execution
 authority:   original
@@ -19,21 +20,20 @@ The approach, the steps, the order, and what each step depends on. The alternati
 the choice was close.
 
 ## Exclusion
-What was asked -> requirements.md. What actually happened -> dev.md. A choice the whole project
+What was asked -> requirements.md. What actually happened -> session.md. A choice the whole project
 should inherit -> promote to decisions.md.
 
 ## Entry format
 Ordinary prose and a numbered list of steps.
 
-**The freeze:** once a session block in dev.md is dated **on or after this file**, the plan is no
+**The freeze:** once a session block in session.md is dated **on or after this file**, the plan is no
 longer rewritten and a dated deviation is appended instead.
 
-**Not simply "dev.md has a session block".** That was the earlier rule and it misfires in the
-commonest case there is: investigating a problem before planning the fix. A block recording *what
-was found* is not execution against a plan, and a plan that does not exist yet cannot be frozen -
-a deviation needs a `**Planned**` line, and there would be nothing to put in it.
+**Not simply "session.md has a session block".** A block recording *what was found* is not execution
+against a plan, and a plan that does not exist yet cannot be frozen - a deviation needs a
+`**Planned**` line, and there would be nothing to put in it.
 
-So: **no plan.md yet -> write the first one**, whatever dev.md already holds. A plan that exists,
+So: **no plan.md yet -> write the first one**, whatever session.md already holds. A plan that exists,
 with work recorded after it -> append a deviation.
 
 ```markdown

@@ -1,37 +1,48 @@
 ---
 description: Checkpoint the session. Rewrites the handover, promotes what outlived the task, drains memory.
-argument-hint: "[id] [--tag <name>] [--promote auto|none] [--dry-run] [--caller <name>]"
-allowed-tools: Read, Glob, Grep, Write, Edit, Bash(git status:*), Bash(git branch:*), Bash(git log:*), Bash(git diff:*), Bash(git stash list:*)
+argument-hint: "[id] [--project <name>] [--tag <name>] [--promote auto|none] [--dry-run] [--caller <name>]"
+allowed-tools: Read, Glob, Grep, Write, Edit, Bash(git rev-parse:*), Bash(git status:*), Bash(git branch:*), Bash(git log:*), Bash(git diff:*)
 ---
 
 The checkpoint. **Idempotent and safe to run many times per session - that is the normal usage, not
 the exception.**
 
-**Called by a tool?** If `--caller <name>` is present, follow
-`${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`: never ask - refuse naming the argument
-that would satisfy it - and end with the outcome line.
+**`--caller <name>`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
 
 `/nk:save` exists so the session becomes disposable: save, then `/clear`, and `/nk:load` restores
 you. Everything below follows from that contract.
 
-Resolve the `dev.md` and `NOTES.md` definitions per
+Resolve the `resume.md`, `session.md` and `NOTES.md` definitions per
 `${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md` before writing either - the user's overlay
 wins over the shipped default.
+
+**Steps 2 and 6 are migration-on-write carriers.** Where the resolved definition's `## Migration`
+declares a step **on write**, convert the file and stamp it in the same write, and name the
+conversion in the report - `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md`. Where it declares
+**upgrade only**, do not convert and do not write that file: report it as outstanding and name
+`/nk:upgrade`. Never walk the store for files you were not already writing, and never move
+`schema_version`.
+
+**Where an `upgrade only` step reaches a file step 2 writes, the whole save stops, and the report
+says so in those words** - step 2 aborts, and every later step is about work that did not happen. No
+shipped definition is in that state today, both work-item files this command writes being at release
+1; the rule stands for the release that changes one. Name it before anything else in the report, and
+**say plainly not to `/clear` on the strength of that save**.
 
 ## The steps, in order
 
 | # | Do | On failure |
 |---|---|---|
 | 1 | **Resolve the store first** per `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`, then the target inside it - **minting one if there is none** (below). State the inference and name the store path; ask only if genuinely ambiguous | **abort** |
-| 2 | Rewrite the handover block in `dev.md` | **abort** |
-| 3 | Append or extend **today's** session block - re-running the same day extends it | **abort** |
+| 2 | Rewrite `resume.md` - the position, and the story below it. `## resume.md` below | **abort** |
+| 3 | Append or extend **today's** `## session <date>` block in `session.md` - re-running the same day extends it | **abort** |
 | 4 | Promotion check - route, scope, dedupe, classify, report verdicts, write on confirmation (or per `--promote`) | **abort** |
-| 5 | Drain the harness memory store - read, promote what survives admission, clear what we wrote | **abort, and say so** |
+| 5 | Drain the harness memory store - read it, promote what survives admission, **clear what was promoted**, and report what could not be placed | **abort, and say so** |
 | 6 | Refresh `NOTES.md` - the active pointer, and the verified stamp if the repo or environment moved | **abort** |
 | 7 | **Settle the item's tags** - `--tag`, plus what the session named. `## Tags` below | **warn** |
 | 8 | Regenerate the store's `index.md` per `${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md` - **a save that changed no id, title, project, parent or tag leaves it byte-identical** | **abort** |
-| 9 | Regenerate projections per `${CLAUDE_PLUGIN_ROOT}/reference/projections.md` - which decides whether either is enabled, checks the markers before writing, and orders the ignore step | **warn** |
-| 10 | Offer `summary.md` when the item closed or its change merged | - |
+| 9 | Regenerate projections per `${CLAUDE_PLUGIN_ROOT}/reference/projections.md` - which decides whether either has anything to render, checks the markers before writing, and orders the ignore step | **warn** |
+| 10 | **Where the session says the work is done, write the closing block** - one dated heading and one line of reason, shape fixed in `${CLAUDE_PLUGIN_ROOT}/reference/schema/files/work/session.md`, *Closing, and staying open*. **Only on what the user said**, never on your own reading of the work. Then offer `summary.md`, as when its change merged | **warn** |
 | 11 | **Is the repo you are standing in a registered project?** If not, say so and offer to initialise it - `## An unregistered repo` below | **warn** |
 
 > **Store first, projections last.** A failed store write aborts the save. A failed projection is a
@@ -45,57 +56,128 @@ wins over the shipped default.
 **`/nk:work` is optional, and this is what makes it optional.** A save with nowhere to write mints
 the bundle itself, so you can simply work and save.
 
+**What a mint produces is `${CLAUDE_PLUGIN_ROOT}/reference/bundle-shape.md`** - the id, the counter,
+the slug, the folder, `requirements.md`, the project. **Follow it; this command decides only
+whether to mint, never what a bundle looks like.** `/nk:work` mints against the same file, so the
+two produce identical bundles.
+
 1. **`[id]` given?** Resolve it. If it exists, that is the target. **If it does not, mint it** with
-   that id, exactly as `/nk:work --id` would.
+   that id.
 2. **No `[id]`?** Infer the target from the branch, the files touched, and what the session has
    discussed - then **resolve that inference against `index.md`**, not against your own memory of it.
-3. **One confident match → that is the target.** Several → list them and ask. **None → mint**, with
-   the next store counter and a slug from the inferred title, and **say plainly that you are creating
-   rather than resuming**.
+3. **One confident match → that is the target.** Several → list them and ask. **None → mint.**
 4. **Anything short of confident → ask.** Naming the item costs one line; the alternative costs a
    duplicate.
 
-> **The hazard is a second bundle for one piece of work**, and it is why this resolves against the
-> index rather than the session. Two saves an hour apart, with the session drifted, can infer two
-> slugs for the same work and open two folders - which nothing later will merge, because nothing here
-> is ever deleted. `/nk:work` carries the same rule for the same reason: **never create a second
-> folder for the same work.**
+**No `index.md`?** It is derived, and a store that has never completed a save has none - so its
+absence is not an answer about the work. **List `work/<YYYY-MM>/` and resolve against that**, which
+is the same set the index is built from, and **say you resolved against the directory**. `/nk:load`
+already falls back this way; a checkpoint that refused where a load succeeded, on the same store,
+would be the asymmetry rather than the caution. **Regenerate the index at step 8 as usual** - that
+is what stops the fallback being needed twice.
 
 **Under `--caller`, mint only when `[id]` was given.** Minting from inference alone, with nobody able
-to confirm and no way to ask, is precisely what the consumer contract's *refuse rather than guess*
-exists to prevent - so with no argument and no resolvable target, **refuse and name `[id]` as what
-would satisfy it.**
+to confirm and no way to ask, is what the consumer contract's *refuse rather than guess* exists to
+prevent - so with no argument and no resolvable target, **refuse and name `[id]`**. If the project
+cannot be resolved either, **name `--project <name>`**.
 
-**A minted bundle gets `requirements.md` or it does not get created**, exactly as in `/nk:work` - a
-folder without one fails `/nk:doctor`'s first error check on the day it is made.
+**`--project <name>` applies to a mint only.** It names the project of a bundle being created; it
+never retargets one that already exists. **`--dry-run`** reports the target it resolved or would
+mint, and every file it would touch, and writes nothing.
 
-Steps 2-7 are the durable invariant. If any fails, **report failure and name what was and was not
+Steps 2-6 are the durable invariant. If any fails, **report failure and name what was and was not
 written.** Never report success on a partial run.
 
-## The handover block
+## `resume.md`
 
-This is the single home of current state, and it is rewritten - never appended to. It carries
-everything a cold session needs:
+**This is the single home of current state and of the story behind it**, and it is what a cold
+session reads first. Its regions and their rules are the definition's -
+`${CLAUDE_PLUGIN_ROOT}/reference/schema/files/work/resume.md` - and are not restated here. What this
+command owes it is **how** it is rewritten.
 
-```markdown
-## Where things stand
-**Branch**    <branch> - <n> ahead of origin - <n> dirty files
-**Done**      what is finished and verified
-**In flight** what is started, and where it is
-**Next**      the next decision or action
-**Blocked**   what is stuck, and on whom
-**Verify**    the command that proves it works
-```
+**`## Where things stand` is regenerated every save; everything below it accumulates.** The position
+is only ever about now, so it is written fresh. The story, the decisions and the rejected list are
+extended, and **an entry already in the rejected list is never dropped** - reworded if it is wrong,
+never removed while the item is open.
 
-About fifteen lines. Longer narrative belongs in today's session block, not here. The project's
-`NOTES.md` holds a **pointer** to this block, never a copy - two copies of "where things stand"
-drift, and the copy is what the next session trusts.
+**About fifteen lines for the position.** Longer narrative belongs in today's session block, not in
+that region. The project's `NOTES.md` holds a **pointer** to this file, never a copy - two copies of
+"where things stand" drift, and the copy is what the next session trusts.
+
+### Re-derive it where you can, carry it forward where you cannot
+
+| This session loaded | Rebuild the story from | `Covers` says |
+|---|---|---|
+| **all of `session.md`** (a `--full` load) | **the record, which is already in context** | `re-derived` |
+| the latest block only (a `--quick` load) | the previous `resume.md`, this session, and that block | `carried forward` |
+
+**Re-deriving is what stops the file drifting**, because each rebuild is anchored to an append-only
+record rather than to the last rebuild - ten carried-forward saves is ten compressions of a
+compression. **Where the history is in context it costs nothing**, which is the whole reason
+`--full` exists.
+
+**Never read `session.md` to re-derive.** A save happens when the context is already filling, a
+second read appends a second copy at full price, and pulling history in at that moment risks
+compacting the very material being summarised. If this session did not load it, carry forward and
+say so - that is what `carried forward` is for, and `/nk:doctor` is what notices a run of them.
+
+**The dirty count excludes the paths `ignore_dirty` names**, exactly as `/nk:load` reports it
+(`${CLAUDE_PLUGIN_ROOT}/reference/config-defaults.md`; unset means exclude nothing). **One field,
+one definition** - this is the number `/nk:load` reads back, and two commands counting it
+differently would make the handover disagree with the session that restored it.
 
 ## The drain is not optional
 
 Anything left only in the harness memory store dies on `/clear`. **A save that cannot drain must say
-so** rather than reporting success. Read that store, promote what passes an admission test, and clear
-only what this plugin put there - never anything else.
+so** rather than reporting success. Read that store, promote what passes an admission test, and
+**clear what was promoted**.
+
+**Empty and unread are different answers, and only one of them is ever inferred.** *Empty* is a
+listing that returned nothing; *unread* is everything else - the directory was not found, the glob
+failed, a file would not parse. **Report `empty` only from a listing you actually got back**, and
+otherwise say the store could not be read and name the path you tried.
+
+**This is the failure that costs the most and shows the least.** A drain that reports an empty store
+it never read is indistinguishable, in the report, from one that found nothing - and it is followed
+by the line that tells the user to `/clear`. Reporting items as absent when they were merely
+unreachable is the same defect stated the other way round, and is worse than saying nothing.
+
+**Never end a save with the safe-to-clear line when the drain did not complete.** Say what is still
+only in memory, or that you could not tell, and say plainly that clearing now would lose it.
+
+**Clearing is bounded by what was filed, not by who wrote it.** An item whose content now lives in
+the store is a second copy of something already kept, and removing it is the same trim the rest of
+the design performs - bounded by the content existing somewhere else. **An item that was not
+promoted is not cleared**, whatever it looks like and whoever appears to have written it: the drain
+never removes something whose only copy it is.
+
+**This is one store, for one directory.** The harness keys memory by a slug derived from the working
+directory, so the store a save can see belongs to the directory it ran in - not to the project, and
+not to every project. **Name the store path in the report.** Where the repository's own slug and the
+one in use differ - a save run from a subdirectory, or a project that has moved - a second store
+holds items this run never saw, and saying so is what stops them being counted as drained.
+`/nk:doctor` carries the finding.
+
+### Finding it
+
+**`~/.claude/projects/<cwd-slug>/memory/`**, where `<cwd-slug>` is the **absolute working directory
+with every path separator, drive colon and dot replaced by `-`** - so a drive-letter root, whose
+colon is followed by a separator, yields two dashes where they meet. **Glob it; do not shell out for
+it.** `Glob` and `Read` reach that path on their own, and this command is granted both.
+
+**Glob `~/.claude/projects/*/memory/*.md` and match the slug** rather than composing the path blind:
+the listing is what tells you whether the directory exists at all, and matching against it is also
+how the sibling-store finding above is spotted.
+
+**A relocated `CLAUDE_CONFIG_DIR` moves this and cannot be read from here.** Nothing in this
+command's grant reads an environment variable, so where `~/.claude/projects/` does not exist,
+**say the store could not be located and name the variable** - never that there was nothing in it.
+
+**What cannot be placed is reported, never cleared.** One line per item, with where it would go if
+you agree. **An instruction goes to the `instructions.md` of the scope it holds at** - the item, an
+area, the project, the workspace - and an instruction that holds everywhere has no scope here at
+all: name your harness instructions file and leave the item alone. Global has no projection, so
+filing it in this store would take it out of force.
 
 ## Tags
 
@@ -109,6 +191,15 @@ sides; `${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md` has the shape.
 |---|---|
 | `--tag <name>` | **repeatable.** Adds each to the resolved item. Explicit, and never refused |
 | **the session** | adds tags the session actually named - below |
+
+**Write the tag into the item's `requirements.md` frontmatter, and only then regenerate the index.**
+`tags:` lives in `requirements.md`; `index.md`'s `tags` column is **derived from it** and is
+authoritative over nothing. **A tag written to the index alone is lost at the next rebuild** - which
+is what `/nk:index` will correctly report and correctly discard.
+
+**This is an amendment, and amendments are allowed.** `requirements.md` is *write-once plus
+amendments*: what `/nk:work` forbids is rewriting the bundle, not adding a label to it. Touch the
+`tags:` key and nothing else in the file.
 
 ### Picking tags up from the session
 
@@ -158,39 +249,65 @@ naming both, because guessing which one they meant is exactly the silent promoti
 
 ## An unregistered repo
 
-**A save resolves the work item's project; it does not ask where you are standing.** That made one
-case invisible: the store resolves, the save is correct, and the repository you are in is not a
+**A save resolves the work item's project; it does not ask where you are standing.** One case turns
+on the difference: the store resolves, the save is correct, and the repository you are in is not a
 registered project of it - so nothing is ever delivered there and nothing ever says why.
 
 **The comparison is free.** Step 1 already resolved the repo root per
-`${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`, and step 8 already read the project register.
+`${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`, and step 9 already read the project register.
 Compare the one against the other. **Use only a root `git rev-parse --show-toplevel` returned** - if
 git was unavailable, you do not know where you are, so say nothing rather than offering to register a
 directory you inferred.
 
-**Inform, then offer - once.**
+**Infer before offering anything.** The working directory is **not** the project: a user can be
+standing anywhere and still be working on something registered, and then there is nothing to say.
+Resolve the work item's `project:` first, then the repo root against the register. **Only a repo
+that is neither is the case this section is about.**
+
+**Then offer what is actually needed**, which is not always registration:
+
+| Where the repo root sits | The offer |
+|---|---|
+| **inside the workspace root**, unregistered | register it - `/nk:init` from inside it |
+| **above the workspace root** | **a project cannot be registered there at all**, so offer to initialise a workspace there, or to point the work item at a project that exists. `/nk:init` would refuse a yes, so never offer one |
 
 > This repo - `/abs/path/web-client` - is not a registered project of this workspace, so notes saved
 > here are not delivered to it. Want me to register it? That is `/nk:init` from inside it.
 
-**If they decline, record the decline in the workspace store and do not ask again.** A scratch clone,
-a vendored dependency, or a repository deliberately kept out is a legitimate standing answer, and a
-prompt that returns every save teaches the user that this command's prompts are noise.
+**Ask every time, and record nothing.** A remembered *no* outlives the thing that would have made
+the question stop - the repo gets registered, or the work item gets its project, and a stored decline
+goes on suppressing a line that is now correct, with nothing anywhere to clear. **A session-scoped
+memory is the worst of both**: it still outlives the fix, and it leaves nothing behind to find.
+
+**What makes asking every time bearable is that inference usually answers it first, and that this is
+one line, last, and never a reason to abort.** Keep it to one line; a prompt that returns every save
+teaches the user that this command's prompts are noise, and that is the cost being accepted here.
 
 **Never register it yourself.** Initialising is `/nk:init`'s job - it resolves the workspace, refuses
 `$HOME`, proposes the name and writes the projection. A save that created a project would be guessing
 the name from the directory, which is the exact inference `/nk:init` exists to stop.
 
 **Under `--caller`, report and move on.** No offer, no registration, nothing recorded: a consumer
-never initialises anything (`reference/consumer-contract.md`). The status stays `ok` - the store
+never initialises anything (`${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`). The status stays `ok` - the store
 resolved and the item saved, so this is a detail, not a failure - and the repo rides in the detail:
 
 ```
-nk: save ok - work/2026-09/spike-auth, 3 files; repo web-client not registered
+nk: save ok — work/2026-09/spike-auth, 3 files; repo web-client not registered
 ```
 
 ## End by confirming it is safe to leave
 
-Name the command that gets them back:
+Name the command that gets them back. **`/nk:load` needs no argument** - it infers from the branch
+and the files touched, both of which survive the clear.
 
-> Saved. Safe to `/clear` - resume with `/nk:load <id>`.
+> Saved. Safe to `/clear` - resume with `/nk:load`.
+
+**This line is a claim about the drain, and it is earned rather than printed.** It says nothing
+survives only in the session, so it may be written **only where step 5 completed** - the store was
+listed, and everything it held was either promoted or reported as still in it.
+
+**Where the drain did not complete, say what is at risk instead** - one line, in place of this one,
+never alongside it:
+
+> Saved, but the memory store could not be read (`<path>`). Do not `/clear` yet: anything in it
+> exists nowhere else.

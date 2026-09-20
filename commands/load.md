@@ -1,14 +1,12 @@
 ---
 description: Resume. Reads only, never writes - restores where you were from the store, git and the tracker.
-argument-hint: "[query] [--caller <name>]"
+argument-hint: "[query] [--full] [--quick] [--caller <name>]"
 allowed-tools: Read, Glob, Grep, Bash(git status:*), Bash(git branch:*), Bash(git log:*), Bash(git diff:*), Bash(git stash list:*)
 ---
 
 Resume where you left off. **This command reads. It never writes anything, anywhere.**
 
-**Called by a tool?** If `--caller <name>` is present, follow
-`${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`: never ask - refuse naming the argument
-that would satisfy it - and end with the outcome line.
+**`--caller <name>`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
 
 ## 1. Resolve the store, then the query
 
@@ -50,7 +48,7 @@ you passed over costs one line and is the only way the collision is ever visible
 id; `<query>` is also a tag on four items."*
 
 Otherwise: one hit loads it; several candidates are listed to pick from, **newest first**; none
-says so plainly. **Newest is derived** - the newest dated block in each candidate's `dev.md`,
+says so plainly. **Newest is derived** - the newest dated block in each candidate's `session.md`,
 falling back to its `work/<YYYY-MM>/` bucket. One cheap read per candidate, never per item.
 
 A bare invocation infers from the current branch, recently touched files, and what this session has
@@ -65,31 +63,97 @@ cannot say *why* it matched.
 ## 2. Read the bundle
 
 - `requirements.md` in **`active`** mode - the amendment chain resolved to current.
-- `dev.md`: the handover block, and the latest session block.
+- **`resume.md` whole.** It is the synthesis - position, the story, why each decision was made, and
+  what has already been ruled out - and it is what makes a cold session continuous rather than
+  merely informed.
+- **`session.md`, how much depending on the depth** - see *Depth* below. On `--quick`, the latest
+  block alone, **`grep -n '^## session ' | tail -1`**, read from there to the next `## ` heading or
+  the end. On `--full`, the file. Every block names its kind, so the part wanted is addressable
+  without the ones before it.
 - `plan.md` next steps and `test.md` status, if they exist.
+- **`instructions.md` whole, if it exists** - what this item requires you to *do* while it is in
+  flight. Its budget is small enough that bounding the read would cost more than it saves.
 
-## 3. Tracker, if an adapter is enabled
+**This is the only delivery that file has**, which is why it is read whole and read first among the
+optional ones: the project's and the workspace's instructions arrive by projection, and re-reading
+them here would pay twice for the same lines. **Say in the report that the item carries instructions
+and how many** - an instruction that loaded silently is indistinguishable, from the outside, from
+one that did not load at all.
 
-Fetch the issue **with its comments and sub-tasks** - the decisive context routinely sits there
-rather than in the structured fields. Fetch every id in `ids:`.
+**Check that the projection actually delivered them; never assume it did.** A projection can be
+missing, stale, or stripped of its block - `/nk:doctor` carries the finding and `/nk:project <name>`
+rebuilds it - so *already in context* is a claim about a file that may not exist. **Look for the
+literal `## Standing instructions` heading** in `<repo>/CLAUDE.local.md` and in the workspace root's,
+per `${CLAUDE_PLUGIN_ROOT}/reference/projections.md`, which is the same detection `/nk:doctor` uses
+and costs one grep per scope.
+
+| What you find | Do |
+|---|---|
+| the heading is there | say the scope's instructions arrived by projection, and do not re-read them |
+| the block is missing, or has no such heading, **and that scope's `instructions.md` has content** | **read it and render it here**, say that it came from the store rather than the projection, and name `/nk:project <name>` or `/nk:doctor --fix` |
+| that scope has no `instructions.md`, or it is empty | nothing to say |
+
+**Reporting them as loaded when nothing loaded them is the failure this prevents**, and it is worse
+than silence: the user is told a standing instruction is in force while the session cannot see it.
+
+## Depth - what is read of `session.md`
+
+| | Reads | Then a save can |
+|---|---|---|
+| **`--quick`** | `resume.md` + the latest session block | only carry `resume.md` forward, which is the one path that can drift |
+| **`--full`** | `resume.md` + all of `session.md` | **re-derive `resume.md` from the record**, at no extra cost, the history already being in context |
+
+**`--quick` is the default**, and `load_depth` in the store's config changes it
+(`${CLAUDE_PLUGIN_ROOT}/reference/config-defaults.md`). A flag beats the setting.
+
+**Depth governs `session.md` and nothing else.** `requirements.md`, `plan.md`, `test.md` and
+`instructions.md` are bounded and cumulative, and both depths read them identically. A `--quick`
+that also read less of those would be answering a different question.
+
+**Never read `session.md` twice in one session.** A second read is not recognised as a repeat: it
+appends a second copy at full price and both are re-sent on every turn after it, where merely having
+read it once is charged at cache rates. So a save later in this session uses what is already here
+and reads only what is missing.
+
+## 3. Tracker
+
+**Only where this session already reaches the tracker** - an MCP server the user has connected, or a
+CLI they run. The fetch is theirs, not this plugin's: it configures no tracker and holds no
+credentials, so where there is no such tool the step is skipped and the bundle is the source.
+
+Where there is one, fetch the issue **with its comments and sub-tasks** - the decisive context
+routinely sits there rather than in the structured fields. Fetch every id in `ids:`.
 
 ## 4. Git state
 
 For each project in the item's `project:` list **and their declared dependencies**: whether the
-branch exists, ahead/behind counts, dirty files excluding configured local-only ones, stashes
-mentioning the id, the last three commits, and a diff stat against the default branch.
+branch exists, ahead/behind counts, **dirty files excluding the paths `ignore_dirty` names**
+(`${CLAUDE_PLUGIN_ROOT}/reference/config-defaults.md`; unset means exclude nothing), stashes
+mentioning the id, a diff stat against the default branch, and **the commits, bounded by the work
+rather than by a number**:
+
+| | Read |
+|---|---|
+| the branch is not the default branch | **`git log <default>..HEAD`** - every commit on it. The branch is the item, so the branch is the bound |
+| the branch **is** the default branch | **`git log --since=<date of the newest block in `session.md`>`** - what has happened since the last checkpoint |
+
+**Neither bound is a count.** The diff stat already says *what* changed, cumulatively; commits are
+read for **sequence and intent**, which the stat cannot carry - and a fixed number of them keeps the
+end of the story and drops its beginning.
 
 ## 5. Parent roll-up
 
 **Find children from the index's `parent` column** - grep it for this item's `id`. That is the
-column's second job, and it is why the roll-up no longer needs a tree-wide scan to discover what it
-is rolling up.
+column's second job, and it is what spares the roll-up a tree-wide scan.
 
-If the item has children, one screen: each child's handover block.
+If the item has children, one screen: **each child's `## Where things stand` region only**, bounded
+by the heading. **Never a child's whole `resume.md`** - that file is a full summary now, and a parent
+with five children would pull five of them to render one screen.
 
 ## 6. MR and pipeline state
 
-Only when one is already known. **No speculative lookups.**
+Only when one is already known, and only through access this session already has. **No speculative
+lookups**, and nothing is fetched on this plugin's behalf.
 
 ## Output
 
@@ -103,11 +167,24 @@ artifacts exist, and the single most important discrepancy if there is one.
 nk: load ok — TKT-482 (repo-a); branch main, clean; requirements only, no plan/test; 1 discrepancy
 ```
 
-**Otherwise - one screen:**
+**Otherwise - one screen, in this order, filled from the run and never copied from here.** It is
+rendered from `resume.md`, which already holds the story; this is the shape it is reported in, not a
+second act of synthesis:
 
 ```
-where it stands -> next actions -> blockers -> code state -> discrepancies
+<id> - <title>  (<project>)
+
+where it stands   <where the handover left it>
+next actions      <the next thing, and the one after>
+blockers          <what is in the way> | none
+code state        branch <branch>, <clean> | <n dirty>; <ahead/behind> ; <stashes>
+discrepancies     <source> disagrees with <source>: <what>, and <which you think is right>
+                  none found
 ```
+
+**All five labels are printed every run.** A section with nothing in it carries `none`, because
+*no blockers* and *blockers not checked* are different answers and the reader cannot tell them
+apart from a missing line.
 
 **The discrepancies section is the point.** The notes, the tracker and git each hold a version of the
 truth and they drift. Naming the drift is worth more than any one of them: say plainly where the

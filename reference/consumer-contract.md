@@ -5,6 +5,17 @@ title: Being called by a tool, not a person
 
 # The consumer contract
 
+| | |
+|---|---|
+| **The contract version this plugin ships** | **1** |
+
+**It is stated here and nowhere else.** `/nk:help --caller` reports it by reading this line - a
+number typed into a command file is one that drifts the first time the contract moves, and a
+consumer built against a drifted number cannot tell which behaviour it is getting. **It moves only
+when an existing consumer would have to change**: a new command, a new flag or a wider `--caller`
+surface leaves it where it is, exactly as a plugin release leaves `schema_version` alone
+(`${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md`, which keeps the same distinction for stores).
+
 **A consumer is any tool that wants notekeeping's capabilities without owning its storage** - another
 plugin, a hook, a scheduled agent, a wrapper someone wrote for themselves. It calls commands. It
 never reads or writes the store directly.
@@ -29,17 +40,11 @@ the difference in what to do about it belongs to them.
 ## When more than one thing is missing
 
 **Validate the call before touching the filesystem.** A refusal names the argument that would
-satisfy it, so **which check fires first decides what the caller retries with** - and a consumer
-told *the store is missing* when the real problem is a missing flag value retries the wrong thing,
-or stops.
+satisfy it, so **which check fires first decides what the caller retries with**.
 
-**The order is the flags, then the store, then the project.** Cheapest first, and it also produces
-the most actionable refusal: an argument the caller controls is one it can fix without a person,
-while a missing store is not.
-
-*(Measured, session 26, on a flag since removed: the same `--caller` call refused twice for different reasons on
-two runs - once naming the missing flag value, which was right, and once naming a store that was
-present. Two refusals for one call is one refusal too many.)*
+**The order is the flags, then the store, then the project.** Cheapest first, and it produces the
+most actionable refusal: an argument the caller controls is one it can fix without a person, while a
+missing store is not.
 
 ## The outcome line
 
@@ -70,28 +75,18 @@ detect. **A command file that describes an output shape does not apply under `--
 appears to, this rule wins and the command file is wrong.
 
 **Do not narrate this rule.** Saying *"since `--caller` is set, only the outcome line is emitted"*
-**is** the report it is suppressing, and it is the one failure mode left once the report is gone.
-Emit the line. Say nothing about emitting it.
-
-*(Measured, session 26, across three rounds and 32 contract calls. **Round 1:** one call in nine
-ended `` ``` ``; diagnosed as a wording problem, and the wording was fixed. **Round 2, after that
-fix: two in nine** - one fenced, one omitting the line entirely and ending on a free-form
-"Discrepancies" section. **Round 3, with the report suppressed except for a bounded block in `load`
-and `doctor`: two in eleven, both of them in the block-keeping commands, and zero in the commands
-emitting the line alone.** The block was the defect at every round; the carve-out kept it alive.
-**Root cause:** `load.md` carried its own `## Output - one screen` section ending in *"the
-discrepancies section is the point"* - a shipped command file contradicting this one, and winning.)*
+**is** the report it suppresses. Emit the line. Say nothing about emitting it.
 
 | Status | Means |
 |---|---|
-| `ok` | it wrote what it was asked to write. Usually the store; **also a projection**, where one was enabled |
+| `ok` | it wrote what it was asked to write. Usually the store; **also a projection**, where one was due |
 | `no-change` | the call was valid and nothing needed writing |
 | `refused` | the command did not run, and the detail says what would let it |
 
 ```
 nk: save ok — work/2026-09/spike-auth, 3 files
 nk: save no-change — work/2026-09/spike-auth
-nk: work refused — project unresolvable; pass --project, or run /nk:index to see the options
+nk: work refused — project unresolvable; pass --project, or run /nk:project to see the options
 ```
 
 **`no-change` is what makes idempotency observable**, and it is the status that separates a consumer
@@ -102,13 +97,12 @@ report is the output.
 
 ## Every command accepts `--caller`. Not every command will act on it
 
-**All sixteen accept the flag**, because a consumer can invoke any of them - nothing stops an agent
-typing `/nk:init` - and a command with no defined behaviour under `--caller` does not become
-unreachable, it becomes **unpredictable**. Accepting the flag is what makes the answer a parseable
-refusal instead of whatever the command happens to do with an argument it does not recognise.
+**Every shipped command accepts the flag**, because a consumer can invoke any of them - nothing
+stops an agent typing `/nk:init`. A command with no defined behaviour under `--caller` does not
+become unreachable, it becomes **unpredictable**; accepting the flag is what makes the answer a
+parseable refusal rather than whatever the command does with an argument it does not recognise.
 
-**Accepting the flag is not authority to act.** These two questions were fused into one table until
-session 37, and separating them is the whole of this section:
+**Accepting the flag is not authority to act**, and the two questions are separate:
 
 | | Under `--caller` |
 |---|---|
@@ -117,24 +111,23 @@ session 37, and separating them is the whole of this section:
 | **`review`** | **reports, never applies.** Compress the findings into `<detail>`. `--apply` and `--apply all` are refused: the write depends on a per-finding selection, and a consumer cannot supply one |
 | **`init`** | **reports, never creates.** Say what it would create and that a person must run it |
 | **`config`** | **reports, never writes.** Resolved values are readable; `set` is refused |
+| **`adopt`** | **reports the inventory, and writes nothing.** Filling a store from material nobody has looked at is a person's act; the later phases are also the expensive half |
+| **`upgrade`** | **reports the version gap, and migrates nothing.** A migration rewrites knowledge the user did not just write |
 
-**A consumer never initialises a store and never edits configuration.** That rule is unchanged and is
+**A consumer never initialises a store, never edits configuration and never migrates one.** That rule is unchanged and is
 now enforced *inside* the two commands rather than by their absence from a list. No store means a
 refusal naming `/nk:init`, run by a person - which is what keeps the machine config reachable only by
 the person whose machine it is.
 
-**Why the refusal beats the omission.** A command outside the contract answered an unrecognised flag
-with undefined behaviour, and the caller learned nothing it could act on. A command inside it answers:
+**Why the refusal beats the omission.** A command outside the contract answers an unrecognised flag
+with undefined behaviour, and the caller learns nothing it can act on. A command inside it answers:
 
 ```
-nk: init refused - a store is created by a person; run /nk:init
-nk: config refused - settings are edited by a person; /nk:config set is not available to a caller
-nk: review refused - --apply needs a per-finding selection; report the findings to your user
+nk: init refused — a store is created by a person; run /nk:init
+nk: config refused — settings are edited by a person; /nk:config set is not available to a caller
+nk: review refused — --apply needs a per-finding selection; report the findings to your user
+nk: upgrade refused — a store is migrated by a person; run /nk:upgrade
 ```
-
-**The old table also contradicted itself**, which is how this was found: `help` sat in the *Not* row
-while this same file specified its `--caller` behaviour two paragraphs below, calling it *"the one
-exception to the table"*. An exception that permanent is a table with the wrong shape.
 
 ## The refusals a consumer will actually hit
 
@@ -144,9 +137,10 @@ none is unactionable.
 | Situation | Refusal must name |
 |---|---|
 | No store above the working directory | `/nk:init`, run by a person - never create one |
-| The project cannot be resolved | `--project <name>`, and `/nk:index` to list the options |
+| The project cannot be resolved | `--project <name>`, and `/nk:project` to list the options |
 | `save` has something to promote | `--promote auto` or `--promote none`. **Supplying neither refuses naming both** - guessing which was meant is the silent promotion this forbids |
 | `init` or `config set` called by a consumer | **a person.** The action is refused whatever the arguments are, and the detail says so rather than naming a flag that would unlock it - there is none |
+| The store's `schema_version` is not the plugin's | **`/nk:upgrade`, run by a person**, when the store is older; the plugin update when it is newer. A command may finish a file it is already writing, where the step allows it; only `/nk:upgrade` sweeps the store |
 | `review --apply` called by a consumer | **a per-finding selection**, which a consumer cannot supply. Report the findings to the user instead |
 
 ## Why a consumer calls rather than reads
@@ -162,8 +156,6 @@ in `store-boundary.md` and `schema/resolution.md` are enforced once instead of b
 per consumer. A fourth follows for free - `allowed-tools` is declared per command and the harness
 enforces it, so a consumer routed through the commands inherits those restrictions.
 
-## What this does not solve
-
-**No locking.** Two consumers, or a consumer and a user, working one store concurrently is unhandled
-in v1 - a stated limit rather than an unnoticed one. Contradiction handling is what catches the
-result, after the fact.
+**One store, one writer at a time.** Nothing here locks, so two consumers - or a consumer and a
+user - checkpointing the same store concurrently can interleave. Contradiction handling catches the
+result after the fact.

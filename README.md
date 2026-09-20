@@ -1,13 +1,20 @@
 # Notekeeping
 
-**What this repository learned cannot reach the next one.**
+**Your session is disposable. What you learned in it is not.**
 
-The gotcha that cost you an afternoon, the decision nobody wrote down, the reason that config is the
-way it is — it lives in one repo. The next project starts from nothing, and a clone takes none of it
-with you.
+**Every task leaves something behind.** The gotcha that cost you an afternoon, the decision nobody
+wrote down, the reason that config is the way it is. Each work item gets a folder that accumulates —
+what was asked, the plan, what happened, how it was verified — and what outlives the task is
+promoted outward: into the project, into the workspace, into knowledge you carry wherever you work.
 
-Notekeeping moves knowledge across that boundary. Work items get a folder that accumulates; what
-outlives the task is promoted into knowledge you keep.
+**Because the notes exist, the session stops being precious.** A long session is a worse session:
+context fills with dead ends and superseded plans, it costs more per turn, and the agent grows
+confident about things that stopped being true an hour ago. When the record is current you can
+`/clear` and lose nothing — `/nk:load` rebuilds your context *out of the notes*, short and true.
+
+**One step writes for both horizons, and that is the whole design.** `/nk:save` brings the record up
+to date and promotes what outlived the task at the same time: the handover that restores you
+tomorrow and the gotcha that saves you next year come out of one act of writing.
 
 **Markdown in a directory you own. No database, no hooks, no background capture.**
 
@@ -35,32 +42,33 @@ it** — never by counting mentions.
 ## Getting started
 
 ```bash
-/nk:init ~/projects      # names your workspace - creates it, plus global, and offers the repos in it
-/nk:work                 # start something — it infers the title from the session
-/nk:save                 # checkpoint: handover, promotion, memory drain
+/nk:init --workspace ~/projects   # names your workspace - creates it, plus global, and offers the repos in it
+/nk:work                          # start a work item up front — optional; /nk:save mints one too
+/nk:save                          # checkpoint: handover, promotion, memory drain
 /clear
-/nk:load                 # and you are back where you were
+/nk:load                          # and you are back where you were
 ```
 
-`/nk:save` exists so the session becomes **disposable**. Save, clear, load. Everything else follows
-from that.
+**That loop is the habit; the store is what it leaves behind.** Each save makes the session safe to
+discard and promotes what it taught you — so the knowledge base is built by working, and never by
+remembering to write it up.
 
 ## What a store looks like
 
 A store is a `.notekeeping/` directory at the root of its scope. There are two kinds and no others:
 `~/.notekeeping/` is global, and `<workspace>/.notekeeping/` covers the projects in that workspace.
-Resolution walks up from where you are; finding none is a refusal, never a guess.
+Resolution walks up from where you are; finding none is a refusal, never a guess. Global also keeps
+a list of the workspaces you have created — the one thing no walk can tell you — and it is used to
+enumerate them, never to resolve one.
 
 ```
 <workspace>/.notekeeping/
   config.md                     schema_version, and your project registry
+  index.md                      the work-item resolver — regenerated, never hand-written
   schema/                       your overlay — wins over everything shipped
   projects/<name>/              NOTES.md, overview.md, and registers as they earn their place
-  work/<YYYY-MM>/<id>/          requirements, plan, dev, test, summary
+  work/<YYYY-MM>/<id>/          requirements, plan, resume, session, test, summary
 ```
-
-**Everything outside `.notekeeping/` is yours.** The plugin claims no ordinary word at any level —
-that is why the directory is named the way it is.
 
 ## Commands
 
@@ -86,14 +94,16 @@ that is why the directory is named the way it is.
 | | |
 |---|---|
 | `/nk:project [name]` | report every project, or rebuild one project's digest and overview |
-| `/nk:review` | read the store's content and propose what should change. Proposes and stops; `--apply` performs only the mechanical findings |
+| `/nk:review` | read the store's content and propose what should change. Proposes and stops; `--apply` shows each finding's diff and you pick which to apply |
 
 **Tooling**
 
 | | |
 |---|---|
-| `/nk:init [path]` | create a store. Naming a workspace also creates global and offers the repositories under it. Makes directories only; never reads your files |
+| `/nk:init [path]` | create a store. Naming a workspace also creates global and offers the repositories under it. Creates structure; never mines your notes |
+| `/nk:adopt [path]` | read the notes you already have and **build the store out of them**. **Nothing is written without `--apply`** - the bare command proposes and stops. Into the store it only ever copies; the one thing it removes is content it has already copied out of a context file, on a second confirmation of its own |
 | `/nk:doctor` | what is broken, drifting, or worth doing. `--fix` repairs only the unambiguous |
+| `/nk:upgrade` | move a store to the schema version this plugin ships. **Nothing is written without `--apply`, and `--apply` still asks once** - the bare command reports the gap and the work it would do. **A store made before schema 2 has to run this before `/nk:save` will checkpoint it** |
 | `/nk:config` | show or change settings, and say which file each value came from |
 | `/nk:budget` | what the notes actually cost you — always-loaded, on-demand, registers |
 | `/nk:index` | rebuild the work-item resolver. Rarely typed; `save` does it |
@@ -108,23 +118,25 @@ that is why the directory is named the way it is.
 - **One thing is written without being asked each time, and here it is. The projections.**
   `CLAUDE.local.md` is written to each repository you registered as a project, and to your workspace
   root - **outside the store**. **It is written when you register the project**, so a repo starts
-  delivering the moment it is added; later saves rewrite only the one project you were working in, and
-  `/nk:project <name>` refreshes any of them. That is how the notes reach a session at all:
-  nothing else the plugin writes is loaded automatically. `projections.enabled: false` and
-  `projections.workspace: false` stop them, and **`/nk:doctor --fix` rebuilds every projection**, so
-  deleting one costs nothing.
-- **Only `CLAUDE.local.md`, never `CLAUDE.md`.** That file is yours or your team's at every level it
-  appears, and **nothing here writes it or proposes a change to it.** Every file this plugin writes
-  outside its own store is personal and local — two `CLAUDE.local.md` files and one
-  `.git/info/exclude` entry. **Nothing it writes is a file your teammates read.**
-- **Already have a `CLAUDE.local.md`? We append below it and never touch what is above.** The block
-  is fenced by markers and labelled with what wrote it; every later save rewrites only what is
+  delivering the moment it is added; later saves rewrite only the one project you were working in,
+  and `/nk:project <name>` refreshes any of them. That is how the notes reach a session at all -
+  nothing else the plugin writes is loaded automatically. **Delivery follows registration**, and
+  **`/nk:doctor --fix` rebuilds every projection**, so deleting one costs nothing.
+- **Nothing outside the store is a file your teammates read.** Two `CLAUDE.local.md` files and one
+  `.git/info/exclude` entry, all personal and none committed. **No projection is ever written to a
+  `CLAUDE.md`.**
+- **`/nk:adopt` is the one command that edits a `CLAUDE.md`, and only downward.** When it moves
+  knowledge out of a context file into the store it offers to remove what moved — **only lines that
+  are not committed, only once the content is in the store, and only on a confirmation of its own.**
+  Anything at `HEAD` is untouchable, and an instruction you obey is never treated as knowledge.
+- **Already have a `CLAUDE.local.md`? The block goes below it, and nothing above it is touched.**
+  It is fenced by markers and labelled with what wrote it; every later save rewrites only what is
   between those markers. **Registering the project is the moment that append happens**, so you see it
   in that command's report. Delete the block and `/nk:project <name>` or `/nk:doctor --fix` writes it
-  back — to stop it for good, `/nk:config set projections.enabled false`.
-- **No tracked file is touched.** The projection is ignored through `.git/info/exclude`, which is
-  local to your clone and never committed. We do not write your `.gitignore` — that one lands in
-  your team's review, so it stays yours.
+  back: it is maintained for as long as the project is registered.
+- **No tracked file is touched.** The projection is ignored through one appended line in
+  `.git/info/exclude`, which is local to your clone and never committed. Your `.gitignore` stays
+  yours — that one lands in your team's review.
 
 ## Make it yours
 
@@ -151,6 +163,18 @@ the contract version and the callable list.
 
 Claude Code. Git is used where it can answer and is never required — a project with no repository is
 a first-class case.
+
+**One setting, once.** Your store sits above your repositories, and the `Read on demand` line in
+every projection points at it by absolute path. Claude Code reads outside the working directory only
+where `additionalDirectories` allows it, so name your workspace root and `~/.notekeeping` in
+`~/.claude/settings.json`:
+
+```json
+{ "permissions": { "additionalDirectories": ["/path/to/your/workspace", "~/.notekeeping"] } }
+```
+
+Without it the always-loaded half still arrives and the on-demand half is refused at the moment it
+is read. `/nk:doctor` reports that as an error until it is set.
 
 ## Licence
 

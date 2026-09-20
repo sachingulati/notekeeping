@@ -1,6 +1,7 @@
 ---
 file:        interfaces.md
 scope:       project
+schema:      1
 enabled:     false
 tier:        example
 shape:       register

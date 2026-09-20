@@ -1,6 +1,7 @@
 ---
 file:        test.md
 scope:       work
+schema:      1
 enabled:     true
 tier:        extended
 shape:       register

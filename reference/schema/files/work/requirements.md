@@ -1,6 +1,7 @@
 ---
 file:        requirements.md
 scope:       work
+schema:      1
 enabled:     true
 tier:        core
 shape:       document+append
@@ -19,7 +20,7 @@ The ask itself, its rationale, its acceptance criteria, and its boundaries - wha
 of scope.
 
 ## Exclusion
-How you will do it -> plan.md. What you learned about the terrain -> how.md. What happened -> dev.md.
+How you will do it -> plan.md. What you learned about the terrain -> how.md. What happened -> session.md.
 
 ## Source
 When the body was written from material the user supplied or a tracker issue rather than from
@@ -49,16 +50,15 @@ empty.
 | `created` | yes | date |
 
 **`tags` is plural on both sides, and that is deliberate.** The frontmatter key is `tags:` and the
-resolver's column is `tags` - **the same word**, unlike `project:`/`projects` below. That asymmetry
-exists for historical reasons and is a documented trap that has already produced a measured bug;
-there is no reason to reproduce it in a newer field.
+resolver's column is `tags` - **the same word**, unlike the `project:`/`projects` asymmetry below,
+which is a documented trap and is not reproduced here.
 
 **A tag is a flat label, not a relation.** It has no owner, no requirement of its own and no
 lifecycle - it is a name several items happen to share. An item may carry any number of them, and
 two items sharing one are not otherwise connected.
 
 **No `updated` field.** Last activity is **derived, never stored** - the newest dated block in
-`dev.md`, which is append-only and therefore cannot drift, falling back to the `work/<YYYY-MM>/`
+`session.md`, which is append-only and therefore cannot drift, falling back to the `work/<YYYY-MM>/`
 bucket for an item too new to have one
 (`${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md`). A stored date would have to be
 maintained by every writer, and a field that nothing maintains is worse than no field: it reads as
@@ -68,13 +68,12 @@ authoritative while being wrong.
 holds this list verbatim - the two names are different on purpose and must not be swapped. Every
 command that reports git state reads `project:`, so writing `projects:` here silently breaks them.
 
-**Never invent a project.** Resolve it: the working directory to a repo root, that root against
-each project's `dirs:`, then the repo directory's basename. If none of that resolves and you cannot
-ask, write `project: []` and say in the body that it is unresolved. A guessed project name routes
-promotion to the wrong scope and reports git state for a repository the work has nothing to do with.
+**Never invent a project**, and never fall back to a directory's basename. How it resolves, and
+what to write when it does not, is
+`${CLAUDE_PLUGIN_ROOT}/reference/bundle-shape.md`.
 
 **No status field, and the resolver carries no `status` column either.** A work item holds no
-workflow state - see the trigger note above. Where a tracker adapter is enabled, `/nk:load` fetches
+workflow state - see the trigger note above. Where the session reaches the tracker, `/nk:load` reads
 live status at read time; it is never cached in the store, because cached live state carries an
 authoritative look while going stale the moment somebody *else* acts.
 

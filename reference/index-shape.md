@@ -14,11 +14,11 @@ candidate list is unreadable without one. The two clauses together exclude `stat
 user-defined field that nothing resolves by earns no column, and grep remains the fallback it
 always was.
 
-**This file exists because four commands touch this one file.** `/nk:index` rebuilds it for repair,
-`/nk:save` and `/nk:work` regenerate it as a matter of course, and `/nk:load` resolves against it.
-Two writers that state the shape separately drift, and that drift has already been measured once:
-*`/nk:work` wrote an empty cell and the next `/nk:save` wrote `[]` for the identical empty project
-list.* One shape, stated once, cited by all four.
+**This file exists because six commands touch this one file.** `/nk:index` rebuilds it for repair,
+`/nk:save` and `/nk:work` regenerate it as a matter of course, `/nk:adopt` writes it where an
+adoption produced work items, `/nk:upgrade` regenerates it rather than migrating it, and `/nk:load`
+resolves against it. Two writers that state the shape separately drift - one rendering an empty
+project list as an empty cell and the other as `[]`. One shape, stated once, cited by all six.
 
 ## The columns
 
@@ -42,11 +42,9 @@ stays authoritative.
 | TKT-517 | | Counter rollup | 2026-08/TKT-517-counter-rollup | repo-a, repo-b | TKT-500 | |
 ```
 
-**The relation columns are the reason this shape changed.** All three - `ids`, `parent`, `tags` -
-are declared in the schema and accepted by `/nk:work`, and none of them used to be indexed. The
-result was three relations each solved separately: a flag for one, a bespoke step for another, a
-silent tree-wide grep for the third. **One indexed lookup serves all three**, and without it a
-relation can be set and never walked.
+**The three relation columns - `ids`, `parent`, `tags` - are each declared in the schema and
+accepted by `/nk:work`.** Indexing them means **one lookup serves all three**; without it a relation
+can be set and never walked.
 
 ## Writing a row
 
@@ -59,7 +57,7 @@ written with `projects:` breaks them silently.
 
 **Render an empty value as an empty cell - never as `[]`, `none` or `-`.** Two commands regenerate
 this file routinely; if they render the same value differently the file churns on every save and
-produces a diff that means nothing. This is the measured bug above, and the rule that prevents it.
+produces a diff that means nothing - the drift named at the top of this file.
 
 **Before overwriting, check for content that is not derivable from frontmatter.** If there is any,
 **stop and report it** rather than destroying it. Regenerating from frontmatter deletes anything
@@ -69,20 +67,17 @@ that exists only here, which is why narrative must never live in this file.
 
 | Not a column | Why |
 |---|---|
-| `status` | The only column that was never derived from frontmatter. It comes from a tracker adapter, **adapters ship in no tier**, so it was empty on every row for every user - and a cached live status carries an authoritative look while going stale when somebody *else* acts |
-| `updated` | **Recency is derived, not stored** - below. Stored, it made the file churn on every save to move one date |
+| `status` | Not in frontmatter. A work item holds no workflow state, and a cached live status carries an authoritative look while going stale the moment somebody *else* acts |
+| `updated` | **Recency is derived, not stored** - below. Stored, it makes the file churn on every save to move one date |
 | `created`, `type` | Neither resolves, and neither is needed to choose between candidates |
-
-**`updated` left the frontmatter as well, not just this table.** It was declared required, written
-by nothing and read by nothing, and with recency derived it duplicated `created` forever. The
-removal is a schema change and was free only while no store existed on anyone else's disk.
 
 ## Recency is derived
 
-**`dev.md` is append-only with dated session blocks, so its newest block *is* last activity.**
+**`session.md` is append-only with dated session blocks, so its newest block *is* last activity** -
+`grep -n '^## session ' | tail -1`, which is a heading match and never a read of the file.
 Nothing maintains that, and it cannot drift, because it is not a field - it is the record.
 
-**Fall back to the `work/<YYYY-MM>/` bucket** when there is no `dev.md`. A just-minted item has
+**Fall back to the `work/<YYYY-MM>/` bucket** when there is no `session.md`. A just-minted item has
 `requirements.md` and nothing else, so there is no session block to read; the bucket is the month of
 first work, and for a fresh item it is the newest thing anyway.
 

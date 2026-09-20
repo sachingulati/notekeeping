@@ -1,7 +1,7 @@
 {
   "name": "nk",
   "displayName": "Notekeeping",
-  "description": "What one repository learns cannot reach the next. Notekeeping promotes knowledge across that boundary: work items get a folder that accumulates, and what outlives the task becomes project, workspace or global knowledge. Markdown in a directory you own - no database, no hooks, no background capture.",
+  "description": "A knowledge base built out of your work rather than beside it. Every piece of work gets a folder that accumulates, and what outlives the task is promoted into project, workspace or global knowledge. The same checkpoint makes the session disposable - save, clear, load. Markdown in a directory you own; no database, no hooks, no background capture.",
   "author": {
     "name": "Sachin Gulati"
   },

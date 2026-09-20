@@ -1,6 +1,7 @@
 ---
 file:        patterns.md
 scope:       project
+schema:      1
 enabled:     true
 tier:        extended
 shape:       register
@@ -19,7 +20,7 @@ A repeatable construction approach **with a canonical implementation you can nam
 identifier.
 
 ## Exclusion
-One-off -> dev.md. Operational rather than build-time -> runbook.md. A choice among alternatives ->
+One-off -> session.md. Operational rather than build-time -> runbook.md. A choice among alternatives ->
 decisions.md. "The obvious way breaks" -> gotchas.md.
 
 ## Entry format

@@ -1,6 +1,7 @@
 ---
 file:        test-manual.md
 scope:       work
+schema:      1
 enabled:     true
 tier:        extended
 shape:       document

@@ -6,9 +6,7 @@ allowed-tools: Read, Glob, Grep, Write, Edit
 
 Fill in `api.md` for a work item. Writes inside the store only.
 
-**Called by a tool?** If `--caller <name>` is present, follow
-`${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`: never ask - refuse naming the argument
-that would satisfy it - and end with the outcome line.
+**`--caller <name>`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
 
 Resolve the `api.md` definition per `${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md` - the
 user's overlay wins over the shipped default - and honour its admission and exclusion tests.
@@ -27,8 +25,12 @@ contract move.
 ## The pair
 
 `api.md` declares `promotes_to: interfaces.md`. When the contract stops changing across two
-consecutive saves, or the item closes, it promotes into the project's settled contracts. **You do not
+consecutive saves, or the item closes, it promotes into the project's settled contracts.
+**`interfaces.md` ships disabled too**, so a store that turns this file on and leaves that one off
+has nowhere to promote to: say so when it comes up, and name the overlay line for both. **You do not
 implement that flow** - declaring the pair is what gives you routing, deduplication, the promotion
 verdicts and contradiction handling.
 
 Say when an entry looks ready to promote. Do not promote silently.
+
+**`--dry-run`** prints what would be written and writes nothing.

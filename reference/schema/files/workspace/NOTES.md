@@ -1,6 +1,7 @@
 ---
 file:        NOTES.md
 scope:       workspace
+schema:      1
 enabled:     true
 tier:        core
 shape:       document
@@ -20,15 +21,16 @@ context. Plus a pointer to what is read on demand.
 
 ## Exclusion
 True of one project -> that project's NOTES.md. True whatever you are working on, in any workspace ->
-global. Current work state -> the handover block in the active work item's dev.md, pointed at and
-never copied.
+global. Current work state -> the handover block in the active work item's resume.md, pointed at and
+never copied. **Something to do rather than something that is true** -> `instructions.md` at this
+scope, which is projected beside this file and is not pointed at from here.
 
 ## Entry format
 The same shape as a project's NOTES.md, with a tighter ceiling: its projection -
-`<workspace-root>/CLAUDE.local.md`, written whenever `projections.workspace` is on (the default) and
-this file has content, whatever the project count (3.18) - is charged in
+`<workspace-root>/CLAUDE.local.md`, written whenever this file has content, whatever the project
+count - is charged in
 **every** session under the workspace root, including ones working on no project at all.
 
-**Over budget, degrade - never truncate.** A file past its ceiling is delivered as a pointer and its
-size, not as a silently shortened version. A budget that fails visibly is the difference between a
-small file and a wrong one.
+**Over budget, this file degrades rather than truncating** - stated once in
+`${CLAUDE_PLUGIN_ROOT}/reference/projections.md`, *Budgets, and what to drop*, and not restated
+here.

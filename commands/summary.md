@@ -6,9 +6,7 @@ allowed-tools: Read, Glob, Grep, Write, Edit, Bash(git log:*), Bash(git diff:*)
 
 Generate `summary.md` for a work item. Writes inside the store only.
 
-**Called by a tool?** If `--caller <name>` is present, follow
-`${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`: never ask - refuse naming the argument
-that would satisfy it - and end with the outcome line.
+**`--caller <name>`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
 
 This is the **only generated file inside a bundle**, and the only one safe to throw away and rebuild.
 
@@ -46,3 +44,5 @@ release note, and something too long to paste does not get pasted.
 
 State where the source material came from - the bundle, the commits, the merge request - so the
 summary can be rebuilt when the work moves on.
+
+**`--dry-run`** prints what would be written and writes nothing.

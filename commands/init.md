@@ -1,31 +1,31 @@
 ---
-description: Create a store - global, workspace, or project. Makes directories only; never scans or infers.
+description: Create a store - global, workspace, or project. Creates structure; never mines your material.
 argument-hint: "[path] [--workspace] [--project] [--caller <name>]"
-allowed-tools: Read, Glob, Bash(git rev-parse:*), Write
+allowed-tools: Read, Glob, Edit, Write, Bash(git rev-parse:*)
 ---
 
-Create an empty store. **This command is deliberately dumb: it makes directories.**
+Create a store. **It creates structure - the directories, a config, and the two documents a project
+needs in order to exist. It never mines your material for content.**
 
-**Called by a tool?** If `--caller <name>` is present, follow
-`${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md` - and note what it says about this command:
-**you report, and you never create.** Say what you would have created, and that a person has to run
-it. A store is a person's act, and that is unchanged by who is asking.
+**`--caller <name>`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`: **report,
+never create.** Say what you would have created and that a person has to run it, in the outcome
+line's detail.
 
-**Emit the outcome line and nothing else.** Explaining the refusal *above* the line is the
-narration the contract forbids - the explanation belongs in `<detail>`, on the line itself.
+**It reads exactly one class of thing**: the repository's own orientation sources - a build file, a
+`README.md`, the repo's own `CLAUDE.md` - and only to fill `overview.md`'s fields, which are facts
+about what the project *is*. Nothing it reads becomes an entry in a register.
 
-It does not look inside your repositories, does not guess a project map, and does not read a single
-file of the user's. If they already have notes, a `CLAUDE.md`, or another tool's store, that is the
-job of `/nk:adopt` - **which does not ship yet.** This command is not a substitute for it and must
-not improvise one.
+**It does not guess a project map, and it reads no notes.** A notes folder, a wiki export, another
+tool's store, the knowledge sitting in a `CLAUDE.md`: none of it is read here. Bringing that material
+in is `/nk:adopt`'s job. This command is not a substitute for it and must not improvise one.
 
 ## The three forms
 
 | Form | Does |
 |---|---|
 | `/nk:init [path]` | **the whole setup, working outward from where you are.** Below |
-| `/nk:init --workspace [path]` | mark this directory a workspace, and nothing else |
-| `/nk:init --project [path]` | mark this directory a project, and nothing else |
+| `/nk:init --workspace [path]` | create the workspace store, and stop there - **plus the offer of the repositories under it**, per `## Workspace` |
+| `/nk:init --project [path]` | create the project inside the workspace above it, and stop there |
 
 `[path]` defaults to the working directory in every form.
 
@@ -36,8 +36,8 @@ written.
 
 ## `/nk:init` - the automatic form
 
-**You are almost always standing in a repository when you decide to keep notes**, so this works
-outward from there rather than asking you to name an abstraction first.
+**Work outward from the repository you are standing in**, rather than asking for an abstraction
+first.
 
 1. **Create global if it is missing.** `~/.notekeeping/` is a fixed home - no judgment, nothing to
    ask. Say that it was created.
@@ -45,7 +45,7 @@ outward from there rather than asking you to name an abstraction first.
 2. **Decide the project directory.** `git rev-parse --show-toplevel` on `[path]`:
    a repository → that root is the project. **Not a repository, or git cannot answer → ask** whether
    to treat this directory as a project, and stop if the answer is no. **Never infer a repository
-   from the filesystem** - `## Project` step 2 forbids it and the measurement is there.
+   from the filesystem** - `## Project` step 2 has the rule.
 
 3. **Resolve the workspace before creating the project.** A project **cannot exist without one** -
    it lives at `<workspace>/.notekeeping/projects/<name>/`, so there is nowhere to put it otherwise.
@@ -67,14 +67,10 @@ outward from there rather than asking you to name an abstraction first.
 already exists, steps 1, 3 and 4 all find their work done and it simply registers the project. That
 is the *"once per repository cloned later"* case, and it needs no flag.
 
-### `$HOME` cannot be a workspace, and this is a refusal rather than a caution
+### `$HOME` cannot be a workspace
 
-A workspace store is `<workspace>/.notekeeping/`. With `<workspace>` as `$HOME` that is
-`~/.notekeeping/` - **which is global's fixed home.** The two stores would be one directory: global
-and workspace scope collapsed into a single file set, with the rule that there is *exactly one
-workspace store between you and global* satisfied by having none.
-
-So when the parent is `$HOME`, **stop and say why**:
+A workspace store at `$HOME` would be `~/.notekeeping/` - **global's fixed home** - collapsing the
+two scopes into one file set. So when the parent is `$HOME`, **stop and say why**:
 
 > A workspace at your home directory would be the same folder as the global store. Put your
 > repositories under a directory - `~/projects`, say - and run `/nk:init` there, or name one with
@@ -93,30 +89,16 @@ which is what makes it reachable everywhere without configuration.
 
 ```
 ~/.notekeeping/
-  config.md          schema_version: 1
+  config.md          schema_version: <the shipped version>
 ```
 
-**Global's `config.md` is a store config *and* the machine config**, and it carries one key. A store
-written without `schema_version` has no version at all, which `07-adoption.md` section 5 says must
-never be assumed - every later upgrade check has to stop and ask.
+**Global's `config.md` is a store config *and* the machine config.** It carries one setting -
+`schema_version` - plus the `## Workspaces` registry, which is not a setting. A store
+written without `schema_version` has no version at all, and **an absent version is never assumed to
+be the current one** - every later upgrade check has to stop and ask.
 
 **Create no knowledge files.** An empty `gotchas.md` is a stub, and a stub is worse than nothing: it
 looks answered. Files appear when promotion first writes to them.
-
-**Write no projection flag.** `projections.enabled` and `projections.workspace` both default
-`true`, so a fresh store leaves both unwritten and both on. There is no `workspace_root` to set: the
-workspace projection's target is the directory holding that store's `.notekeeping/`, which
-resolution already produced.
-
-**`init` still writes nothing outside the store, and that is worth checking rather than assuming.**
-Projections are written by `/nk:save`, not by `init`; a fresh store has no registered project, so
-the repo projection has no target; and it creates no knowledge files, so the workspace projection
-has no source. **No write-on-install survives the default flip** - what changed is that the user
-does not have to find a flag before the *first save* delivers anything.
-
-**Say that projections are on.** One line in the report, naming both targets in the shape they will
-take. A user who does not want them runs `/nk:config set projections.enabled false`, and they should
-learn that here rather than from a file appearing in a repository.
 
 ---
 
@@ -126,11 +108,19 @@ A workspace is a directory holding connected projects. **The user names it; neve
 
 ```
 <workspace>/.notekeeping/
-  config.md          schema_version: 1, and nothing else
-  schema/            empty - the user's overlay lives here
+  config.md          schema_version: <the shipped version>, and nothing else
+  schema/            the user's overlay lives here
   projects/
   work/
 ```
+
+**`config.md` is the only thing this command writes here.** The three directories below it are the
+shape the store takes, **not a list to create**: nothing in this command's `allowed-tools` makes an
+empty directory - `Write` creates parents only on the way to a file - and the portability rule in
+`${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md` rules out reaching for a shell to do it.
+**Each appears when something is first written into it**, which is what *Create no knowledge files*
+above already says for files. **Do not report them as created, and do not treat their absence as a
+failed init.**
 
 The store's own knowledge files - `NOTES.md`, `domain.md`, `gotchas.md`, `decisions.md` - sit
 directly in `.notekeeping/` when promotion creates them. **A store's own scope is not a subdirectory
@@ -140,10 +130,8 @@ of itself**, so do not create a `workspace/` or `global/` folder inside it.
 ask again on later runs.
 
 **Creating the workspace writes the workspace projection** - `<workspace>/CLAUDE.local.md`, per
-`${CLAUDE_PLUGIN_ROOT}/reference/projections.md`, and skipped when `projections.workspace` is off.
-It has nothing to carry yet, and that is not a reason to defer it: the file and its markers are what
-later saves update in place, and a store whose delivery target appears only after the first promotion
-gives `/nk:doctor` a finding on a store nobody has done anything wrong to.
+`${CLAUDE_PLUGIN_ROOT}/reference/projections.md`. It has nothing to carry yet; write it anyway, since
+the file and its markers are what later saves update in place.
 
 ### Then offer the projects that are already there
 
@@ -153,30 +141,28 @@ already in front of you.
 
 1. **`git rev-parse --show-toplevel` on the named path and on each of its *direct* children.** Depth
    one, no recursion. A child is offered only when git returns a root for it.
-2. **If git is unavailable, offer nothing and say so.** Do not glob for `.git/`: recording a repo
-   root the filesystem implied rather than git returned is the defect `## Project` step 2 already
-   forbids, and it is measured. Point at `/nk:init` inside each repository instead.
+2. **If git is unavailable, offer nothing and say so.** Do not glob for `.git/` - `## Project`
+   step 2 forbids it. Point at `/nk:init` inside each repository instead.
 3. **List what you found and let them choose.** Nothing is registered without an explicit answer,
    and the default is worth stating: propose all of them, since the user named the parent.
-4. **For each chosen repository, run `## Project` steps 3-5** - propose and confirm the name, write
-   `NOTES.md` and `overview.md`, register the root. **Report only what you actually wrote.**
+4. **For each chosen repository, run `## Project` steps 3-6** - propose and confirm the name, write
+   `NOTES.md` and `overview.md`, register the root, and write the repo projection and its ignore
+   entry. **Report only what you actually wrote.**
 5. **None found, or none chosen, is a normal outcome.** Say the workspace is ready and name the next
    step. An empty workspace is not a failure.
 6. **Reached from the automatic form, the directory you started in is already being registered** by
    its step 5 - do not offer it twice, and do not register it twice.
 
-**This is not the scanning `/nk:init` refuses to do.** The banned behaviour is reading a user's
-material and inferring a project map from it - that is `/nk:adopt`'s job, and it does not ship. This
-enumerates directory entries
-one level below a path the user just named, asks about each, and reads nothing inside any of them.
-The offer is a proposal with a confirmation, exactly as the project name already is.
+**This stays inside the no-scanning rule.** It enumerates directory entries one level below a path
+the user just named, asks about each, and reads nothing inside any of them. Reading a user's
+material and inferring a project map from it is `/nk:adopt`'s job.
 
 ---
 
 ## Project - `<workspace>/.notekeeping/projects/<name>/`
 
-**This is what stops a project from being guessed.** Without it, resolving a newly cloned repository
-had to fall back to the directory's basename, which is how a project gets invented.
+**Registering is what stops a project from being guessed**, and from resolution falling back to a
+directory's basename.
 
 1. **Resolve the workspace store** per `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`. No store
    above this directory means **refuse** and point at a workspace init - do not create one silently.
@@ -188,17 +174,12 @@ had to fall back to the directory's basename, which is how a project gets invent
    | **not** a repository, git present | no root; the project resolves by name |
    | **git unavailable, or you cannot run it** | **unknown.** Say so, and record no root |
 
-   The third case is not the second. Recording *"no repository"* when you could not tell makes every
-   later git-dependent behaviour report *not applicable* for a project that may well be a repo, and
-   nothing will ever correct it.
-
-   **It is not the first either, and that is the easier mistake to make.** When git cannot answer,
-   do not substitute the filesystem: globbing for `.git/` and recording *"a repository, root here"*
-   is an inference presented as a measurement, and what lands in the config is indistinguishable
-   from a root git actually returned. **Record a repo root only from `git rev-parse --show-toplevel`.**
-   `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md` already forbids inferring a *store* from the
-   filesystem; the repo root is the same rule. *(Measured: with git unavailable, two runs out of two
-   reported the root as confirmed.)*
+   **The third case is neither of the others.** Recording *"no repository"* when you could not tell
+   makes every later git-dependent behaviour report *not applicable* for a project that may well be
+   a repo, and nothing corrects it. Substituting the filesystem is the mirror error: a `.git/` found
+   by glob is an inference, and once written it is indistinguishable from a root git returned.
+   **Record a repo root only from `git rev-parse --show-toplevel`** -
+   `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`.
 3. **Propose the name and confirm it.** The repository's directory name is a *proposal*, not an
    answer - say which name you will use and let them correct it. **A project need not be a repo:** an
    initiative with no clone is a first-class case, and resolves by name.
@@ -208,60 +189,64 @@ had to fall back to the directory's basename, which is how a project gets invent
    `${CLAUDE_PLUGIN_ROOT}/reference/schema/files/project/{NOTES.md,overview.md}`. Write the
    structure each definition specifies and nothing beyond it.
 
-   **These two are not stubs, and the no-stub rule below does not reach them.** A register is a stub
-   when empty because it looks answered; `NOTES.md` and `overview.md` are the documents that say
-   where things are and what this project is, and a project without them has nowhere to point.
-   **Create no registers and no ledger** - not `gotchas.md`, not `decisions.md`, not `domain.md`.
-   A typical set invites stub files, and a stub looks answered. They appear when promotion first
-   writes to them.
+   **These two are not stubs**: they say where things are and what this project is, and a project
+   without them has nowhere to point. **Create no registers and no ledger** - not `gotchas.md`, not
+   `decisions.md`, not `domain.md`. Those appear when promotion first writes to them.
 
    **Report only what you actually wrote.** If a definition could not be resolved, say so and create
    nothing rather than describing a file that is not there.
 5. **Register the repo root** so later sessions resolve without asking again.
 6. **Write the repo projection**, per `${CLAUDE_PLUGIN_ROOT}/reference/projections.md` - the file,
    and the ignore entry it orders. **Registration is what creates a projection, not the first save**,
-   so a project that has just been registered is already delivering. Skip it when
-   `projections.enabled` is off, and say that you skipped it rather than reporting a file you did not
-   write.
+   so a project that has just been registered is already delivering. **Never report a file you did
+   not write** - the ordinary reason one is absent is that its source has no content, which is an
+   empty render rather than a skip.
 
-   **A repo that already holds a `CLAUDE.local.md` of the user's own is the ordinary case here**, not
-   an edge: append below it, never modify a byte above it, and check for our markers *anywhere* in the
-   file first. `projections.md` has the rule; this is the command that reaches it most often.
+   **A repo that already holds a `CLAUDE.local.md` of the user's own is the ordinary case here.**
+   Append below it, never modify a byte above it, and search the whole file for the markers first.
 
-   **Only this project's file.** Registering one project never touches another project's projection,
-   because the repo projection carries the project alone - when several are registered in one run,
-   each gets its own write, and nothing is concatenated.
+   **Only this project's file.** The repo projection carries one project, so several registered in
+   one run get one write each and nothing is concatenated.
 
 ---
 
 ## Refuse a non-empty directory
 
-If the target store directory exists and has any content, **stop**. Say:
+**This is a check on a store being created, and only there.** A store that already exists is the
+ordinary re-run above - step 1, 3 or 4 finding its work done - and it is never refused for holding
+the notes it is supposed to hold.
+
+If the target store directory is one this run would create and it exists with any content,
+**stop**. Say:
 
 > `<path>` is not empty - it has <what you saw>. `/nk:init` only creates an empty store, so it
 > will not touch this one.
 
-**Then stop.** Reading what is already there and proposing where it belongs is `/nk:adopt`, which
-is a later tier and **is not implemented here** - so do not offer it as a next step the user can
-take. Say the directory is not empty, say this command only creates empty stores, and name the two
-things they can do now: point `/nk:init` at a different path, or move the existing content aside
-themselves.
+**Then stop and name `/nk:adopt`** - reading what is already there and building the store from it
+is that command's job. The other two ways out are pointing `/nk:init` at a different path, or moving
+the existing content aside.
 
 Do not create a store around material nobody has looked at. This is the one check `init` makes.
 
-## Two rules for the config files
+## The config files
 
-**Write no *setting* a store does not need**, and at init that means exactly one: `schema_version`,
-in a workspace store config and in global's alike. Every other setting has a documented default, the
-file is edited by hand, and a wall of commented settings makes it unreadable.
+**Write exactly one setting: `schema_version`** - in a workspace store config and in global's alike.
+**Take its value from `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md`**, where the shipped
+version is stated; a number typed into this file drifts the first time the schema moves.
+Every other setting has a documented default and is edited by hand; a wall of commented settings is
+unreadable. **Never invent a setting name**: a plausible key the plugin does not read looks
+configured.
 
-**The `## Projects` registry is not a setting, and this rule does not forbid it.** Project init
-writes a project's `dirs:` there - that is step 5 above, and `06-config.md` shows the section in the
-store config as the normal, populated state. *(Measured: read as a ban on the registry, `/nk:doctor`
-reported a store as out of spec for holding the very mapping `/nk:init` had just written.)*
+**The `## Projects` registry is not a setting.** Project init writes a project's `dirs:` there -
+step 5 above - and a store config may hold that mapping.
 
-**Never invent a setting name.** Writing a plausible-looking key that the plugin does not read is
-worse than omitting it: it looks configured. If you are not certain a key exists, leave it out.
+**Nor is global's `## Workspaces` registry.** **Creating a workspace store appends its absolute path
+there**, in `~/.notekeeping/config.md` - **creating global first where it is missing**, since
+`--workspace` on a fresh machine reaches this step with no file to append to - so that a machine's
+workspaces can be enumerated at all -
+`${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md` has what it is and is not for. **Append; never
+rewrite the list**, and do not add an entry for a workspace that already has one. This is the only
+thing workspace creation writes into global.
 
 ## Report
 
@@ -273,15 +258,13 @@ Then the single next step: `/nk:work` to start something, `/nk:init` inside a re
 later to add it, or `/nk:help` to see what exists.
 
 **Say how many calls are left.** After the automatic form there are none for what already exists -
-global, the workspace and its repositories are done. Say so, because the impression this command
-otherwise gives is that it must be run once per level forever.
+global, the workspace and its repositories are done - so the user does not think this runs once per
+level forever.
 
-**Name every write outside the store, separately.** Since a projection is written at registration,
-this command no longer writes only inside `.notekeeping/`: each registered repo gets a
-`CLAUDE.local.md` and a `.git/info/exclude` line, and the workspace root gets one too. **List them by
-absolute path**, and say which were *appended to* rather than created. A user who agreed to register
-four repositories has agreed to four files in their own trees, and the only moment they can see that
-is this report.
+**Name every write outside the store, separately.** A projection is written at registration, so each
+registered repo gets a `CLAUDE.local.md` and a `.git/info/exclude` line, and the workspace root gets
+one too. **List them by absolute path**, and say which were *appended to* rather than created. This
+report is the only moment the user sees the files they just agreed to in their own trees.
 
-Nothing else on disk was touched. Say so, and mean it literally - if you wrote anything not on that
-list, name it instead.
+Nothing else on disk was touched. Say so literally: anything written that is not on that list is
+named instead.

@@ -6,27 +6,24 @@ allowed-tools: Read, Glob, Grep, Write, Edit
 
 Fill in `plan.md` for a work item. Writes inside the store only.
 
-**Called by a tool?** If `--caller <name>` is present, follow
-`${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`: never ask - refuse naming the argument
-that would satisfy it - and end with the outcome line.
+**`--caller <name>`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
 
 Resolve the `plan.md` definition per `${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md` - the
 user's overlay wins over the shipped default - and honour its admission and exclusion tests.
 
 ## Before writing
 
-Resolve the item, then decide whether the plan is frozen. **The test is not "does `dev.md` have a
-session block".**
+Resolve the item, then decide whether the plan is frozen. **The test is whether a session block is
+dated on or after the plan** - not whether `session.md` has one at all.
 
 | State | Do |
 |---|---|
-| No `plan.md` | **Write the first one**, whatever `dev.md` already holds. Nothing exists to freeze |
+| No `plan.md` | **Write the first one**, whatever `session.md` already holds. Nothing exists to freeze |
 | `plan.md` exists, no session block dated on or after it | Rewrite it - it has not been acted on yet |
 | `plan.md` exists, and a session block is dated on or after it | **Frozen.** Append a deviation |
 
-Investigating a problem before planning the fix is the commonest case there is, and it leaves a
-session block full of findings and no plan. Freezing on that would refuse to write the first plan of
-almost every bug.
+Investigating before planning the fix leaves a session block full of findings and no plan, which is
+the commonest case there is - so the presence of a block cannot be the test.
 
 **When frozen**, do not rewrite. Append a dated deviation instead:
 
@@ -52,3 +49,5 @@ If a choice here is one the whole project should inherit, say so and offer to pr
 `decisions.md` - do not quietly write it in two places.
 
 **Never write a stub.** If there is not enough to plan yet, say that and write nothing.
+
+**`--dry-run`** prints what would be written and writes nothing.

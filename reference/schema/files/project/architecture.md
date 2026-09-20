@@ -1,6 +1,7 @@
 ---
 file:        architecture.md
 scope:       project
+schema:      1
 enabled:     true
 tier:        extended
 shape:       register

@@ -1,6 +1,7 @@
 ---
 file:        process.md
 scope:       global
+schema:      1
 enabled:     true
 tier:        extended
 shape:       register

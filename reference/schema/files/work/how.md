@@ -1,6 +1,7 @@
 ---
 file:        how.md
 scope:       work
+schema:      1
 enabled:     false
 tier:        example
 shape:       register
@@ -19,7 +20,7 @@ What you had to understand about the terrain before you could act: how the piece
 the mechanism actually is, which part is load-bearing.
 
 ## Exclusion
-What was asked -> requirements.md. What you did -> dev.md. A construction approach the whole project
+What was asked -> requirements.md. What you did -> session.md. A construction approach the whole project
 should inherit -> promote to patterns.md.
 
 ## Entry format

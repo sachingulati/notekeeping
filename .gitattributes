@@ -1,0 +1,2 @@
+# Every shipped file - Markdown, JSON and LICENSE - is LF everywhere; the shipped tree must not drift per-platform.
+* text=auto eol=lf

@@ -1,28 +1,21 @@
 ---
 description: Read the store's content and propose what should change. Proposes and stops; --apply shows each diff and you pick what to apply.
-argument-hint: "[project] [--since <date>] [--apply [all]] [--dry-run] [--caller <name>]"
-allowed-tools: Read, Glob, Grep, Write, Edit, Bash(git log:*), Bash(git status:*)
+argument-hint: "[project] [--since <date>] [--apply [all]] [--dry-run] [--page | --no-page] [--caller <name>]"
+allowed-tools: Read, Glob, Grep, Write, Edit, Bash(git log:*), Artifact
 ---
 
 Read the store and propose what should change. **It proposes and stops.** Nothing is written without
 `--apply`, and `--apply` shows each finding's diff and **lets the user choose which to apply and which
 to skip**.
 
-**Resolve the store first**, per `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`, and read only
-what is inside it. Everything outside `.notekeeping/` belongs to the user.
+**Resolve the store first**, per `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`. Read inside
+it, plus the registered repository when a finding needs a path checked against it - finding 5 is the
+only one that does. Write nowhere else; everything outside `.notekeeping/` belongs to the user.
 
-**Called by a tool?** If `--caller <name>` is present, follow
-`${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md` - and note what it says about this command:
-**you report, and you never apply.** Compress the pass into the outcome line's detail, exactly as
-`doctor` does, and emit nothing else.
-
-**`--apply` is refused under `--caller`, and `--apply all` with it.** The write depends on a
-per-finding selection, and a consumer cannot supply one; a blanket write across the user's own
-knowledge with no human choosing is the precise thing the selection exists to prevent. Refuse naming
-the reason - the caller can surface the findings to its user, who can then run the pass themselves.
-
-**Emit the outcome line and nothing else.** Explaining the refusal *above* the line is the
-narration the contract forbids - the explanation belongs in `<detail>`, on the line itself.
+**`--caller <name>`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`: **report,
+never apply.** Compress the pass into the outcome line's detail. **`--apply` and `--apply all` are
+refused** - the write depends on a per-finding selection a consumer cannot supply. Refuse naming
+that reason; the caller can surface the findings to its user.
 
 ## What this is, against `/nk:doctor`
 
@@ -33,18 +26,54 @@ narration the contract forbids - the explanation belongs in `<detail>`, on the l
 | Cost | cheap, run it often | a real pass; run it occasionally |
 | Output | errors to fix | proposals to accept or decline |
 
-**Five of the ten findings below are already `doctor` findings, and that is not duplication.**
-`doctor` sees them structurally and cheaply - *this register is past its threshold* - and says so
+**Five of the ten findings below are also `doctor` findings.** `doctor` sees them structurally and
+cheaply - *this register is past its threshold* - and says so
 continuously, so this command is never the first time you hear that something needs attention. What
 it adds is the reading: **which topic dominates the register, so which `areas/` the split creates.**
 A finding `doctor` can state, this command has to justify from the entries.
 
 ## Scope, and why it has one
 
-`[project]` limits the pass to one project's files; `--since <date>` limits it to entries added or
-changed since. **With neither, the pass covers the whole store**, which on a mature store is not
-something to run on a whim - say how many files it will read and roughly what that costs before
-starting, and let the user narrow it.
+**With no scope the pass covers the whole store**, which on a mature store is not something to run on
+a whim - say how many files it will read and roughly what that costs before starting, and let the
+user narrow it.
+
+`[project]` limits the pass to one project's files.
+
+### `--since <date>`
+
+**It narrows the *subject*, and it is not free of charge.** The entries added or changed since the
+date are what the pass is about. Two things follow, and both must be said out loud rather than
+discovered by the user.
+
+**First, what it saves.** Cost falls only where something can be skipped **without reading it**:
+
+| Bound | When |
+|---|---|
+| **`git log --since=<date> --name-only`** gives the changed set | the store is a git work tree and git answers - `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`, which has **three** git outcomes, not two |
+| **the bucket path** - `work/<YYYY-MM>/` is the month of first work, so buckets before the date's month hold no newer work item | always, and it needs no git |
+
+**Where neither applies, the file is read.** A register's entries carry their dates *inside* it, so
+narrowing to recent entries still costs the whole file. **Say what was skipped and what still had to
+be read**, and never report a narrowed pass as though it were cheap when it was not.
+
+**Second, and this is the sharper half: `--since` changes which findings are possible.** Five of the
+ten need more than the subject set, so a narrowed pass **cannot** produce them:
+
+| # | Why a recency filter cannot see it |
+|---|---|
+| **1 merge** · **7 promote** | both need **a pair**. With one side outside the window there is nothing to compare, and the pass reports *no duplicates* while sitting next to one |
+| **2 split** | the threshold is a count of **the whole register**, and a subset cannot exceed a total |
+| **3 area** | the test is **spanning three or more month buckets**, which a window shorter than that excludes by construction |
+| **9 close** | **inverted.** It looks for a work item with *no* activity; `--since` selects for activity. A recency filter can never surface it |
+
+**Name the suppressed findings before the pass runs, not in the report afterwards** - a user who
+wanted a quick look should learn that half the command is off *while they can still change their
+mind*, and a pass that silently drops five findings reports *nothing found* in a store that has
+plenty.
+
+**Findings 4, 5, 6, 8 and 10 read one entry at a time and are unaffected**, which is what makes the
+flag worth keeping.
 
 ## The ten findings
 
@@ -64,11 +93,46 @@ not a finding; say what you looked at.
 | 9 | A work item with no activity and no closure for months | **close it, or say why it is open** |
 | 10 | `NOTES.md` holding something needed on one task in ten | **demote it** to the file it belongs to |
 
+### When one entry earns two findings
+
+**This is ordinary, not exotic**, and it must resolve the same way every run. An entry citing a
+path that no longer exists, which also makes the same claim as another entry, satisfies **5** and
+**1** at once.
+
+**The order is fixed, and it runs from whether the entry should exist to how it should be
+arranged:**
+
+| Rank | Findings | The question it answers |
+|---|---|---|
+| **1** | **5 retire** | should this entry exist at all? Its subject is gone |
+| **2** | **6 demote** · **7 promote** · **10 demote from `NOTES.md`** | is it in the right place? |
+| **3** | **1 merge** | is it arranged well where it is? |
+
+**The higher rank wins, and the reason is not a preference.** Merging two entries about code that no
+longer exists is work spent tidying something the next finding proposes to retire; placing an entry
+correctly is worth doing before deciding whether it duplicates its new neighbours. **A proposal that
+the following proposal would undo is not a finding, it is churn.**
+
+**Report the winner, and name what it displaced, in one clause** - *"retire; this pair would also
+merge, which is moot if they go"*. Nothing is lost, the user can see both, and **the count stays the
+count** because one entry produced one finding.
+
+**2 split** and **3 area** never compete here: they are findings about a **register**, not about an
+entry, so an entry can earn one of those and one of the above without contradiction. **4**, **8** and
+**9** are about a contradiction, a decision and a work item respectively, which are not entries in a
+register either.
+
+**And the evidence that tells two findings apart is not optional. Source is the whole test** that
+separates a merge from one entry written twice - so a merge proposal, and any refusal of one,
+**prints both provenance stamps side by side**. A sentence asserting a shared source while showing
+two different ones cannot survive its own output.
+
 ### What each one requires before you may report it
 
 - **1 - merge.** The two entries must make *the same claim*, not cover the same topic. Different
   sources is what makes it worth merging; **same source is one entry written twice**, which is a
-  duplicate, not a merge. Quote both claims side by side.
+  duplicate, not a merge. **Quote both claims and both provenance stamps side by side** - the source
+  is the test, so it is shown rather than asserted, in a refusal exactly as in a proposal.
 - **2 - split.** Past the threshold **and** a dominant topic. Past the threshold with entries spread
   evenly is not a split proposal - it is a long register, and saying so is the honest finding. Name
   the topic and the count that makes it dominant.
@@ -98,10 +162,19 @@ not a finding; say what you looked at.
   **You never reopen a decision**, and you never write the reversal - both halves stay visible and
   that is a human's call - a ledger records reversals, it does not overwrite them.
 - **9 - close.** No activity and no closure. **A work item explicitly marked open with a stated
-  reason is not stale**, however old.
+  reason is not stale**, however old - that is the `## open <date>` block in its `session.md`, and the
+  closing block is its twin. **Both shapes are defined in that file's definition**
+  (`${CLAUDE_PLUGIN_ROOT}/reference/schema/files/work/session.md`, *Closing, and staying open*):
+  one dated heading and one line of reason. **Write that block and nothing else** - `--apply` here
+  appends a known shape, never improvised prose, and it never edits what the item already says.
 - **10 - demote from `NOTES.md`.** The entry must be genuinely niche. `NOTES.md` is the
   always-loaded file, so this is the one finding where being wrong costs the user on every single
   task; require a clear case and decline the marginal one.
+
+
+**The report can be a page.** Where there is enough to choose between, offer it at the very
+end, per `${CLAUDE_PLUGIN_ROOT}/reference/report-pages.md` - which owns the offer, the two
+flags, and what the page may carry. **The terminal report is printed either way.**
 
 ## Report, and what a proposal looks like
 
@@ -117,8 +190,9 @@ Group by finding type, most confident first. Each proposal carries:
 **Say what you read and found nothing in.** A pass that reports four findings over 60 files should
 say it read 60; otherwise a clean register is indistinguishable from one nobody looked at.
 
-**Never report a count you did not derive.** Count the findings you are about to print, not the ones
-you expected to.
+**Number the findings as you print them, and the count is the last number** - one list, nothing
+reported outside it, and any split into categories printed as arithmetic that reconciles to it.
+`${CLAUDE_PLUGIN_ROOT}/reference/report-shape.md`.
 
 ## `--apply`
 
@@ -126,7 +200,7 @@ you expected to.
 1 merge - 2 split - 3 area - 5 retire - 6 demote - 7 promote - 9 close - 10 demote from `NOTES.md`.
 
 **4 and 8 are not withheld, they have nothing to write.** 4's proposal is to *run a check*, and your
-tools are `git log`, `git status` and `ls` - you cannot run an arbitrary check, and recording *what
+tools are the ones declared above - you cannot run an arbitrary check, and recording *what
 was checked and what it returned* would mean inventing it. 8's proposal **is** the flag: applying it
 would mean writing the reversal, which you never do. Report both as proposals under every flag.
 
@@ -161,10 +235,14 @@ now. A selection is only ever taken in the same turn as the report that produced
 
 1. **Never delete.** Retirement marks an entry superseded and leaves its text where it is. A merge
    keeps both provenance stamps. A split moves entries into `areas/<topic>/` and leaves a pointer.
-2. **`--apply` is never implied by another flag**, and `--dry-run` beats it: with both, show
+2. **A split is not finished by the write.** `NOTES.md`'s `## Read on demand` heading and both
+   projections render from the directory listing, so a new area is invisible to a session until
+   something re-renders them. **Name `/nk:project <name>` as the step that completes it**, for
+   findings 2 and 3 alike - an area nothing points at is knowledge that has been moved out of reach.
+3. **`--apply` is never implied by another flag**, and `--dry-run` beats it: with both, show
    everything, offer nothing and write nothing.
-3. **Apply nothing outside the store**, and nothing this pass did not report.
-4. **A disabled definition still refuses.** Where finding 7 routes a fact to `interfaces.md` and the
+4. **Apply nothing outside the store**, and nothing this pass did not report.
+5. **A disabled definition still refuses.** Where finding 7 routes a fact to `interfaces.md` and the
    store has switched that file off, selecting the finding does not override it: name the enabling
    overlay line, exactly as the finding's own rule says.
 
@@ -177,6 +255,6 @@ now. A selection is only ever taken in the same turn as the report that produced
 - **Never invent a finding to fill a category.** Ten types is what exists, not a quota - a store
   with two findings has two. **A proposal you cannot cite the entries for is a fabrication**, and
   this command reads the user's own knowledge, so a wrong proposal costs more than a missed one.
-- Never report on anything outside the store.
+- Never report on anything outside the store, **beyond the path finding 5 verifies against the registered repository.**
 - Never touch `requirements.md` bodies, which are write-once evidence, or `decisions.md` entries,
   which are append-only.

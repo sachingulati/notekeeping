@@ -7,9 +7,7 @@ allowed-tools: Read, Glob, Grep, Write
 Force a rebuild of the store's `index.md`. **This exists for repair** - `/nk:save` regenerates it as a
 matter of course.
 
-**Called by a tool?** If `--caller <name>` is present, follow
-`${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`: never ask - refuse naming the argument
-that would satisfy it - and end with the outcome line.
+**`--caller <name>`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
 
 Resolve the store first, per `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`, and enumerate
 work items only from inside it.
@@ -20,9 +18,10 @@ A **resolver, not a journal.** One line per work item, regenerated in full from 
 `requirements.md` frontmatter, which stays authoritative.
 
 **The shape is `${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md` and is not restated here** - the
-seven columns, how a row is rendered, what earns a column and what does not. Four commands touch
-this file and two of them write it; a shape stated in more than one place drifts, and it already
-has once.
+seven columns, how a row is rendered, what earns a column and what does not. Seven commands touch
+this file and **six of them write it** - this one rebuilds it, `save` and `work` regenerate it,
+`adopt` writes it where an adoption produced work items, `upgrade` regenerates it after a
+migration, `doctor --fix` regenerates a row, and `load` only resolves against it. A shape stated in more than one place drifts.
 
 ## What this command adds
 
@@ -39,3 +38,15 @@ current contents are not trusted. Walk `work/<YYYY-MM>/` inside the resolved sto
 
 **Report what moved.** A repair that says `rebuilt` and nothing else gives no way to tell a no-op
 from a rescue: name how many rows were written, and how many differ from what was there.
+
+**The shape, filled from the run and never copied from here:**
+
+```
+Index rebuilt - <store scope>
+  rows written    <n>
+  rows differing  <n>
+  <row id>        <what differs>
+```
+
+**`rows differing` is `0` printed, never a line omitted** - a rebuild that changed nothing is the
+outcome this command exists to be able to report.

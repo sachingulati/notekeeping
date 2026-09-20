@@ -1,6 +1,7 @@
 ---
 file:        gotchas.md
 scope:       project
+schema:      1
 enabled:     true
 tier:        core
 shape:       register
@@ -19,7 +20,7 @@ What here contradicts a reasonable expectation?
 
 ## Exclusion
 **You simply did not know it** -> the content type it belongs to: domain - patterns - architecture -
-interfaces - runbook. One-off, this item only -> dev.md.
+interfaces - runbook. One-off, this item only -> session.md.
 
 ## Entry format
 - **The claim, stated as something you could be wrong about.** The mechanism, naming the identifier

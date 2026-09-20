@@ -4,13 +4,13 @@
     "name": "Sachin Gulati",
     "url": "https://github.com/dexterslaboratories"
   },
-  "description": "Notekeeping - engineering knowledge that crosses the repository boundary.",
+  "description": "Notekeeping - engineering knowledge that outlives the session that taught it.",
   "plugins": [
     {
       "name": "nk",
       "source": "./",
       "displayName": "Notekeeping",
-      "description": "What one repository learns cannot reach the next. Notekeeping promotes knowledge across that boundary: work items get a folder that accumulates, and what outlives the task becomes project, workspace or global knowledge.",
+      "description": "A knowledge base built out of your work rather than beside it. What outlives the task is promoted into project, workspace or global knowledge, and the same checkpoint makes the session disposable: save, clear, load.",
       "author": {
         "name": "Sachin Gulati"
       },

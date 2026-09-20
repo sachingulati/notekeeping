@@ -11,19 +11,43 @@ Explain Notekeeping. `$ARGUMENTS` narrows to one topic - a command, a file, or a
 Three short sections, in this order:
 
 **The loop.** `/nk:work` to start, `/nk:save` to checkpoint, `/clear`, `/nk:load` to come back.
-That is the whole product; everything else supports it.
+That is the whole product; everything else supports it. **`/nk:work` is optional** - a save with
+nowhere to write mints the bundle itself, so you can just work and save.
 
 **The commands**, grouped by family, one line each:
 - *lifecycle* - `load` `save` `work`
 - *artifact* - named exactly after the file each produces: `plan` `test` `summary` `how` `api`
 - *knowledge* - `project` `review`
-- *tooling* - `config` `doctor` `help` `index` `init` `budget`
+- *tooling* - `config` `doctor` `help` `index` `init` `budget` `adopt` `upgrade`
 
 That is the whole set. **Name every command that ships** - a command missing from this list is a
 command nobody finds, and `help` is the only place the set is enumerated for a person.
 
 **Where things are.** Which store resolved here, `~/.notekeeping/` for global, and whether either
-exists yet.
+exists yet. **Plus the machine's other workspaces**, from global's `## Workspaces` registry - it is
+the only way to answer *what else have I got*, since resolution only ever walks up from here
+(`${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`).
+
+**The shape, filled from the run and never copied from here:**
+
+```
+The loop
+  <the four steps, one line>
+
+The commands
+  lifecycle   <names>
+  artifact    <names>
+  knowledge   <names>
+  tooling     <names>
+
+Where things are
+  here        <resolved store> | <none yet>
+  global      <path> | <not created>
+  workspaces  <names from global's registry> | <none registered>
+```
+
+**The three sections keep this order and all three are printed** - a store that does not exist yet
+is the answer to *where things are*, not a reason to drop the section.
 
 ## With an argument
 
@@ -48,12 +72,22 @@ means notes only exist if they run `/nk:save`, and it is worth saying that plain
 
 ## `--caller` - the discovery surface
 
-**`help` is not a contract command, and this is its one exception.** A consumer asks it what it is
-talking to. Answer with the contract version and the callable list, and nothing conversational:
+**`help` is the discovery surface.** A consumer asks it what it is talking to. Answer with the
+contract version and the callable list, and nothing conversational. **Read the version from
+`${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md` and never state one from here.**
+
+**Derive the list; never recite one from here.** Read
+`${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md` and name **every command it accounts for** -
+which is every command that ships, because all of them accept the flag. A list typed into this file
+goes stale the next time a command is added. **Accepting the flag is what makes a command callable;
+what it then does is the contract's per-command table, not this list.**
+
+The shape, with the command names filled in from that table rather than copied from here:
 
 ```
-nk: help ok — contract 1; work save load index doctor plan summary test how api project
+nk: help ok — contract <version>; <every command the contract accounts for>
 ```
 
 That is what lets a consumer built against an older contract find out before it calls anything.
-`${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md` is the rule it is reporting on.
+**If the derived list and this file's grouped list above disagree in length, say so** - one of them
+is wrong, and that is worth a line of output rather than a silent choice between them.

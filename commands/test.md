@@ -1,14 +1,12 @@
 ---
 description: Write test.md and test-manual.md - how this is verified, by machine and by hand.
 argument-hint: "[id] [--dry-run] [--caller <name>]"
-allowed-tools: Read, Glob, Grep, Write, Edit, Bash(git diff:*), Bash(git log:*)
+allowed-tools: Read, Glob, Grep, Write, Edit
 ---
 
 Fill in the verification pair for a work item. Writes inside the store only.
 
-**Called by a tool?** If `--caller <name>` is present, follow
-`${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`: never ask - refuse naming the argument
-that would satisfy it - and end with the outcome line.
+**`--caller <name>`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
 
 **Both files are written, every time.** They are a pair by policy: `test.md` is the reusable
 protocol, `test-manual.md` is the human walkthrough. Someone running the check by hand and something
@@ -38,3 +36,5 @@ path to each surface, the expected result at each step, and what must look uncha
 flags, file pickers, real assistive technology.
 
 **No repository detail.** It should read as instructions, not as a summary of the change.
+
+**`--dry-run`** prints what would be written and writes nothing.
