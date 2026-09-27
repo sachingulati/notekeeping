@@ -1,15 +1,13 @@
 ---
 description: Create a store - global, workspace, or project. Creates structure; never mines your material.
-argument-hint: "[path] [--workspace] [--project] [--caller <name>]"
-allowed-tools: Read, Glob, Edit, Write, Bash(git rev-parse:*)
+argument-hint: "[path] [--workspace] [--project] [--oneline]"
+allowed-tools: Read, Glob, Edit, Write, Bash(git rev-parse:*), Bash(git -C:*)
 ---
 
 Create a store. **It creates structure - the directories, a config, and the two documents a project
 needs in order to exist. It never mines your material for content.**
 
-**`--caller <name>`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`: **report,
-never create.** Say what you would have created and that a person has to run it, in the outcome
-line's detail.
+**`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
 
 **It reads exactly one class of thing**: the repository's own orientation sources - a build file, a
 `README.md`, the repo's own `CLAUDE.md` - and only to fill `overview.md`'s fields, which are facts
@@ -29,8 +27,8 @@ in is `/nk:adopt`'s job. This command is not a substitute for it and must not im
 
 `[path]` defaults to the working directory in every form.
 
-**Detecting is not guessing: every level confirms before it writes**, and the report names everything
-written.
+**Detecting is not guessing: every level except global confirms before it writes** - global's path is
+fixed - and the report names everything written.
 
 ---
 
@@ -40,7 +38,7 @@ written.
 first.
 
 1. **Create global if it is missing.** `~/.notekeeping/` is a fixed home - no judgment, nothing to
-   ask. Say that it was created.
+   ask. Say that it was created, and write its projection per `## Global` below.
 
 2. **Decide the project directory.** `git rev-parse --show-toplevel` on `[path]`:
    a repository → that root is the project. **Not a repository, or git cannot answer → ask** whether
@@ -100,6 +98,11 @@ be the current one** - every later upgrade check has to stop and ask.
 **Create no knowledge files.** An empty `gotchas.md` is a stub, and a stub is worse than nothing: it
 looks answered. Files appear when promotion first writes to them.
 
+**Creating global writes the global projection** - `~/CLAUDE.local.md`, per
+`${CLAUDE_PLUGIN_ROOT}/reference/projections.md`. Its fixed line renders whether or not there is
+anything else, so the file is always written; later saves update it in place. **Whichever route
+creates global writes it** - this step, or a workspace creation that finds global missing.
+
 ---
 
 ## Workspace - `<workspace>/.notekeeping/`
@@ -108,7 +111,7 @@ A workspace is a directory holding connected projects. **The user names it; neve
 
 ```
 <workspace>/.notekeeping/
-  config.md          schema_version: <the shipped version>, and nothing else
+  config.md          schema_version: <the shipped version>; ## Projects once one is registered
   schema/            the user's overlay lives here
   projects/
   work/
@@ -181,8 +184,8 @@ directory's basename.
    **Record a repo root only from `git rev-parse --show-toplevel`** -
    `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`.
 3. **Propose the name and confirm it.** The repository's directory name is a *proposal*, not an
-   answer - say which name you will use and let them correct it. **A project need not be a repo:** an
-   initiative with no clone is a first-class case, and resolves by name.
+   answer - say which name you will use and let them correct it. A project with no repository resolves by
+   name.
 4. **Create the directory, `NOTES.md` and `overview.md`.** Those are the two documents `/nk:project`
    owns. **Resolve both definitions per `${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md`
    before writing either** - the user's overlay wins over the shipped
@@ -241,12 +244,21 @@ configured.
 step 5 above - and a store config may hold that mapping.
 
 **Nor is global's `## Workspaces` registry.** **Creating a workspace store appends its absolute path
-there**, in `~/.notekeeping/config.md` - **creating global first where it is missing**, since
+there**, in `~/.notekeeping/config.md` - **creating global first where it is missing**, projection
+and all, since
 `--workspace` on a fresh machine reaches this step with no file to append to - so that a machine's
 workspaces can be enumerated at all -
 `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md` has what it is and is not for. **Append; never
 rewrite the list**, and do not add an entry for a workspace that already has one. This is the only
 thing workspace creation writes into global.
+
+## The read permission
+
+**Creating global or a workspace adds `~/.notekeeping` or the workspace root (the directory holding
+`.notekeeping/`) to `permissions.additionalDirectories` in
+`~/.claude/settings.json`**, per `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`, *The read
+permission* - add, never replace, and nothing written if the file does not parse. Without it every
+on-demand read of the store is refused, so this is part of creating the store, not an option on it.
 
 ## Report
 
@@ -262,8 +274,10 @@ global, the workspace and its repositories are done - so the user does not think
 level forever.
 
 **Name every write outside the store, separately.** A projection is written at registration, so each
-registered repo gets a `CLAUDE.local.md` and a `.git/info/exclude` line, and the workspace root gets
-one too. **List them by absolute path**, and say which were *appended to* rather than created. This
+registered repo gets a `CLAUDE.local.md` and a `.git/info/exclude` line, the workspace root gets
+one too, and so does the home directory when this run created global. **The settings entry is
+listed too**: the file, and each path added or already present. **List them by absolute
+path**, and say which were *appended to* rather than created. This
 report is the only moment the user sees the files they just agreed to in their own trees.
 
 Nothing else on disk was touched. Say so literally: anything written that is not on that list is

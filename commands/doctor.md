@@ -1,14 +1,16 @@
 ---
 description: Check the store for what is broken, drifting, or worth doing. Reports; --fix repairs the unambiguous.
-argument-hint: "[--fix [<text>]] [--baseline] [--page | --no-page] [--caller <name>]"
-allowed-tools: Read, Glob, Grep, Write, Edit, Bash(git status:*), Bash(git log:*), Artifact
+argument-hint: "[--fix [<text>]] [--baseline] [--page | --no-page] [--oneline]"
+allowed-tools: Read, Glob, Grep, Write, Edit, Bash(git status:*), Bash(git log:*), Bash(git -C:*), Artifact
 ---
 
-Check the store. **Reports by default.** `--fix` repairs only the unambiguous and `--baseline` records
-the findings as acknowledged; nothing else writes.
+Check the store. **Reports by default, then offers to repair what is unambiguous.** `--fix` repairs
+only the unambiguous, in the same run, and `--baseline` records the findings as acknowledged; nothing
+else writes to the store. **Every run saves its report** to `.notekeeping/tmp/`, per
+`${CLAUDE_PLUGIN_ROOT}/reference/report-shape.md`'s *The report is saved* - output, not a store write.
 
-**`--caller <name>`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md` - the counts
-go in the outcome line's detail, and the findings below are not printed.
+**`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md` - the counts
+go in the outcome line's detail, and the findings go to the report file it names.
 
 Resolve the store first, per `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`, and check only
 what is inside it. A store you found rather than resolved is the wrong store.
@@ -22,7 +24,8 @@ This command exists because **the failures it looks for are silent.**
 | **info** | an opportunity - a proposal you may decline |
 
 **`--fix` repairs a finding at any severity when the repair is unambiguous** - a projection to
-rebuild, an ignore entry to add, an index row to regenerate. Anything needing a judgment call is
+rebuild, an ignore entry to add, an index row to regenerate - in the shape
+`${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md` states, which every writer of that file follows. Anything needing a judgment call is
 reported and left alone. **Severity is not the test**: it says how bad a finding is, and
 repairability says how certain the fix is. A stale projection is a `warn` with an exact repair; a
 store version newer than this plugin is an error with no safe repair at all.
@@ -30,6 +33,12 @@ store version newer than this plugin is an error with no safe repair at all.
 **Four prohibitions bound it whatever else is said**, and none of them is a severity: **never
 migrate a store**, **never lower a schema stamp**, **never merge tags**, **never remove a registry
 entry.**
+
+**Where the report holds a repairable finding and there is a turn to answer in, end by asking whether
+to repair them.** A yes is `--fix` over exactly the repairs listed, per
+`${CLAUDE_PLUGIN_ROOT}/reference/report-shape.md`'s `## A yes applies what was shown` - so list each
+repair as what it will write, not only as what is wrong. An answer can narrow it, as `--fix <text>`
+does.
 
 ### `--fix <text>`
 
@@ -62,11 +71,14 @@ user can see what their sentence actually bought.
 - Every work folder has a `requirements.md` with parseable frontmatter.
 - A file declaring `authority: derived` that carries no refresh recipe.
 - **A projection that is missing, stale, or missing its block**, per
-  `${CLAUDE_PLUGIN_ROOT}/reference/projections.md`. Check both targets: `<repo>/CLAUDE.local.md`
-  and `<workspace-root>/CLAUDE.local.md`. Every registered project is expected to have one, and a
-  file present without a `notes:begin` marker is the same finding as an absent one - the notes are
-  not delivered either way. **Name the remedy: `/nk:project <name>`, or `--fix`.** Do not say the
-  next save will write it; a save maintains the active work item's project and nothing else.
+  `${CLAUDE_PLUGIN_ROOT}/reference/projections.md`. Check all three targets:
+  `<repo>/CLAUDE.local.md`, `<workspace-root>/CLAUDE.local.md` and `~/CLAUDE.local.md`. Every
+  registered project is expected to have one, and a file present without a `notes:begin` marker is
+  the same finding as an absent one - the notes are not delivered either way. **Global is expected
+  wherever `~/.notekeeping/` exists**, content or not, because its fixed line always renders.
+  **Name the remedy: `/nk:project <name>` for a repo, and `/nk:doctor --fix` for any of them.** Do
+  not say the next save will write a repo's; a save maintains the active work item's project and no
+  other.
 - **An unfinished migration.** A file whose stamp is **below its own definition's `schema:`** while
   the store's `schema_version` already claims that release, or a store left mid-run. **Name
   `/nk:upgrade` and say that re-running resumes it**, with the outstanding count per definition.
@@ -92,9 +104,10 @@ user can see what their sentence actually bought.
 - **The store is not readable from where the projections point.** Every `Read on demand` line
   carries an absolute path above the repository root, and Claude Code reads outside the working
   directory only where `additionalDirectories` in `~/.claude/settings.json` allows it. **Test it by
-  reading a file you know is there** - the resolved store's `config.md` - rather than by parsing
-  settings. A refusal is this finding: the on-demand half of delivery is not arriving. Name the
-  store root and `~/.notekeeping` as the entries to add.
+  reading a file you know is there** - the resolved store's `config.md` and `~/.notekeeping/config.md`
+  - rather than by parsing settings; where the working directory is under the root being tested, the
+  read proves nothing, so check the settings entry for that root instead. A refusal is this finding:
+  the on-demand half of delivery is not arriving. **The repair adds each missing root**, under the rule in `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`, *The read permission*.
 - A user-defined file definition with no `## Exclusion` section.
 - **An overlay definition that replaces the shipped one whole and omits a load-bearing field** -
   `schema`, `enabled`, `budget` or `env_axis`. A whole replacement stands alone, so an omitted field
@@ -111,8 +124,8 @@ user can see what their sentence actually bought.
   (`resolution.md`, *What a definition carries*), and a typo in a fragment is silent in a way a typo
   in a whole replacement is not: the misspelt field is ignored and the inherited value stands, so
   the override the user wrote does nothing. Name the field, and the one it was probably meant to be.
-- A user command whose `writes:` declaration does not match what it touches, or that shadows a
-  shipped command name.
+- A user command in `<store>/schema/commands/` with no `writes:`, a `writes:` path outside the
+  store, or a shipped command's name - each is one `/nk:run` would refuse, so say it before a run does.
 
 The overlay checks resolve definitions through
 `${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md` so you are checking the definition this store
@@ -136,12 +149,18 @@ actually uses rather than the shipped default.
   `## Standing instructions` block.** Found by grepping the heading in the target, never by reading
   it - a stale projection delivers the facts and silently drops what was to be obeyed, and the block
   looks complete either way. `/nk:project <name>` or `--fix` rebuilds it.
+- **A global instruction that duplicates or contradicts your harness instructions file**
+  (`~/.claude/CLAUDE.md`). Both load in every session under `~`. **A duplicate** is what a move that
+  was never trimmed leaves behind - the copy in `~/.notekeeping/instructions.md` is the one to keep, and the
+  remedy is `/nk:adopt` again, whose trim finishes the move. **A contradiction** is two rules and no
+  way to tell which wins. Report either as the pair, quoting each; **never edit either, and `--fix`
+  must not** - which one is right is the user's call.
 - **A `resume.md` whose `Covers` line is behind `session.md`.** Compare the last session it names
-  against `grep -n '^## session ' session.md | tail -1`. Behind means the summary was not brought up
+  against the latest block in `session.md` - `Grep` `^## session ` with line numbers and take the last match. Behind means the summary was not brought up
   to the record, and what a later session resumes from is missing whole sessions. **Two greps, no
   reading.**
 
-- **A `resume.md` carried forward five saves running.** The `Covers` line says `re-derived` or
+- **A `resume.md` carried forward five saves running** - the threshold `work/resume.md` sets. The `Covers` line says `re-derived` or
   `carried forward`; a run of the second is a summary that has been a compression of a compression
   five times over. It is a warning rather than an error - nothing is lost, `session.md` still holds
   the record - and the remedy is one `/nk:load --full` before the next save.
@@ -149,7 +168,7 @@ actually uses rather than the shipped default.
 - **An area directory with no line in that scope's `NOTES.md`.** It renders as its slug alone, which
   is a guess about what the shelf holds - `${CLAUDE_PLUGIN_ROOT}/reference/projections.md`, *What
   the on-demand half renders*.
-- Content *outside* the block at either projection target - hand-written, or another tool's - is
+- Content *outside* the block at any projection target - hand-written, or another tool's - is
   **never a finding**. It is expected: the block is appended below it and nothing above it is
   touched.
 - An unresolved contradiction whose recorded check has not been run.
@@ -159,10 +178,10 @@ actually uses rather than the shipped default.
 
 - **The harness memory store growing unpromoted** - items surviving several saves without being
   filed. **Some of this is expected and is not a defect**: an item the drain could not place is
-  reported and deliberately left where it is, and an instruction that holds everywhere belongs in
-  the harness instructions file rather than in any store. Report the count and the oldest date.
+  reported and deliberately left where it is. Report the count and the oldest date.
 - A register past its split threshold - propose `areas/<topic>/`.
-- The same fact in two projects - a workspace promotion, or a contract, per `depends_on`.
+- The same fact in two projects - a workspace promotion, unless one `depends_on` the other and the
+  fact is their contract, which is read from the dependee's code rather than kept.
 - A workspace or global entry whose provenance names one project - a demotion candidate.
 - A `decisions.md` entry whose `Would reopen if:` trigger has plausibly fired, and **an
   `instructions.md` entry whose `Retire when:` has** - one finding, because they are the same
@@ -176,6 +195,13 @@ actually uses rather than the shipped default.
   path for that. Merging is a hand edit: only the user knows which spelling they meant, and `--fix`
   must not touch a label they chose.
 - A work-item tree nested more than two deep.
+- **Entries still marked `unseen`** - promoted in a `--oneline` run, so no person has read them
+  (`${CLAUDE_PLUGIN_ROOT}/commands/save.md`, *Promotion*). Count them per scope and name the files.
+  **Never clear the mark**: reading the entry is what clears it, and that is a person's hand edit.
+- **Saved reports in `.notekeeping/tmp/` that have been applied, or are more than a week old**
+  (`${CLAUDE_PLUGIN_ROOT}/reference/report-shape.md`, *The report is saved*). **`--fix` deletes
+  them** - never one from today, which someone may still be reading or about to apply - and leaves
+  `tmp/.gitignore`.
 
 
 **The report can be a page.** Where there is enough to choose between, offer it at the very
@@ -196,6 +222,8 @@ prevent, happening inside it.
 ## Never
 
 Report on anything outside the store **beyond the targets this command is given to check** - the
-two projection files, the ignore entry, a registered project's directory, and a registry path being
-probed. Everything else outside `.notekeeping/` belongs to the user and will outlive this plugin;
+three projection files, the ignore entry, a registered project's directory, a registry path being
+probed, the harness memory stores this project's directories resolve to, and the harness
+instructions file, read for the contradiction check and never written, and `~/.claude/settings.json`,
+read and added to by the read-permission repair. Everything else outside `.notekeeping/` belongs to the user and will outlive this plugin;
 loose files, scratch, and anything the user put there are theirs, and none of them is a finding.

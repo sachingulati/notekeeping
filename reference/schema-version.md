@@ -158,7 +158,7 @@ the user's own file, which is not a repair anyone can make on their behalf.
 
 | | Why |
 |---|---|
-| **both projections** | derived. `${CLAUDE_PLUGIN_ROOT}/reference/projections.md` - losing every projection loses nothing, and `/nk:doctor --fix` rebuilds them |
+| **every projection** | derived. `${CLAUDE_PLUGIN_ROOT}/reference/projections.md` - losing every projection loses nothing, and `/nk:doctor --fix` rebuilds them |
 | **`index.md`** | regenerated in full from `requirements.md` frontmatter, which is the thing that gets migrated |
 | **`config.md`** | it carries `schema_version` itself |
 
@@ -198,7 +198,7 @@ mistakes that are otherwise invisible until a user's store is wrong: a definitio
 release left behind, and a release bumped with no definition moved. **It belongs in the release
 checks**, where it costs nothing to run.
 
-## Writing a migration, when there is a release 2
+## Writing a migration
 
 **Raise `schema:` on the definitions whose shape changed, and only those.** That bump *is* the
 declaration of what the release touches; nothing else records it.
@@ -208,7 +208,7 @@ performs:
 
 ```markdown
 ## Migration
-**1 -> 2** - `sources:` becomes a list. A header carrying one source string becomes a single-item
+**1 -> 2 - upgrade only** - `sources:` becomes a list. A header carrying one source string becomes a single-item
 list. A header with no `sources:` at all is left alone and named in the report.
 ```
 
@@ -241,7 +241,7 @@ stamp like any other write.
 
 ```markdown
 ## Migration
-**1 -> 2** - rebuild. Every field here is assembled from sources, so `/nk:project <name>` produces
+**1 -> 2 - on write** - rebuild. Every field here is assembled from sources, so `/nk:project <name>` produces
 the new shape directly; there is nothing to convert in place.
 ```
 
@@ -283,10 +283,13 @@ is. An overlay silently "corrected" is the user's own decision overwritten.
 **This is the procedure, and every part of it is a glob or a grep.** No file is opened until it is
 about to be converted.
 
-1. **Resolve every definition** per `resolution.md`, and take its `schema:`. **A definition at 1 with
-   no file stamped below 1 is finished before you start** - skip it without globbing.
+1. **Resolve every definition** per `resolution.md`, and take its `schema:`. **A definition whose
+   `schema:` is at or below the store's `schema_version` is finished before you start** - skip it without globbing.
 2. **Glob that definition's files** inside the resolved store, and **count what came back.** That
-   count is carried through the rest of the survey and into the report.
+   count is carried through the rest of the survey and into the report. **Shape the pattern as
+   `<store>/**/<filename>`** and keep the hits at the definition's scope - never `projects/*/<filename>`,
+   which can return zero with the files present (*A pattern that matches nothing*, in
+   `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`).
 3. **Grep each for the stamp** - **anchored at the start of the line and never at the end.** A file is
    never read whole to find out whether it needs work.
 4. **Stamp below the definition's `schema:` is outstanding. At or above is done.**
@@ -300,7 +303,9 @@ up to the count from step 2.** Print the arithmetic per definition -
 matched* and *nothing is outstanding* are the same output and mean opposite things: one is a store
 with nothing to do, the other is a survey that did not look where the files are. **Say which one it
 is** - name the pattern and the path the glob ran against, and where the definition's files would
-live if there were any. A definition whose files exist and whose glob returned none must not be
+live if there were any. **Before reporting a zero, re-run the glob in the other form** that
+`store-boundary.md` names; a zero only one form produced is the pattern's, not the store's. A
+definition whose files exist and whose glob returned none must not be
 counted as done, and **`schema_version` must not move on a survey that reported zero for a definition
 without saying so.**
 

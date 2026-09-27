@@ -16,8 +16,8 @@ env_axis:    optional
 What do I need to know here on almost every task, and where is everything else?
 
 ## Admission
-Would I need this on most tasks in this project? Plus a pointer to every on-demand file, each with a
-required one-line description, **and one line per area carrying the cues that identify its topic**.
+Would I need this on most tasks in this project? Plus a pointer to every on-demand file the project holds - an
+enabled definition with a file on disk, `overview.md` included - each with a required one-line description, **and one line per area carrying the cues that identify its topic**.
 
 ## Exclusion
 Needed on one task in ten -> the on-demand file it belongs to, cited from here. Current work state ->
@@ -39,7 +39,7 @@ pointed at from here.
 build - run - ports - naming - the one or two traps that bite every time
 
 ## Read on demand - <store>/projects/<project>/
-gotchas - patterns - decisions - domain - runbook - architecture - interfaces
+overview - gotchas - patterns - decisions - domain - runbook - architecture
 
 ### Areas
 - **<topic>** - the cues that identify it -> areas/<topic>/

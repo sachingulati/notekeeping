@@ -28,10 +28,10 @@ stays one register.
 **The same shape as a project's area**, stated once at
 `${CLAUDE_PLUGIN_ROOT}/reference/schema/files/project/areas.md`. Here an area sits at
 `~/.notekeeping/areas/<topic>/`, and the registers that can split are `gotchas.md`, `decisions.md`,
-`domain.md`, `people.md` and `process.md`.
+`domain.md` and `process.md`. `environment.md` does not split: it is bounded in bytes, not entries, because it is projected.
 
-**Global has no projection**, so an area here is reached by reading rather than by delivery, and
-nothing needs to be rebuilt before it is reachable.
+**The global projection names each area here the way the repo projection names a project's**
+(`${CLAUDE_PLUGIN_ROOT}/reference/projections.md`), so a split is finished by the next render.
 
 **Extended, not core.** Global is the tightest scope in the store: a register that reaches a split
 threshold here is unusual, and is worth a second look at whether its entries were really global.

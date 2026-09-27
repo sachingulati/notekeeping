@@ -1,21 +1,20 @@
 ---
-description: Read the store's content and propose what should change. Proposes and stops; --apply shows each diff and you pick what to apply.
-argument-hint: "[project] [--since <date>] [--apply [all]] [--dry-run] [--page | --no-page] [--caller <name>]"
-allowed-tools: Read, Glob, Grep, Write, Edit, Bash(git log:*), Artifact
+description: Read the store's content and propose what should change. A yes applies the proposals; --apply applies a saved report.
+argument-hint: "[project] [--since <date>] [--apply [<report>] [all | <numbers>]] [--dry-run] [--page | --no-page] [--oneline]"
+allowed-tools: Read, Glob, Grep, Write, Edit, Bash(git log:*), Bash(git ls-files:*), Bash(git -C:*), Artifact
 ---
 
-Read the store and propose what should change. **It proposes and stops.** Nothing is written without
-`--apply`, and `--apply` shows each finding's diff and **lets the user choose which to apply and which
-to skip**.
+Read the store and propose what should change. **It proposes, then asks once: a plain yes applies
+every applyable finding exactly as proposed**, per `${CLAUDE_PLUGIN_ROOT}/reference/report-shape.md`'s
+`## A yes applies what was shown`, and an answer can narrow it - *"yes, but not 3"*. **Every proposal is saved as a report, and
+`--apply` applies a saved report** - all of it, the findings you name, or one at a time - in this
+session or any later one. Nothing is written without one or the other.
 
 **Resolve the store first**, per `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`. Read inside
 it, plus the registered repository when a finding needs a path checked against it - finding 5 is the
 only one that does. Write nowhere else; everything outside `.notekeeping/` belongs to the user.
 
-**`--caller <name>`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`: **report,
-never apply.** Compress the pass into the outcome line's detail. **`--apply` and `--apply all` are
-refused** - the write depends on a per-finding selection a consumer cannot supply. Refuse naming
-that reason; the caller can surface the findings to its user.
+**`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
 
 ## What this is, against `/nk:doctor`
 
@@ -88,7 +87,7 @@ not a finding; say what you looked at.
 | 4 | An unresolved contradiction whose recorded check was never run | **run it now**, or surface the check |
 | 5 | Entries about code that no longer exists - the path is gone | **retire** - mark superseded, never delete |
 | 6 | A wide entry whose provenance names one project | **demote** to that project |
-| 7 | The same fact in two projects | **promote** to the workspace, or to `interfaces.md` if one depends on the other |
+| 7 | The same fact in two projects | **promote** to the workspace |
 | 8 | A `decisions.md` entry whose `Would reopen if:` has plausibly fired | **flag it for a human** - never reopened automatically |
 | 9 | A work item with no activity and no closure for months | **close it, or say why it is open** |
 | 10 | `NOTES.md` holding something needed on one task in ten | **demote it** to the file it belongs to |
@@ -146,18 +145,14 @@ two different ones cannot survive its own output.
   and disagreed is a different thing entirely** - that is a live contradiction, and it goes to a
   human as-is.
 - **5 - retire.** The path must be *gone*, verified against the repository now, not inferred from an
-  old entry. **Never delete**: retirement marks superseded and leaves the text.
+  old entry. **Gone takes two answers**: `git ls-files -- <path>` prints nothing, so it is not
+  tracked, and neither `Read` nor `Glob` finds it, so it is not on disk untracked either. Either one alone
+  is not gone. **Never delete**: retirement marks superseded and leaves the text.
 - **6 - demote.** The entry sits at workspace or global scope and its provenance names exactly **one**
   project. Provenance naming two is correctly placed.
 - **7 - promote.** The **same fact**, not the same subject. Where one project `depends_on` the
-  other, the target is `interfaces.md` rather than the workspace. **`interfaces.md` ships
-  `enabled: false`** - resolve it through
-  `${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md` before proposing, and if it is disabled
-  here, **say so and name the overlay line that enables it**, exactly as any command does when it
-  meets a disabled definition. Never propose a write into a file the store has switched off, and
-  never quietly retarget to the workspace instead - the dependency is what chose `interfaces.md`,
-  and the user deciding not to keep that file is a different answer from the fact belonging
-  somewhere else.
+  other and the shared fact is the contract between them, it is not a promotion: a contract is read
+  from the dependee's code, not kept in the store, so say that and propose nothing.
 - **8 - flag.** The trigger must have *plausibly fired*, and you say what you saw that suggests it.
   **You never reopen a decision**, and you never write the reversal - both halves stay visible and
   that is a human's call - a ledger records reversals, it does not overwrite them.
@@ -187,6 +182,9 @@ Group by finding type, most confident first. Each proposal carries:
   why: <the rule above that it satisfies>
 ```
 
+**An applyable proposal names its write** - the file, and what changes in it - because that line is
+what a plain yes approves. A proposal that only says *merge these* has not shown what will be written.
+
 **Say what you read and found nothing in.** A pass that reports four findings over 60 files should
 say it read 60; otherwise a clean register is indistinguishable from one nobody looked at.
 
@@ -204,47 +202,39 @@ tools are the ones declared above - you cannot run an arbitrary check, and recor
 was checked and what it returned* would mean inventing it. 8's proposal **is** the flag: applying it
 would mean writing the reversal, which you never do. Report both as proposals under every flag.
 
-### The user chooses, one finding at a time
+### `--apply` applies a saved report
 
-1. **Take the applyable findings in the order you reported them**, and for each: **show the diff**,
-   then take that finding's decision. **Not every diff first and one question at the end** - a single
-   trailing question invites a blanket yes to a list nobody re-read.
-2. **Offer three answers per finding - apply, skip, and stop.** *Stop* ends the pass and keeps
-   whatever was already applied; say what was applied and what was left.
-3. **A skipped finding is not resolved.** Record nothing about it, and do not mark it done. The next
-   pass will find it again, which is correct - declining a proposal is not the same as answering it.
-4. **Report the split at the end**: *applied 3 of 8, skipped 5*. Count what you actually wrote, per
-   the derived-count rule above.
+**Every pass saves its report**, and `--apply [<report>] [all | <numbers>]` applies it, per
+`${CLAUDE_PLUGIN_ROOT}/reference/report-shape.md`'s *The report is saved*. **A pass never applies its own findings on a flag** - `--apply` reads a
+report that already exists, the latest one when none is named, and **the pass does not run again**:
+the findings are the report's, so a number means what it meant when it was printed. The finding set is
+not stable between identical passes, which is exactly why the report and not a new pass is what gets
+applied.
+
+**The walk - `--apply` with no selection** - takes the report's applyable findings in order, shows
+each diff, and offers *apply*, *skip* or *stop*. *Stop* keeps what was applied. **A skipped finding is
+not resolved**: record nothing about it; the next pass finds it again, which is correct - declining a
+proposal is not answering it. **Report the split at the end**: *applied 3 of 8, skipped 5, 0 stale*,
+counted from what you wrote.
 
 ### When there is no turn to answer in
 
-**Write nothing.** Report every finding, say which were applyable, and say plainly that nothing was
-written because no selection was made. **This is not a degraded mode, it is the correct one**: a
-selection is an input you cannot supply on the user's behalf, and this command edits the user's own
-knowledge.
-
-**`--apply all` is the exception, and it must be typed.** It authorises every applyable finding this
-pass produced, with no per-finding question. Never infer it, and never treat a bare `--apply` as
-meaning it.
-
-**Never accept finding numbers from an earlier run** - `--apply 1,3,7` is refused. The finding set is
-not stable between identical passes, so a number from a previous report may name a different finding
-now. A selection is only ever taken in the same turn as the report that produced it.
+**Write nothing, and save the report.** Say which findings were applyable and that nothing was written
+because no selection was made. **This is not a degraded mode, it is the correct one**: a selection is
+an input you cannot supply on the user's behalf. The report is what lets someone make it later.
 
 ### Under every form
 
 1. **Never delete.** Retirement marks an entry superseded and leaves its text where it is. A merge
    keeps both provenance stamps. A split moves entries into `areas/<topic>/` and leaves a pointer.
-2. **A split is not finished by the write.** `NOTES.md`'s `## Read on demand` heading and both
-   projections render from the directory listing, so a new area is invisible to a session until
-   something re-renders them. **Name `/nk:project <name>` as the step that completes it**, for
+2. **A split is not finished by the write.** `NOTES.md`'s `## Read on demand` heading and the
+   projection of that scope render from the directory listing, so a new area is invisible to a session until
+   something re-renders them. **Name `/nk:project <name>` as the step that completes a project's
+   split, and `/nk:doctor --fix` or the next `/nk:save` for a workspace or global one**, for
    findings 2 and 3 alike - an area nothing points at is knowledge that has been moved out of reach.
 3. **`--apply` is never implied by another flag**, and `--dry-run` beats it: with both, show
    everything, offer nothing and write nothing.
-4. **Apply nothing outside the store**, and nothing this pass did not report.
-5. **A disabled definition still refuses.** Where finding 7 routes a fact to `interfaces.md` and the
-   store has switched that file off, selecting the finding does not override it: name the enabling
-   overlay line, exactly as the finding's own rule says.
+4. **Apply nothing outside the store**, and nothing the report does not carry.
 
 ## Never
 

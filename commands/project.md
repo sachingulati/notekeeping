@@ -1,13 +1,13 @@
 ---
 description: Report every project, or rebuild one project's two documents.
-argument-hint: "[name] [--dry-run] [--caller <name>]"
-allowed-tools: Read, Glob, Grep, Write, Edit, Bash(git rev-parse:*), Bash(git log:*), Bash(git remote:*)
+argument-hint: "[name] [--dry-run] [--oneline]"
+allowed-tools: Read, Glob, Grep, Write, Edit, Bash(git rev-parse:*), Bash(git log:*), Bash(git remote:*), Bash(git -C:*)
 ---
 
 Report the store's projects, or rebuild one project's documents. **It owns exactly two files** -
 `NOTES.md` and `overview.md` - and writes no other file in any project.
 
-**`--caller <name>`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
+**`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
 
 Resolve the store first, per `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`, and resolve
 `<name>` against the projects registered in it. **Never invent a project.** Resolve both file
@@ -42,12 +42,12 @@ this command finishes the files in its hands and nothing else.
 `${CLAUDE_PLUGIN_ROOT}/reference/projections.md`. The
 projection is derived from `NOTES.md` and the directory listing, so rebuilding the source and leaving
 the delivered copy stale would leave the user reading yesterday's file. **This is also the only thing
-that picks up a new area**: `## Read on demand` renders from the listing, so an area added by a
+that writes a new area's cue into `NOTES.md`**: `## Read on demand` renders from the listing, so an area added by a
 promotion or by `/nk:review`'s split is not reachable from a session until something re-renders it -
 and this is that something.
 
 **Registers and ledgers are never regenerated** - `gotchas` - `patterns` - `decisions` - `domain` -
-`runbook` - `architecture` - `interfaces` - `areas/` - **and `instructions`, which is not a register
+`runbook` - `architecture` - `areas/` - **and `instructions`, which is not a register
 but is written the same way**. They are appended to by promotion and edited in place by
 re-promotion. **A rebuild that touched one would destroy accumulated knowledge to refresh a stamp**,
 so read them freely and write none of them.
@@ -140,7 +140,7 @@ Print the diff for both files and which facts look stale. Write nothing, includi
 
 ## The outcome line
 
-Emit it only under `--caller`, as the last line:
+Emit it only under `--oneline`, as the last line:
 
 ```
 nk: project ok — repo-a, 2 files

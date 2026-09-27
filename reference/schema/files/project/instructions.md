@@ -23,9 +23,8 @@ carries no correction shape. A register entry is a claim you could be wrong abou
 ## Exclusion
 A fact that is true -> `NOTES.md`, or the register it belongs to. True of one task -> that work
 item's `instructions.md`. **Conditional on a topic** -> that topic's area, once the area exists -
-an entry that begins *when the work touches X* belongs to X. True of every project you work on ->
-**your harness instructions file, not here**: global has no projection, so an instruction promoted
-there is stored and never obeyed. **Team-wide -> the repository's committed `CLAUDE.md`**, which
+an entry that begins *when the work touches X* belongs to X. True of every project in the workspace ->
+the workspace's `instructions.md`; true of every project you work on -> the global one. **Team-wide -> the repository's committed `CLAUDE.md`**, which
 this plugin never writes.
 
 ## Entry format
@@ -49,8 +48,7 @@ entry whose trigger has plausibly fired, exactly as it does for a `decisions.md`
 ## How one is found
 
 **The filename is the marker, and nothing is stamped onto an entry.** `instructions.md` sits at a
-path the schema fixes, so `*/instructions.md` and `areas/*/instructions.md` already find every
-instruction in a store - the same argument that keeps a per-entry token out of `gotchas.md`. A token
+path the schema fixes, so `<store>/**/instructions.md` already finds every instruction in a store - the same argument that keeps a per-entry token out of `gotchas.md`. A token
 here would also fight the entry format's own rule: what leads an entry is the imperative, not a
 field name.
 

@@ -8,7 +8,7 @@ shape:       document
 owner:       nk:save
 trigger:     always
 authority:   original
-budget:      4000 bytes
+budget:      12000 bytes
 env_axis:    optional
 ---
 

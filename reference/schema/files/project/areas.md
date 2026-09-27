@@ -65,7 +65,7 @@ stamps and their corrections intact, which is what makes a split reversible by h
 a sign the topic was drawn too wide, and the answer is a second area beside it.
 
 **An area is not reachable until something renders it by name.** `NOTES.md`'s `## Read on demand`
-heading and both projections render from the directory listing, so an area created by a split is
+heading and the repo projection render from the directory listing, so an area created by a split is
 invisible to a session until `/nk:project <name>` rebuilds them. **A split is finished by that
 rebuild**, not by the write.
 

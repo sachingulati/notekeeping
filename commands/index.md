@@ -1,13 +1,13 @@
 ---
 description: Rebuild the work-item resolver from frontmatter. Rarely typed - save does this.
-argument-hint: "[--caller <name>]"
+argument-hint: "[--oneline]"
 allowed-tools: Read, Glob, Grep, Write
 ---
 
 Force a rebuild of the store's `index.md`. **This exists for repair** - `/nk:save` regenerates it as a
 matter of course.
 
-**`--caller <name>`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
+**`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
 
 Resolve the store first, per `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`, and enumerate
 work items only from inside it.

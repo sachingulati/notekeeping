@@ -20,7 +20,8 @@ A term, field or identifier whose meaning is **not derivable from its name**.
 
 ## Exclusion
 Means the same across projects -> promote to the workspace or global. The *shape* is the point rather than
-the meaning -> interfaces.md. The name actively misleads -> gotchas.md.
+the meaning -> a contract, read from the code rather than kept here. The name actively misleads ->
+gotchas.md.
 
 ## Entry format
 - **The claim, stated as something you could be wrong about.** The mechanism, naming the identifier

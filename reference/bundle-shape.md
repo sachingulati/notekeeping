@@ -10,7 +10,7 @@ title: Minting a work item - its id, its folder, and what makes it a bundle
 > both follow it.
 
 Stated once, because two writers that state it separately drift - the same reason
-`${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md` is stated once and cited by its six callers, five of them writers.
+`${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md` is stated once and cited by its seven callers, six of them writers.
 
 ## The id
 
@@ -59,7 +59,8 @@ projects registered in the store, per
 `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`. **Never fall back to a directory's basename.**
 
 **If it does not resolve and you cannot ask, write `project: []`** and name it as unresolved in the
-body. A guessed project routes promotion to the wrong scope and reports git state for a repository
+body - **except under `--oneline`, where the question comes back as a refusal naming `--project <name>`**
+(`${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`). A guessed project routes promotion to the wrong scope and reports git state for a repository
 the work has nothing to do with.
 
 **`--project <name>` supplies the answer when nobody can be asked**, and is what a refusal names.

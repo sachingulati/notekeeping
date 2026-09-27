@@ -84,14 +84,14 @@ store would move to a shape they explicitly declined.
 | `extends` | **overlay only.** `shipped` makes this file a fragment: what it does not name is inherited. Absent, the overlay replaces the shipped definition whole |
 | `schema` | **the schema release at which this definition's shape last changed.** A written file is outstanding for migration when its stamp is below this - which is how a release targets the definitions it moved and reads nothing else. `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` |
 | `enabled` | **`false` means the file does not exist for this store.** Say so, name the one line of overlay that turns it on, and write nothing |
-| `tier` | `core` - always useful; `extended` - useful to some stores; `example` - a worked shape to copy. Informational; only `enabled` decides anything |
+| `tier` | `core` - always useful; `extended` - useful to some stores. Informational; only `enabled` decides anything |
 | `shape` | `document`, `document+append`, `register`, `ledger` or `container`. A ledger is never edited; a register is appended to and corrected in place; a **container** is a directory whose files each keep the shape of the register they came from |
 | `owner` | the one command that writes it, or `promotion` |
 | `trigger` | when it is written |
 | `authority` | `original`, or `derived` - and a `derived` file must carry its refresh recipe in the header |
 | `budget` | the ceiling in bytes, or the entry count that is a register's **split threshold**. `none` means uncapped. **A write that leaves the file at or past `budget_notice_pct` of it says so** - below |
 | `env_axis` | whether the verified stamp's environment half is `required` or `optional` |
-| `promotes_to` `promote_when` `pairs_with` `paired_from` | the pair pattern: where entries graduate to, and when |
+| `promotes_to` `promote_when` `pairs_with` `paired_from` | the pair pattern, for a definition the overlay adds: where its entries are promoted to, and when |
 
 ### The budget notice
 
@@ -100,9 +100,9 @@ leaves it at or past `budget_notice_pct` of that ceiling** - the share is in
 `${CLAUDE_PLUGIN_ROOT}/reference/config-defaults.md`, and it defaults to 80.
 
 **The rule is here rather than in each command** so that every writer inherits it by resolving the
-definition, and so there is one place to change it. It covers **twenty-two definitions today**:
-eight with byte ceilings, and fourteen registers whose ceiling is a **split threshold** in entries,
-where 80% of 60 is 48. **`work/resume.md` is outside the rule rather than a twenty-third** - its
+definition, and so there is one place to change it. It covers **twenty-one definitions today**:
+ten with byte ceilings, and eleven registers whose ceiling is a **split threshold** in entries,
+where 80% of 60 is 48. **`work/resume.md` is outside the rule rather than a twenty-second** - its
 number is a notice, not a ceiling, so there is nothing to take 80% of, and `work/session.md` carries
 no number at all.
 
@@ -171,9 +171,11 @@ substance - say which part you refused, and why.
 
 ## A user-defined command
 
-`<store>/schema/commands/<name>.md`. It is namespaced identically to a shipped command
-and behaves like one.
+`<store>/schema/commands/<name>.md`, run as **`/nk:run <name>`** - the harness registers only the
+plugin's own commands, so a user command is reached through that one, and bare `/nk:run` lists them.
+The file carries `description:` and `writes:` in its frontmatter, and its body is the prompt.
 
-- **`writes:` is required**, and is validated against what the command actually touches.
-- **It may write only inside a store.** Projections belong to the plugin.
-- **It may not shadow a shipped command name.** Refuse at load, and say which name collided.
+- **`writes:` is required**, and is validated against what the command actually touches. Each
+  entry is a store-relative path; one ending in `/` covers everything below it; no wildcards.
+- **It may write only inside the resolved workspace store.** Projections belong to the plugin.
+- **It may not use a shipped command's name.** `/nk:run` refuses it, and says which name collided.

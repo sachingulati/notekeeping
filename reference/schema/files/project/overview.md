@@ -73,4 +73,6 @@ this file, and it rewrites the whole of it every time.
 
 **Where a field's content did not come from a recorded source it is carried across verbatim**, label
 added and wording untouched, and the report names each one. Those are the lines that make this file
-`original` rather than `derived`, and a rebuild that dropped them would lose the only copy.
+`original` rather than `derived`, and a rebuild that dropped them would lose the only copy. **The
+rebuild sets the header's `authority:` to match**: `original` when it carried any such line,
+`derived` only when it carried none - never the value the old header had.

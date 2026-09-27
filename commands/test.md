@@ -1,16 +1,24 @@
 ---
 description: Write test.md and test-manual.md - how this is verified, by machine and by hand.
-argument-hint: "[id] [--dry-run] [--caller <name>]"
+argument-hint: "[id] [--dry-run] [--oneline]"
 allowed-tools: Read, Glob, Grep, Write, Edit
 ---
 
 Fill in the verification pair for a work item. Writes inside the store only.
 
-**`--caller <name>`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
+**`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
+
+**Resolve the store first**, per `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`, then the item:
+`[id]`, or the inference `/nk:save` step 1 makes, resolved against `index.md` - acting on a confident match and asking
+where there is none, as `/nk:save` does.
 
 **Both files are written, every time.** They are a pair by policy: `test.md` is the reusable
 protocol, `test-manual.md` is the human walkthrough. Someone running the check by hand and something
 re-running it later need different documents, and writing only one leaves the other job undone.
+
+**They are written differently.** `test.md` is a register: add to it, and never rewrite an entry -
+a re-run records its new outcome under the check it re-ran. `test-manual.md` is a document, and is
+rewritten to the walkthrough as it stands now.
 
 Resolve both definitions - `test.md` and `test-manual.md` - per
 `${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md`, and honour their admission and exclusion

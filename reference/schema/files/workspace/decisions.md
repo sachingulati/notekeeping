@@ -24,8 +24,10 @@ Binds one project -> that project's decisions.md. A choice about how you work wh
 on -> global. A trap rather than a choice -> gotchas.md.
 
 ## Entry format
-- **The decision, in one line.** Why, in one or two. **Would reopen if:** the condition that would
-  make you revisit it. `(source - date)`
+```markdown
+- **Chose X over Y.** Rejected: Y, Z. Because <the reason that actually decided it>.
+  **Would reopen if:** <the condition that would make this wrong>. `(source - date)`
+```
 
 **A ledger is never edited.** A decision that changes gets a **new** entry that supersedes the old one
 by name and date; both stay visible, because the reasoning is worth more than the conclusion.

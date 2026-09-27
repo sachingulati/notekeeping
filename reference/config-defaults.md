@@ -33,39 +33,40 @@ with a default to fall back to.
 | `context_window_tokens` | `1000000` | store |
 | `load_depth` | `quick` - `/nk:load` reads `resume.md` and the latest session block. `full` reads all of `session.md`, which lets the next save re-derive rather than carry forward | store |
 | `budget_notice_pct` | `80` | store |
-| `projection_project_bytes` | `20000` | store |
-| `projection_workspace_bytes` | `6000` | store |
+| `projection_bytes` | `26000` | store |
 | `dirs:` | **no default** - written by `/nk:init` from `git rev-parse --show-toplevel`, never inferred | project |
 | `depends_on:` | none | project |
 
 **`staleness_warn_commits` and `staleness_warn_days` are an either-trips pair** - a knowledge file
 is stale when it passes *either* threshold, not both.
 
-**The two `projection_*_bytes` rows are ceilings, and what happens at a ceiling is not a default** -
+**`projection_bytes` is a ceiling, and what happens at a ceiling is not a default** -
 a slice past its ceiling degrades to a pointer whole, and that rule lives in
 `${CLAUDE_PLUGIN_ROOT}/reference/projections.md`. Only the numbers are here.
 
+**One ceiling bounds all three projections, sized for the largest.** A `NOTES.md` is 12000 bytes
+and an `instructions.md` is 2000 at every scope; global adds `environment.md` at 6000. One number
+sized for global's three sources holds the other two with room to spare, and a second number would
+only let one of them fall below what its sources may produce.
+
 **A projection ceiling is never below what its sources may produce, and that is the whole rule.**
-It was stated as a *match* while a projection had one source; it now has two, so it is a **sum**:
-`project/NOTES.md`'s 12000 plus `instructions.md`'s 2000, with headroom for the generation header
-and the area lines, is **20000**; the workspace's 4000 plus 2000 is **6000**. A user who fills both
-sources to their ceilings does not silently lose the end of either on the way into a repository,
-which is the defect this rule exists to prevent and the one it was written for.
+It is a **sum**: 12000 plus 6000 plus 2000, with headroom for the generation header, the fixed
+line and the area lines, is **26000**. A user who fills every source to its ceiling does not silently
+lose the end of one on the way into the projection, which is the defect this rule exists to prevent.
 
 **Instructions are not budgeted against the facts, and raising these is what makes that true.** At
 the old ceilings an instruction could only be afforded by a `NOTES.md` that was under its own
 budget, so the two competed for one number and the trade was invisible at write time. Each source
-now has its own ceiling and the projection holds both.
+now has its own ceiling and the projection holds them all.
 
-**They are not one pool.** The 20000 here measures one project's rendered slice; the 12000 on the
-definition measures that project's `NOTES.md` across all three of its sections, so `## Active` eats
+**They are not one pool.** The 26000 here measures one rendered slice; the 12000 on the
+definition measures that scope's `NOTES.md` across all three of its sections, so `## Active` eats
 into the source budget while contributing nothing to this one. **Neither sees content hand-written
 above the block** in a `CLAUDE.local.md`.
 
-**Both projections can load in one session**, so the worst case a session pays is the two ceilings
-together - 26000 bytes, about 7000 tokens. That is the number `OPEN.md` §3 compares against other
-systems, and it is a ceiling rather than an observed size: the largest block any run has produced is
-under 1600 bytes.
+**All three projections can load in one session**, so the worst case a session pays is the ceiling
+three times - 78000 bytes, about 19500 tokens. That is a ceiling rather than an observed size: the
+largest block any run has produced is under 1600 bytes, and a projection costs what its sources hold.
 
 **`budget_notice_pct` applies to every `budget:` in the schema, not to projections** - the rule is
 stated once, beside the field, in `${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md`.

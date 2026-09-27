@@ -21,7 +21,8 @@ obvious from the name.
 
 ## Exclusion
 Used by one project only -> that project's domain.md. True in this domain whatever workspace you are
-in -> global. A term that is really a contract between two projects -> the dependee's interfaces.md.
+in -> global. A term that is really a contract between two projects -> read it from the dependee's
+code; the store does not keep contracts.
 
 ## Entry format
 - **The claim, stated as something you could be wrong about.** The mechanism, naming the identifier

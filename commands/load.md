@@ -1,12 +1,12 @@
 ---
 description: Resume. Reads only, never writes - restores where you were from the store, git and the tracker.
-argument-hint: "[query] [--full] [--quick] [--caller <name>]"
-allowed-tools: Read, Glob, Grep, Bash(git status:*), Bash(git branch:*), Bash(git log:*), Bash(git diff:*), Bash(git stash list:*)
+argument-hint: "[query] [--full] [--quick] [--oneline]"
+allowed-tools: Read, Glob, Grep, Bash(git status:*), Bash(git branch:*), Bash(git log:*), Bash(git diff:*), Bash(git stash list:*), Bash(git -C:*)
 ---
 
 Resume where you left off. **This command reads. It never writes anything, anywhere.**
 
-**`--caller <name>`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
+**`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
 
 ## 1. Resolve the store, then the query
 
@@ -67,7 +67,7 @@ cannot say *why* it matched.
   what has already been ruled out - and it is what makes a cold session continuous rather than
   merely informed.
 - **`session.md`, how much depending on the depth** - see *Depth* below. On `--quick`, the latest
-  block alone, **`grep -n '^## session ' | tail -1`**, read from there to the next `## ` heading or
+  block alone - **`Grep` `^## session ` with line numbers and take the last match** - read from there to the next `## ` heading or
   the end. On `--full`, the file. Every block names its kind, so the part wanted is addressable
   without the ones before it.
 - `plan.md` next steps and `test.md` status, if they exist.
@@ -75,22 +75,23 @@ cannot say *why* it matched.
   flight. Its budget is small enough that bounding the read would cost more than it saves.
 
 **This is the only delivery that file has**, which is why it is read whole and read first among the
-optional ones: the project's and the workspace's instructions arrive by projection, and re-reading
+optional ones: the project's, the workspace's and global's instructions arrive by projection, and re-reading
 them here would pay twice for the same lines. **Say in the report that the item carries instructions
 and how many** - an instruction that loaded silently is indistinguishable, from the outside, from
 one that did not load at all.
 
 **Check that the projection actually delivered them; never assume it did.** A projection can be
-missing, stale, or stripped of its block - `/nk:doctor` carries the finding and `/nk:project <name>`
+missing, stale, or stripped of its block - `/nk:doctor` carries the finding and `/nk:doctor --fix`
 rebuilds it - so *already in context* is a claim about a file that may not exist. **Look for the
-literal `## Standing instructions` heading** in `<repo>/CLAUDE.local.md` and in the workspace root's,
-per `${CLAUDE_PLUGIN_ROOT}/reference/projections.md`, which is the same detection `/nk:doctor` uses
-and costs one grep per scope.
+literal `## Standing instructions` heading** in `<repo>/CLAUDE.local.md`, in the workspace root's and
+in `~/CLAUDE.local.md`, per `${CLAUDE_PLUGIN_ROOT}/reference/projections.md`, which is the same
+detection `/nk:doctor` uses and costs one grep per scope. **Global's file reaches only a session
+whose directory is under the home directory**; outside it, treat that block as missing.
 
 | What you find | Do |
 |---|---|
 | the heading is there | say the scope's instructions arrived by projection, and do not re-read them |
-| the block is missing, or has no such heading, **and that scope's `instructions.md` has content** | **read it and render it here**, say that it came from the store rather than the projection, and name `/nk:project <name>` or `/nk:doctor --fix` |
+| the block is missing, or has no such heading, **and that scope's `instructions.md` has content** | **read it and render it here**, say that it came from the store rather than the projection, and name `/nk:project <name>` for a repo projection, or `/nk:doctor --fix` for any |
 | that scope has no `instructions.md`, or it is empty | nothing to say |
 
 **Reporting them as loaded when nothing loaded them is the failure this prevents**, and it is worse
@@ -157,7 +158,7 @@ lookups**, and nothing is fetched on this plugin's behalf.
 
 ## Output
 
-**Under `--caller`: one line, and nothing else.** Follow
+**Under `--oneline`: one line, and nothing else.** Follow
 `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md` - the outcome line **is** the output.
 Compress what matters into its detail: the item, the project, branch and cleanliness, which
 artifacts exist, and the single most important discrepancy if there is one.

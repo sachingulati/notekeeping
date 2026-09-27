@@ -37,7 +37,7 @@ Re-running save on the same day extends today's block rather than opening a seco
 
 **Every block names its kind first, and that is what makes this file greppable.** Two kinds share it
 - the sessions and the closing blocks - so a heading that carried only a date told a reader nothing
-and told a `grep` even less. **`grep -n '^## session ' session.md | tail -1` is the latest session
+and told a `grep` even less. **The last `^## session ` match, from `Grep` with line numbers, is the latest session
 block**, which is the half a `--quick` load needs and the one thing a date-only heading could not
 give it.
 

@@ -9,48 +9,53 @@ title: Being called by a tool, not a person
 |---|---|
 | **The contract version this plugin ships** | **1** |
 
-**It is stated here and nowhere else.** `/nk:help --caller` reports it by reading this line - a
+**It is stated here and nowhere else.** `/nk:help --oneline` reports it by reading this line - a
 number typed into a command file is one that drifts the first time the contract moves, and a
 consumer built against a drifted number cannot tell which behaviour it is getting. **It moves only
-when an existing consumer would have to change**: a new command, a new flag or a wider `--caller`
-surface leaves it where it is, exactly as a plugin release leaves `schema_version` alone
+when an existing consumer would have to change**: a new command or a new flag leaves it where it is,
+exactly as a plugin release leaves `schema_version` alone
 (`${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md`, which keeps the same distinction for stores).
 
 **A consumer is any tool that wants notekeeping's capabilities without owning its storage** - another
 plugin, a hook, a scheduled agent, a wrapper someone wrote for themselves. It calls commands. It
-never reads or writes the store directly.
+never writes the store directly, and reads only the report file a line names (below).
 
-`--caller <name>` declares **this call came from a tool**. The name is an opaque string used for
-provenance and nothing else. **No command branches on its value** - a rule here may never acquire a
-particular consumer's name.
+## `--oneline` changes the output, and nothing else
 
-**It does not declare that no human is present.** That is a property of the consumer, and consumers
-vary: one has a user at the keyboard, one runs unattended for hours. Both get the same behaviour, and
-the difference in what to do about it belongs to them.
+**Every command does exactly what it does for a person.** It resolves the same way, infers the same
+way, acts on the same confident inference and stops where a person's run would stop. **A flag is
+approval, whoever types it**: `--apply` on a saved report and `--fix` work under `--oneline` exactly
+as they do when a person types them, and a consumer answers to its own user for the flags it passes. **Only the output differs**, in three ways:
 
-## The four obligations
-
-| Obligation | What it means here |
+| A person's run | Under `--oneline` |
 |---|---|
-| **Never ask. Refuse instead** | The refusal names what is missing **and which argument supplies it**. A command that asked would reach around its caller to interrupt a flow it cannot see |
-| **Never guess** | Refusal is the only alternative to asking. Disclosing a guess in prose does not count - nobody reads prose when a tool is driving |
-| **End with the outcome line** | The call has no return value. Without a fixed last line the caller parses prose |
-| **No-op when nothing changed** | A consumer checkpoints repeatedly. Report `no-change` and write nothing rather than churning a file |
+| **prints its report** | **prints one line** - the outcome line, below. A report that does not fit goes to a file the line names |
+| **asks a question** where it cannot go on | **refuses**, and the line carries the question: what is missing, the argument that supplies it, and **the options, where the run has them** |
+| **offers a page** (`${CLAUDE_PLUGIN_ROOT}/reference/report-pages.md`) or makes any other closing offer | **offers nothing.** An offer is a question with nowhere to go, and it never blocked the run |
 
-## When more than one thing is missing
+**A refusal is the question, handed back.** A consumer with a user at the keyboard can put it to them
+and call again with the answer; one without can stop. Either way the command never interrupts a flow
+it cannot see:
 
-**Validate the call before touching the filesystem.** A refusal names the argument that would
-satisfy it, so **which check fires first decides what the caller retries with**.
+```
+nk: save refused — 2 items match: 0012-auth-timeout, 0015-auth-ui; pass [id]
+nk: work refused — project unresolvable; pass --project <name>, or run /nk:project to see the options
+```
 
-**The order is the flags, then the store, then the project.** Cheapest first, and it produces the
-most actionable refusal: an argument the caller controls is one it can fix without a person, while a
-missing store is not.
+**`--oneline` does not declare that no human is present.** Consumers vary: one has a user at the
+keyboard, one runs unattended for hours. Both get the same behaviour, and the difference in what to do
+about it belongs to them.
+
+**One consequence for what gets written.** A save promotes without asking, because the report is how
+a person sees what went where - and under `--oneline` nobody sees that report. So **every entry
+promoted in a `--oneline` run carries `unseen` in its provenance stamp**, per
+`${CLAUDE_PLUGIN_ROOT}/commands/save.md` *Promotion*, and `/nk:doctor` counts what is still unseen.
 
 ## The outcome line
 
 **The last line matching `^nk: `** - and the only part of the output a consumer may depend on.
 
-**Match it; do not take the last line blindly.** Under `--caller` it is the only line there is, so
+**Match it; do not take the last line blindly.** Under `--oneline` it is the only line there is, so
 the two are the same thing in the normal case - but a consumer that *matches* is unharmed by
 anything that ever went wrong here (a wrapping fence, a preamble, a trailing remark), and a consumer
 that takes the last line is broken by all three. **The producing rule is strict and the parsing rule
@@ -61,87 +66,60 @@ second can be relied on absolutely.
 nk: <command> <status> — <detail>
 ```
 
-**Under `--caller` the outcome line is the whole output. There is no report.** This is the rule
-above applied to reporting and not only to asking - **a consumer is not a reader**, and any prose at
-all is prose the line can get lost behind.
+**Under `--oneline` the outcome line is the whole output.** No heading, no summary, no findings, no
+code fence, nothing before it and nothing after it. **A command file that describes an output shape
+does not apply under `--oneline`** - if one appears to, this rule wins and the command file is wrong.
 
-**Every contract command emits exactly one line and nothing else.** No heading, no summary, no
-findings, no code fence, nothing before it and nothing after it. **A command whose job is to report
-compresses its findings into `<detail>`** - `2 errors, 2 warnings, 0 info` is a report, and it fits.
-
-**This is structural, not stylistic.** With nothing else in the output there is nothing for the line
-to be buried behind, and its absence is an empty response rather than something a caller has to
-detect. **A command file that describes an output shape does not apply under `--caller`** - if one
-appears to, this rule wins and the command file is wrong.
-
-**Do not narrate this rule.** Saying *"since `--caller` is set, only the outcome line is emitted"*
+**Do not narrate this rule.** Saying *"since `--oneline` is set, only the outcome line is emitted"*
 **is** the report it suppresses. Emit the line. Say nothing about emitting it.
 
 | Status | Means |
 |---|---|
-| `ok` | it wrote what it was asked to write. Usually the store; **also a projection**, where one was due |
+| `ok` | it did what it was asked. Usually that is a write - the store, and **also a projection** where one was due. For a command that only reads, and **under `--dry-run`**, it is the report: the detail leads with `dry run` where that flag was given, and says what would have been written |
 | `no-change` | the call was valid and nothing needed writing |
-| `refused` | the command did not run, and the detail says what would let it |
+| `refused` | the command stopped where a person's run would have asked, and the detail carries the question |
 
 ```
-nk: save ok — work/2026-09/spike-auth, 3 files
-nk: save no-change — work/2026-09/spike-auth
-nk: work refused — project unresolvable; pass --project, or run /nk:project to see the options
+nk: save ok — work/2026-09/0012-spike-auth, 3 files
+nk: save no-change — work/2026-09/0012-spike-auth
+nk: plan ok — dry run; would write work/2026-09/0012-spike-auth/plan.md
+nk: plan ok — work/2026-09/0012-spike-auth (inferred from branch)
 ```
 
-**`no-change` is what makes idempotency observable**, and it is the status that separates a consumer
-that can safely retry from one that must track state itself.
+**Where the run acted on an inference, the detail says so** - `(inferred from branch)`. A person
+reads that in the report; a consumer can only read it here.
 
-**Emit the line only under `--caller`.** Without the flag a person is reading, and the ordinary
+**`no-change` is what makes idempotency observable.** Writing nothing when nothing changed is every
+command's rule, not this contract's (`${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`, *Every
+run*); `no-change` is how the line reports it.
+
+**Emit the line only under `--oneline`.** Without the flag a person is reading, and the ordinary
 report is the output.
 
-## Every command accepts `--caller`. Not every command will act on it
+## A report that does not fit
 
-**Every shipped command accepts the flag**, because a consumer can invoke any of them - nothing
-stops an agent typing `/nk:init`. A command with no defined behaviour under `--caller` does not
-become unreachable, it becomes **unpredictable**; accepting the flag is what makes the answer a
-parseable refusal rather than whatever the command does with an argument it does not recognise.
+**Most commands fit** - `save`, `load`, `work`, `plan`, `test`, `summary`, `index`, `run`, `init`,
+`config`, `budget` and `help` answer in the detail. **`review`, `doctor`, `adopt`, `upgrade` and a
+bare `project` do not**: their report is a list someone has to read.
 
-**Accepting the flag is not authority to act**, and the two questions are separate:
-
-| | Under `--caller` |
-|---|---|
-| `work` `save` `load` `index` `doctor` `plan` `summary` `test` `how` `api` `project` | **act normally**, within the four obligations |
-| `budget` `help` | **act normally** - they only ever read. `help` is the discovery surface: it answers with the contract version and the callable list, so a consumer built against an older contract can tell |
-| **`review`** | **reports, never applies.** Compress the findings into `<detail>`. `--apply` and `--apply all` are refused: the write depends on a per-finding selection, and a consumer cannot supply one |
-| **`init`** | **reports, never creates.** Say what it would create and that a person must run it |
-| **`config`** | **reports, never writes.** Resolved values are readable; `set` is refused |
-| **`adopt`** | **reports the inventory, and writes nothing.** Filling a store from material nobody has looked at is a person's act; the later phases are also the expensive half |
-| **`upgrade`** | **reports the version gap, and migrates nothing.** A migration rewrites knowledge the user did not just write |
-
-**A consumer never initialises a store, never edits configuration and never migrates one.** That rule is unchanged and is
-now enforced *inside* the two commands rather than by their absence from a list. No store means a
-refusal naming `/nk:init`, run by a person - which is what keeps the machine config reachable only by
-the person whose machine it is.
-
-**Why the refusal beats the omission.** A command outside the contract answers an unrecognised flag
-with undefined behaviour, and the caller learns nothing it can act on. A command inside it answers:
+**The first four save every report anyway** - it is what `--apply` applies, per
+`${CLAUDE_PLUGIN_ROOT}/reference/report-shape.md`'s *The report is saved*. A bare `project` saves
+one only under `--oneline`. Either way **the line names the file by absolute path:**
 
 ```
-nk: init refused — a store is created by a person; run /nk:init
-nk: config refused — settings are edited by a person; /nk:config set is not available to a caller
-nk: review refused — --apply needs a per-finding selection; report the findings to your user
-nk: upgrade refused — a store is migrated by a person; run /nk:upgrade
+nk: review ok — 14 findings, 9 applyable; nothing written; details: <store>/.notekeeping/tmp/review-20260928-143012.md
 ```
 
-## The refusals a consumer will actually hit
+- **One file per run**, named `<command>-<YYYYMMDD-HHMMSS>.md`, so two consumers calling at once never
+  overwrite a report the other is still reading.
+- **The file is the report a person would have seen**, in the same shape - never more than that.
+- **The directory is created by the first report written into it**, together with a
+  `tmp/.gitignore` holding `*`, so a store kept under git never shows a report as a change.
+- **It is output, not store content.** Only `--apply` reads it back. `/nk:doctor --fix` deletes
+  reports that were applied or are more than a week old.
 
-These are the ask-points that become refusals. Each names its argument, because a refusal that names
-none is unactionable.
-
-| Situation | Refusal must name |
-|---|---|
-| No store above the working directory | `/nk:init`, run by a person - never create one |
-| The project cannot be resolved | `--project <name>`, and `/nk:project` to list the options |
-| `save` has something to promote | `--promote auto` or `--promote none`. **Supplying neither refuses naming both** - guessing which was meant is the silent promotion this forbids |
-| `init` or `config set` called by a consumer | **a person.** The action is refused whatever the arguments are, and the detail says so rather than naming a flag that would unlock it - there is none |
-| The store's `schema_version` is not the plugin's | **`/nk:upgrade`, run by a person**, when the store is older; the plugin update when it is newer. A command may finish a file it is already writing, where the step allows it; only `/nk:upgrade` sweeps the store |
-| `review --apply` called by a consumer | **a per-finding selection**, which a consumer cannot supply. Report the findings to the user instead |
+**A command that only reads never writes one** - it compresses into the detail, or names a store
+file that already holds the answer.
 
 ## Why a consumer calls rather than reads
 

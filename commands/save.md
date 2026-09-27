@@ -1,30 +1,30 @@
 ---
 description: Checkpoint the session. Rewrites the handover, promotes what outlived the task, drains memory.
-argument-hint: "[id] [--project <name>] [--tag <name>] [--promote auto|none] [--dry-run] [--caller <name>]"
-allowed-tools: Read, Glob, Grep, Write, Edit, Bash(git rev-parse:*), Bash(git status:*), Bash(git branch:*), Bash(git log:*), Bash(git diff:*)
+argument-hint: "[id] [--project <name>] [--tag <name>] [--dry-run] [--oneline]"
+allowed-tools: Read, Glob, Grep, Write, Edit, Bash(git rev-parse:*), Bash(git status:*), Bash(git branch:*), Bash(git log:*), Bash(git diff:*), Bash(git -C:*)
 ---
 
 The checkpoint. **Idempotent and safe to run many times per session - that is the normal usage, not
 the exception.**
 
-**`--caller <name>`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
+**`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
 
 `/nk:save` exists so the session becomes disposable: save, then `/clear`, and `/nk:load` restores
 you. Everything below follows from that contract.
 
 Resolve the `resume.md`, `session.md` and `NOTES.md` definitions per
-`${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md` before writing either - the user's overlay
+`${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md` before writing any of them - the user's overlay
 wins over the shipped default.
 
-**Steps 2 and 6 are migration-on-write carriers.** Where the resolved definition's `## Migration`
+**Steps 2 and 3 are migration-on-write carriers.** Where the resolved definition's `## Migration`
 declares a step **on write**, convert the file and stamp it in the same write, and name the
 conversion in the report - `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md`. Where it declares
 **upgrade only**, do not convert and do not write that file: report it as outstanding and name
 `/nk:upgrade`. Never walk the store for files you were not already writing, and never move
 `schema_version`.
 
-**Where an `upgrade only` step reaches a file step 2 writes, the whole save stops, and the report
-says so in those words** - step 2 aborts, and every later step is about work that did not happen. No
+**Where an `upgrade only` step reaches a file step 2 or 3 writes, the whole save stops, and the
+report says so in those words** - that step aborts, and every later step is about work that did not happen. No
 shipped definition is in that state today, both work-item files this command writes being at release
 1; the rule stands for the release that changes one. Name it before anything else in the report, and
 **say plainly not to `/clear` on the strength of that save**.
@@ -36,13 +36,13 @@ shipped definition is in that state today, both work-item files this command wri
 | 1 | **Resolve the store first** per `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`, then the target inside it - **minting one if there is none** (below). State the inference and name the store path; ask only if genuinely ambiguous | **abort** |
 | 2 | Rewrite `resume.md` - the position, and the story below it. `## resume.md` below | **abort** |
 | 3 | Append or extend **today's** `## session <date>` block in `session.md` - re-running the same day extends it | **abort** |
-| 4 | Promotion check - route, scope, dedupe, classify, report verdicts, write on confirmation (or per `--promote`) | **abort** |
+| 4 | Promotion check - route, scope, dedupe, classify, write every verdict that writes, then report what was written | **abort** |
 | 5 | Drain the harness memory store - read it, promote what survives admission, **clear what was promoted**, and report what could not be placed | **abort, and say so** |
 | 6 | Refresh `NOTES.md` - the active pointer, and the verified stamp if the repo or environment moved | **abort** |
 | 7 | **Settle the item's tags** - `--tag`, plus what the session named. `## Tags` below | **warn** |
-| 8 | Regenerate the store's `index.md` per `${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md` - **a save that changed no id, title, project, parent or tag leaves it byte-identical** | **abort** |
-| 9 | Regenerate projections per `${CLAUDE_PLUGIN_ROOT}/reference/projections.md` - which decides whether either has anything to render, checks the markers before writing, and orders the ignore step | **warn** |
-| 10 | **Where the session says the work is done, write the closing block** - one dated heading and one line of reason, shape fixed in `${CLAUDE_PLUGIN_ROOT}/reference/schema/files/work/session.md`, *Closing, and staying open*. **Only on what the user said**, never on your own reading of the work. Then offer `summary.md`, as when its change merged | **warn** |
+| 8 | Regenerate the store's `index.md` per `${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md` - **a save that changed no id, related id, title, project, parent or tag leaves it byte-identical** | **abort** |
+| 9 | Regenerate projections per `${CLAUDE_PLUGIN_ROOT}/reference/projections.md` - the active item's project, the workspace and global; that file decides whether each has anything to render, checks the markers before writing, and orders the ignore step | **warn** |
+| 10 | **Where the session says the work is done, write the closing block** - one dated heading and one line of reason, shape fixed in `${CLAUDE_PLUGIN_ROOT}/reference/schema/files/work/session.md`, *Closing, and staying open*. **Only on what the user said**, never on your own reading of the work | **warn** |
 | 11 | **Is the repo you are standing in a registered project?** If not, say so and offer to initialise it - `## An unregistered repo` below | **warn** |
 
 > **Store first, projections last.** A failed store write aborts the save. A failed projection is a
@@ -75,11 +75,6 @@ is the same set the index is built from, and **say you resolved against the dire
 already falls back this way; a checkpoint that refused where a load succeeded, on the same store,
 would be the asymmetry rather than the caution. **Regenerate the index at step 8 as usual** - that
 is what stops the fallback being needed twice.
-
-**Under `--caller`, mint only when `[id]` was given.** Minting from inference alone, with nobody able
-to confirm and no way to ask, is what the consumer contract's *refuse rather than guess* exists to
-prevent - so with no argument and no resolvable target, **refuse and name `[id]`**. If the project
-cannot be resolved either, **name `--project <name>`**.
 
 **`--project <name>` applies to a mint only.** It names the project of a bundle being created; it
 never retargets one that already exists. **`--dry-run`** reports the target it resolved or would
@@ -175,9 +170,9 @@ command's grant reads an environment variable, so where `~/.claude/projects/` do
 
 **What cannot be placed is reported, never cleared.** One line per item, with where it would go if
 you agree. **An instruction goes to the `instructions.md` of the scope it holds at** - the item, an
-area, the project, the workspace - and an instruction that holds everywhere has no scope here at
-all: name your harness instructions file and leave the item alone. Global has no projection, so
-filing it in this store would take it out of force.
+area, the project, the workspace - and an instruction that holds everywhere goes to global's,
+`~/.notekeeping/instructions.md`, which is projected like the others. **Never write your harness
+instructions file**: an instruction is filed in a store or not at all.
 
 ## Tags
 
@@ -189,7 +184,7 @@ sides; `${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md` has the shape.
 
 | Source | Does |
 |---|---|
-| `--tag <name>` | **repeatable.** Adds each to the resolved item. Explicit, and never refused |
+| `--tag <name>` | **repeatable.** Adds each to the resolved item. Explicit, and never refused - but check `index.md` first and reuse the existing spelling, as `/nk:work --tag` does, and say which spelling was used |
 | **the session** | adds tags the session actually named - below |
 
 **Write the tag into the item's `requirements.md` frontmatter, and only then regenerate the index.**
@@ -221,9 +216,6 @@ user did not type. Three rules make that safe enough to be worth it:
 **Adding a tag is never destructive** - it appends to the list and removes nothing. **Removing a tag
 is a hand edit**, deliberately: nothing here deletes a label the user chose.
 
-**Under `--caller`, apply `--tag` and mint nothing.** Naming something the user did not type, with
-nobody able to confirm and no way to ask, is exactly what the consumer contract refuses.
-
 **`/nk:doctor` reports near-duplicate tags**, which is the repair path when a variant is minted
 anyway.
 
@@ -231,21 +223,26 @@ anyway.
 
 For each candidate fact: does it belong in the store at all, which file does its admission test send
 it to, what is the narrowest scope covering every source that taught it, and is it already there.
-Report the verdicts and **write on confirmation**. Do not promote silently.
+**Apply the verdicts, then report every one of them** - what was written, where, and what was
+skipped or held back and why. Promotion does not wait for a yes: the report is how you see it, and a
+wrong entry is corrected like any other. `--dry-run` shows the verdicts and writes nothing.
 
-**When nobody can be asked, `--promote` is what authorises it.** A save that has something to promote
-and no way to ask would otherwise be stuck: it may not ask, and it may not promote silently.
+**Under `--oneline` nobody sees that report**, so every entry this run promotes carries `unseen` as
+the last part of its provenance stamp - `(0012 - 2026-09-28 - unseen)`. It is the one thing
+`--oneline` changes in what is written, and it is there so an entry no person has read never looks
+like one someone curated. **Reading it is what clears it**: whoever has read the entry deletes the
+word by hand. `/nk:doctor` counts what is still unseen.
 
-| | |
-|---|---|
-| *(omitted)* | report the verdicts and ask. The normal case, and the default |
-| `--promote auto` | apply every verdict without asking, and list what was written |
-| `--promote none` | report the verdicts and write none of them |
+**A scope the user named is the scope.** Where the session shows the user asking for a fact to go to
+a particular level - *put this in the workspace notes*, *this is global* - route it there and propose
+no other, even where the narrowest-scope rule would pick a nearer one. That is the user's decision,
+not a candidate for correction. **A topic the user named narrows the candidates** - *save what we
+learned about deployments to the workspace* promotes everything the session taught about that topic,
+across whichever files it belongs in. The verdicts still apply inside that scope: already there is a
+duplicate, a conflict is still reported.
 
-**`auto` is not "promote everything".** The verdicts are unchanged - a duplicate is still skipped, a
-conflict is still reported rather than resolved. It authorises acting on them without a human turn.
-Under `--caller`, one of the two must be given: a consumer that supplies neither gets a refusal
-naming both, because guessing which one they meant is exactly the silent promotion this forbids.
+**Applying is not "promote everything".** A duplicate is skipped, and a contradiction is reported
+and never written - which of two claims is true is the user's call.
 
 ## An unregistered repo
 
@@ -287,8 +284,8 @@ teaches the user that this command's prompts are noise, and that is the cost bei
 `$HOME`, proposes the name and writes the projection. A save that created a project would be guessing
 the name from the directory, which is the exact inference `/nk:init` exists to stop.
 
-**Under `--caller`, report and move on.** No offer, no registration, nothing recorded: a consumer
-never initialises anything (`${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`). The status stays `ok` - the store
+**Under `--oneline`, make no offer** - an offer is a question with nowhere to go
+(`${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`) - and record nothing. The status stays `ok` - the store
 resolved and the item saved, so this is a detail, not a failure - and the repo rides in the detail:
 
 ```

@@ -20,7 +20,7 @@ A process fact that holds across the projects in this workspace and that you hav
 something shipped.
 
 ## Exclusion
-How to run or deploy one system -> that project's runbook.md. Who to ask -> people.md. True of how you
+How to run or deploy one system -> that project's runbook.md. True of how you
 work whatever the employer or the machine -> global.
 
 ## Entry format

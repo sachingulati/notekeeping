@@ -19,7 +19,7 @@ How does work move here - review, release, escalation?
 A process fact that holds across projects and that you have to know to get something shipped.
 
 ## Exclusion
-How to run or deploy one system -> that project's runbook.md. Who to ask -> people.md.
+How to run or deploy one system -> that project's runbook.md.
 
 ## Entry format
 - **The claim, stated as something you could be wrong about.** The mechanism, naming the identifier
@@ -34,5 +34,5 @@ it. No manual numbering.
 
 **Extended, not core.** A solo store has no team and no colleagues, and a file that is definitionally
 empty is a stub. Most of this is also **workspace-scoped rather than global** - an employer's
-process and people belong to the workspace holding that employer's projects. See
-`files/workspace/process.md`.
+process belongs to the workspace holding that employer's projects. See
+`${CLAUDE_PLUGIN_ROOT}/reference/schema/files/workspace/process.md`.

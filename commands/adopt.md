@@ -1,7 +1,7 @@
 ---
 description: Read the notes and context files you already have and build the store from them, leaving one source of truth.
-argument-hint: "[path] [--apply [<text>]] [--dry-run] [--sample <n>] [--page | --no-page] [--caller <name>]"
-allowed-tools: Read, Glob, Grep, Write, Edit, Bash(git rev-parse:*), Bash(git ls-files:*), Bash(git diff:*), Artifact
+argument-hint: "[path] [--apply [<report>] [all | <numbers> | <text>]] [--dry-run] [--page | --no-page] [--oneline]"
+allowed-tools: Read, Glob, Grep, Write, Edit, Bash(git rev-parse:*), Bash(git ls-files:*), Bash(git diff:*), Bash(git -C:*), Artifact
 ---
 
 Read what you already have - a notes folder, a wiki export, another tool's store, your `CLAUDE.md`
@@ -13,9 +13,7 @@ means refuse and name `/nk:init`.** That command creates the store; this one fil
 file definition you write through `${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md`, so the
 user's overlay wins here exactly as it does everywhere else.
 
-**`--caller <name>`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`: **report the
-inventory, and write nothing.** Filling a store from material nobody has looked at is a person's
-act, and the detail says so rather than naming an argument that would unlock it.
+**`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
 
 ## The two forms
 
@@ -42,27 +40,36 @@ command becomes one nobody runs.
 
 **What makes one confirmation safe is rule 3 below**: everything written into the store is a copy.
 The worst case is a store you delete and run again, with your own material untouched. **The one
-exception is the trim, and it takes a second yes of its own.**
+exception is the trim**, which is why it is shown line by line before the question is asked.
 
-## Nothing is written without `--apply`
+## Nothing is written without a yes
 
-**The bare command behaves as `--dry-run`:** it reads, classifies, and shows both halves - what
-would be written into the store, and what would be trimmed - and **writes nothing at all.** So the
-form a person types first is always the safe one, and `--apply` is the only spelling that writes.
+**The bare command reports the inventory and lets you narrow it (phase 1), then reads, classifies,
+shows both halves - what would be written into the store, and
+what would be trimmed - saves that as a report, and asks once for the writes.** A yes writes both
+halves exactly as shown, per `${CLAUDE_PLUGIN_ROOT}/reference/report-shape.md`'s `## A yes applies what
+was shown`. With no turn to answer in, it writes nothing, and the saved report is what a later
+`--apply` applies.
 
-**`--dry-run` remains, and means exactly the same thing.** It is worth typing when you want the
-intent on the record, and on a large or unfamiliar pile.
+**`--dry-run` shows both halves and does not ask.** It is worth typing when you want the intent on
+the record, and on a large or unfamiliar pile.
 
-**`--apply` authorises the store build. The trim still takes its own second yes**, after its own
-report - the flag does not carry it, and no flag ever does.
+**`--apply [<report>] [all | <numbers> | <text>]` applies a saved report**, per
+`${CLAUDE_PLUGIN_ROOT}/reference/report-shape.md`'s *The report is saved* - the latest when none is named. It never reads your material again:
+the report is what gets written.
+
+**The trim is items like any other.** Its lines are in the report line by line, so `all` includes
+them, numbers can name them, and text can narrow to or away from them - *"skip the trim"*. Every
+trimmed line is one the report showed, and **the four rules below hold whatever the selection is**:
+nothing is removed that did not reach the store first.
 
 ### `--apply <text>`
 
-**Free text narrows and disambiguates, within what this run just proposed.** *"Only the gotchas"*,
-*"skip the wiki export"*, *"treat the ADR folder as decisions"* - it picks from the proposals in
-front of it, and it can supply a judgement a classification was missing.
+**Free text narrows and disambiguates, within the saved report.** *"Only the gotchas"*, *"skip the
+wiki export"*, *"treat the ADR folder as decisions"* - it picks from the proposals the report carries,
+and it can supply a judgement a classification was missing.
 
-**It cannot reach past the proposal list**, it never authorises the trim, and **the four rules below
+**It cannot reach past the report**, and **the four rules below
 hold whatever it says.** Text asking for something outside them is refused by name, and the rest of
 the instruction is still honoured. **Say which writes the proposal earned on its own and which the
 text authorised.**
@@ -84,22 +91,24 @@ text authorised.**
 | **1 · Inventory** | Walk what you were pointed at, plus the context files below - and collect the references they name. Files, sizes, formats. **Do not assume markdown** | no |
 | **2 · Classify** | Read **content**, and test every file and every section against each definition's admission and exclusion tests | no |
 | **3 · Plan** | The store you are about to build: every target, its entry count, everything excluded - and the trim, listed separately | no |
-| **4 · Confirm** | **One decision for the store. A second for the trim** | no |
+| **4 · Confirm** | **One question, covering the store and the trim as shown** | no |
 | **5 · Build** | Create the files and write the entries | **yes, in the store** |
-| **6 · Trim** | Remove from the context files only what reached the store, and only if confirmed | **yes, outside the store** |
+| **6 · Trim** | Remove from the context files only what reached the store, and only what the yes covered | **yes, outside the store** |
 | **7 · Report** | What was written, what was removed, what was not, and what needs a human eye | no |
 
 **Phase 1 is cheap and phase 2 is not.** Report the inventory first - how many files, what formats,
 how much text - and **let the user narrow before any content is read.** Dropping a root from a wave
-is how scope is cut; **`--sample <n>` classifies a stratified sample** spread across the directories
-and formats the inventory found, for when the question is *do these targets fit my material at all*.
-**Say it was a sample, and never present a sampled plan as a complete one.**
+is how scope is cut. **Where the pile is large, offer a sample in the same breath** - *read all of
+it, or classify ~30 files first to see whether the targets fit?* - and on a yes classify a stratified
+sample spread across the directories and formats the inventory found. **Say it was a sample, and
+never present a sampled plan as a complete one.**
 
 ## What it writes into the store
 
 **Registers and ledgers, and the two project documents** - `gotchas.md`, `patterns.md`,
-`decisions.md`, `domain.md`, `runbook.md`, `architecture.md`, and a project's `NOTES.md` and
-`overview.md` where the material supports them.
+`decisions.md`, `domain.md`, `runbook.md`, `architecture.md`, `process.md`, global's
+`environment.md`, each scope's `NOTES.md` and `instructions.md`, and a project's `overview.md` where
+the material supports them.
 
 **Write only what the material earns.** A target with no admitted entry is not created: an empty
 register is a stub, and a stub looks answered. `/nk:init` follows the same rule.
@@ -117,6 +126,18 @@ projections last.**
 **Read every `CLAUDE.md` and `CLAUDE.local.md` in scope** - the repository's, the workspace's, and
 your own - as sources like any other pile. They are usually where knowledge went when there was
 nowhere better to put it.
+
+**Your own is `~/.claude/CLAUDE.md`, and its knowledge goes to global.** Distil it the way any pile
+is distilled, never copy it across: what is needed in every session goes to `~/.notekeeping/NOTES.md`, which
+the global projection carries back into every session under `~`; the machine itself - installed
+tools, paths, versions, scripts, layout - goes to `environment.md`, which the same projection carries
+under `## Environment`; what is needed only sometimes goes to the global register it belongs to -
+`process.md` for how work moves - review, release, testing and
+deployment across projects - and `gotchas.md`, `decisions.md`, `domain.md` for the rest - where it
+costs nothing until read. Its instructions go to `~/.notekeeping/instructions.md`, which the same projection
+carries. A fact or an instruction that holds in one workspace or one project goes there instead,
+not to global. **Do not skip the global projection** because the source file is
+large: it is where the always-needed half comes back.
 
 **One source of truth is the point.** A fact copied into the store and left in a context file is now
 in two places, drifting, and paying always-loaded cost in one of them. So the move is finished
@@ -151,11 +172,19 @@ nothing inside a followed directory is edited, moved or removed, however much is
 
 ### What moves, and what stays
 
-**Instructions are not knowledge.** A directive you *obey* - house style, a workflow rule, *always
-run the linter* - **stays exactly where it is, whatever its git state.** What moves is a fact you
-*look up*: a port, a name, a trap, a decision and its reason. That test is the schema's own
-(`${CLAUDE_PLUGIN_ROOT}/reference/schema/files/global/NOTES.md`), and it is the whole difference
-between tidying a context file and gutting it.
+**Both move, and they go to different files.** A fact you *look up* - a port, a name, a trap, a
+decision and its reason - goes to `NOTES.md` or the register it belongs to. A directive you *obey* -
+house style, a workflow rule, *always run the linter* - goes to the `instructions.md` of the scope it
+holds at: the project, the workspace, or global for one that holds everywhere. **Never merge the
+two**: a fact filed as an instruction becomes unfalsifiable, and an instruction filed as a fact
+becomes optional. The test is the schema's own
+(`${CLAUDE_PLUGIN_ROOT}/reference/schema/files/global/NOTES.md`).
+
+**An instruction moves only if it fits.** Every `instructions.md` has a byte budget, and the
+projection renders it whole. **Where the instructions that hold at one scope do not fit, move what
+fits, leave the rest exactly where it was, and say so in the report** - naming what stayed and the
+budget it would have broken. Never shorten an instruction to make it fit: a reworded rule is a
+different rule, and nobody approved it.
 
 ### The trim invariant
 
@@ -174,7 +203,13 @@ working tree is recoverable from `git diff`, and one that is **staged** is recov
 index and not from `git diff` at all - so the recovery path differs per line and the user cannot be
 expected to know which they have. **Quoting is the one thing that does not depend on knowing.**
 
-**Compute this; never estimate it.** `git ls-files --error-unmatch <path>` says whether a file is
+**Compute this; never estimate it** - and **where git cannot answer** - refused, unavailable, or a
+repository you cannot run it in - **the file is untrimmable**, exactly as if it were at `HEAD`.
+**A file in no work tree is untracked, and that is an answer, not a failure**: `git rev-parse
+--is-inside-work-tree` run in its directory reports that it is outside one, so there is no `HEAD` and
+no index to hold it. It takes the untracked row. This is what makes `~/.claude/CLAUDE.md` trimmable
+on most machines. Only a refusal, an error or git being absent leaves a file untrimmable.
+Never infer tracked state from what is inside `.git/`: that is an inference, and a trim acts on it. `git ls-files --error-unmatch <path>` says whether a file is
 tracked. **The removable set is `git diff -- <path>` *and* `git diff --cached -- <path>` together** -
 the first is what is unstaged, the second is what is staged, and **a staged line appears only in the
 second**. Reading only `git diff` would classify a staged line as *at `HEAD`* and refuse to trim it,
@@ -186,12 +221,12 @@ tell those three apart - so trim nothing, and say why.**
 end, per `${CLAUDE_PLUGIN_ROOT}/reference/report-pages.md` - which owns the offer, the two
 flags, and what the page may carry. **The terminal report is printed either way.**
 
-### The trim is confirmed separately
+### The trim is shown in full, and the same yes covers it
 
-**The store build and the trim are two questions.** Everything else is a copy into a directory you
-can delete; this is the one thing that changes a file you wrote. **Show the lines, grouped by file,
-and take a second yes.** Declining is a normal answer - the store is built either way, and you can
-run the trim later by running the pass again.
+Everything else is a copy into a directory you can delete; this is the one thing that changes a file
+you wrote. **Show the lines, grouped by file, inside the proposal** - never a count in their place -
+so the yes that approves the store has seen them. **Leaving it out is a normal answer**: *"yes, but
+don't trim"* builds the store and removes nothing, and you can trim later by running the pass again.
 
 ## The four rules, and they hold in every phase
 
@@ -219,7 +254,7 @@ been in a context window**, so this is a gate rather than a caution.
    token, a password, a connection string carrying one, a private key block.
 2. **Be wrong in one direction only.** Excluding something harmless costs a line in the report;
    including a credential cannot be undone.
-3. **An exclusion is not a row anyone can say yes to.** Neither confirmation reaches it. Report it,
+3. **An exclusion is not a row anyone can say yes to.** No yes reaches it. Report it,
    with its path and the reason, under its own heading.
 4. **An excluded line is never trimmed.** It did not reach the store, so the invariant forbids it -
    and a secret deleted from the only file holding it is the worst outcome available here.
@@ -240,7 +275,7 @@ command's call, and a migration that quietly picks a winner does it in the least
    shape of the store is visible. **Name the roots you traversed**, and for any beyond the first,
    what pointed at them.
 3. **What was trimmed** - every file touched, every line removed, and **the store file each one went
-   to.** Quote the removed lines for any untracked file. If the trim was declined or skipped, say so.
+   to.** **Quote every removed line**, tracked file or untracked - the recovery path differs per line. If the trim was declined or skipped, say so.
 4. **Unmapped, excluded, unfollowed and contradictory** - everything that matched no target, every
    credential exclusion, every reference you could not or did not follow, and every contradictory
    pair, each with a reason. **This section is never empty by omission**; if there is nothing, say
@@ -252,15 +287,17 @@ command's call, and a migration that quietly picks a winner does it in the least
 list, the count is its last number, and a split prints its arithmetic. **What you wrote and what you
 removed are counted after doing them**, never from the proposal.
 
-**Under `--caller` none of this applies**: the outcome line is one line, and nothing else.
+**Under `--oneline` this report goes to the file the outcome line names**, per the contract.
 
 ## Never
 
 - **Never touch anything at `HEAD`**, in any file, under any flag. That is the permanent one.
-- **Never remove a line whose content is not in the store**, and never remove an instruction.
+- **Never remove a line whose content is not in the store** - an instruction included: it is removed
+  only once it is in an `instructions.md`, under the same trim invariant as a fact.
 - **Never rewrite a context file.** A trim removes lines; it does not reword, reorder or reformat
   what stays.
-- **Never write outside the store** other than the projections and a confirmed trim.
+- **Never write outside the store** other than the projections, their `.git/info/exclude` entry, and a
+  confirmed trim.
 - **Never move or delete a file**, only lines within one.
 - **Never follow a reference the user declined**, never read the same path twice, and **never edit
   anything inside a followed pile.**

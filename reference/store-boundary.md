@@ -29,24 +29,32 @@ treats them as one.
 
 1. **Walk up** from the working directory to the nearest `.notekeeping/`. That is the workspace
    store. **Test the exact path at each level** - does `<dir>/.notekeeping` exist - rather than
-   listing a directory and reading what comes back. **A store is a hidden directory and the
-   ordinary listing does not show one:** a glob of `*` does not match it, and a plain `ls` omits
-   it, so a walk built that way reports *no store* while standing next to one.
+   listing a directory and reading what comes back. **A store is a hidden directory, and a listing
+   is not a reliable witness to one:** a plain `ls` omits it, and a glob of `*` has both skipped
+   hidden directories and descended into them, depending on the harness. A walk built on a listing
+   can report *no store* while standing next to one.
 
    **The failure is silent, and so is the obvious fix.** Probe for the store **by name**; never
    ask a listing to reveal it:
 
    | Pattern | Finds a `.notekeeping/`? |
    |---|---|
-   | `<dir>/*` | **no** - the trap above |
-   | `<dir>/.*` | **no.** The intuitive correction fails the same way, and reports nothing rather than erroring |
-   | `<dir>/.notekeeping/*` | **yes** - the literal name is in the pattern |
+   | `<dir>/.notekeeping/*` | **yes** - the literal name is in the pattern. **Use this one** |
    | `<dir>/**/<file>` | **yes** - a recursive descent crosses into hidden directories |
+   | `<dir>/*` | **not dependably.** It has behaved both ways - and where it descends, it returns files from any depth, so a hit does not say which level holds the store |
+   | `<dir>/.*` | **no.** The intuitive correction matches hidden files at that level, not what is inside a hidden directory, and reports nothing rather than erroring |
+   | `<dir>/*/<file>` | **no - it can return nothing with the file present.** See *A pattern that matches nothing*, below |
 
    **So: `Glob` the exact path `<dir>/.notekeeping/*`, or `Read` a file you expect inside it.**
    Existence is proved by a hit, never by a name's absence from a listing. **A walk that returns
    "no store" after only listing directories has not looked**, and must not be reported as an
    absence.
+
+   **The walk stops below `~`.** Under your home directory, the last level probed is the one
+   directly beneath `~` - `~` itself is global's home, a workspace cannot sit there, and nothing
+   above it is yours. Outside your home directory, walk to the filesystem root. **A probe that
+   errors or times out is named as unprobed**, not counted as an absence and not reported as an
+   outer store: say which levels could not be checked, and carry on with the nearest store found.
 2. `~/.notekeeping/` is **global**, and is an ancestor of every workspace, so it is always in scope.
 3. **Found nothing?** Stop and say so. Point at `/nk:init`. Do not continue with a guess.
    **Name the directories you actually walked.** *"No store above here"* is a claim about every
@@ -103,43 +111,62 @@ distinguishable from here.
 
 | | |
 |---|---|
-| Reads | the resolved workspace store, plus `~/.notekeeping/`. Plus the repository you are working in, **for git state** - and for a repo's own `CLAUDE.md` or `README.md` as a *source* when assembling `overview.md`, never as a target |
-| Writes | **inside a store, plus the five named targets below - and that list is closed. Every one of them is personal and local; none is a file anyone else reads.** The machine config is `~/.notekeeping/config.md`, which is a store |
+| Reads | the resolved workspace store, plus `~/.notekeeping/`. Plus **git state** from the repository you are working in, **and from the repositories the store registers** where a command reports across projects - `init`, `load` and `project` do. **Address another repository as `git -C <repo> <subcommand>`**, never `cd <repo> && git ...`: every command that reads git declares `Bash(git -C:*)` so that form is granted, and it is the one form that is. Use it only for the read-only subcommands the command already declares. **Where a git read is refused anyway, say so in the report** - *not checked* is a different answer from *found nothing* - and for a repo's own `CLAUDE.md` or `README.md` as a *source* when assembling `overview.md`, never as a target |
+| Writes | **inside a store, plus the seven named targets below - and that list is closed. Every one of them is personal and local; none is a file anyone else reads.** The machine config is `~/.notekeeping/config.md`, which is a store |
 | Grep and glob | rooted at a resolved store - never at `~`, never at the working directory. **One exception, and it is the drain's**: `/nk:save` globs `~/.claude/projects/*/memory/` to find the store it is draining, which is the only way to address a directory keyed by a slug. It is a listing, not a search of `~` |
 | A path in a query | resolved relative to the store, and refused if it escapes it |
+
+### A pattern that matches nothing
+
+**A `*` segment followed by a literal filename can return zero with the file present.**
+`<store>/projects/*/overview.md` has been measured returning nothing against a store holding that
+file, while `<store>/**/overview.md` found it. A pattern that **ends** in a wildcard -
+`<dir>/*/memory/*.md` - did not fail the same way. Nothing tells you which one you ran: the empty
+result is indistinguishable from a real absence.
+
+- **To find a named file at any depth, root the pattern at the store and lead with `**`** -
+  `<store>/**/overview.md` - then keep the hits whose path has the shape you wanted. Never put a
+  single `*` segment in front of a literal name.
+- **To address one exact file, `Read` it.** Globbing is for files whose names you do not know.
+- **A zero is a finding until a second form agrees.** Before reporting that a definition has no
+  files, or that a thing is absent, re-run it as `<store>/**/<name>`. Two forms returning zero is
+  an absence; one is not.
 
 **Everything outside `.notekeeping/` is the user's.** Repositories, loose files, personal scratch
 and anything else are read only when the user names them, and never reorganised or rewritten.
 
-### The five writes that land outside a store
+### The seven writes that land outside a store
 
 **The property this protects is not *never outside a store* - it is *only into a target somebody had
 to name*.** They are listed here rather than carved out per command, because a rule that is quietly
 false is one the next reader is entitled to ignore.
 
-**None of the five is committed, and none is read by anybody but you.** Three are files the plugin
-generates and owns; the fourth removes content that is **not at `HEAD`**, so even there nothing a
-teammate can see is touched; the fifth is below the table, because what bounds it is not a path.
+**None of the seven is committed, and none is read by anybody but you.** Three are files the plugin
+generates and owns; two are single entries added to files of yours (`.git/info/exclude`, `~/.claude/settings.json`); one removes content that is **not at `HEAD`**, so even there nothing a
+teammate can see is touched; the drain is below the table, because what bounds it is not a path.
 
 | What | Target, and what bounds it | Written by |
 |---|---|---|
-| the repo projection | `<repo>/CLAUDE.local.md` - only a repository **registered as a project** | `init`, `save`, `project`, `doctor --fix`, `upgrade` |
-| the workspace projection | `<workspace-root>/CLAUDE.local.md` - only the directory holding that store's `.notekeeping/` | the same five |
-| the ignore step | `<repo>/.git/info/exclude` - never `.gitignore`, and written **before** the projection | the same five |
-| the context-file trim | a `CLAUDE.md` or `CLAUDE.local.md` - **only lines not at `HEAD`, only once their content is in the store**, and only on a confirmation of its own | `adopt` |
+| the repo projection | `<repo>/CLAUDE.local.md` - only a repository **registered as a project** | `init`, `save`, `project`, `adopt`, `upgrade`, `doctor --fix` |
+| the workspace projection | `<workspace-root>/CLAUDE.local.md` - only the directory holding that store's `.notekeeping/` | the same, less `project` - which writes a named project's and nothing else |
+| the global projection | `~/CLAUDE.local.md` - only the home directory, beside `~/.notekeeping/` | the same as the workspace's |
+| the ignore step | `<repo>/.git/info/exclude` - never `.gitignore`, and written **before** the projection | the repo projection's six |
+| the read permission | `~/.claude/settings.json` - **only adding** the workspace root and `~/.notekeeping` to `permissions.additionalDirectories`. Below | `init`, and `doctor`'s repair |
+| the context-file trim | a `CLAUDE.md` or `CLAUDE.local.md` - **only lines not at `HEAD`, only once their content is in the store**, and only on the yes to a proposal that showed every line (5.75) | `adopt` |
 
-**The trim is the one write that removes rather than generates**, which is why it is bounded twice
+**The trim is one of two writes that remove rather than generate - the drain, below, is the other -**
+which is why it is bounded twice
 over: by `HEAD`, and by the content already existing somewhere else.
 `${CLAUDE_PLUGIN_ROOT}/commands/adopt.md` holds the invariant.
 
 **`init` is on that list because creation belongs to registration** - a registered project is
-delivering before any save has run. **`doctor --fix` rebuilds them and `/nk:upgrade` regenerates
-them after a migration**; both write the same two targets under the same rules, which is why they
+delivering before any save has run. **`adopt` refreshes the ones it wrote into, `doctor --fix`
+rebuilds them and `/nk:upgrade` regenerates them after a migration**; all of them write the same three targets under the same rules, which is why they
 are in the column rather than carved out beside it. Which command owns which *moment* is
 `${CLAUDE_PLUGIN_ROOT}/reference/projections.md`; if that file and this one ever disagree about which
 command writes a projection when, that file is the one to believe.
 
-**And a fifth, which removes rather than generates:** `/nk:save` drains the harness memory store,
+**And the drain, which removes rather than generates:** `/nk:save` drains the harness memory store,
 removing **only what it has just promoted into a store** and nothing else. The bound is the content
 existing somewhere else, exactly as the context-file trim's is - not who wrote the item, which
 nothing records and nothing can infer. **An item that was not promoted is left alone and reported.**
@@ -154,9 +181,27 @@ exactly that. The count is the cheap thing; the bound is the point.
 which is why `/nk:doctor` reports the sibling stores a project's directories resolve to and the last
 save did not see.
 
+### The read permission
+
+**Without it the plugin does not work**, so creating a store adds it. Every `Read on demand` line
+points above the repository by absolute path, and Claude Code reads outside the working directory
+only where `permissions.additionalDirectories` allows it; missing, the always-loaded half arrives
+and every on-demand read is refused.
+
+**Add, never replace.** Read `~/.claude/settings.json`, parse it, and add each missing path to
+`permissions.additionalDirectories` - creating the key, or the file, only if absent. Every other key,
+every other entry and the order of what is there stay exactly as they were. **Write absolute paths**,
+forward slashes, the same form the projections use.
+
+**If the file does not parse, write nothing to it.** Report that, and print the one line to add by
+hand - a settings file the plugin cannot read is one it must not rewrite.
+
+**Only the user's own settings, never a project's.** `.claude/settings.json` in a repository is
+committed and the team's; this entry is personal, like every other write on this list.
+
 ### The one thing that can leave this machine
 
-**A report can be published as a page** - `${CLAUDE_PLUGIN_ROOT}/reference/report-pages.md`. It is
+**A report, or a summary, can be published as a page** - `${CLAUDE_PLUGIN_ROOT}/reference/report-pages.md`. It is
 not a write to disk and it is not on the table above, and it is named here because it is the only
 thing the plugin does that leaves the machine at all.
 
@@ -167,10 +212,24 @@ whether it happens or not**, so nothing depends on it. **A page published withou
 a defect**, exactly as a write outside a store is.
 
 **Nothing else, ever. A write outside a store that is not on this list is a defect, not a judgment
-call.** What each of the three generated files may contain is governed by
+call.** What each of the three projections may contain is governed by
 `${CLAUDE_PLUGIN_ROOT}/reference/projections.md`, and the trim's bound is
 `${CLAUDE_PLUGIN_ROOT}/commands/adopt.md`'s; this table settles only *which targets exist*, so
 that *inside a store* stays checkable rather than approximately true.
+
+## Every run
+
+**Nothing changed, nothing written.** A command whose output would be byte-identical to what is on
+disk writes nothing and says so - *nothing new since the last save*. Compare the rendered file to the
+file, never the sources to their last generation. A second `/nk:save` straight after the first leaves
+`resume.md` and `session.md` untouched: an empty diff and a fresh date that say nothing new are
+churn, for a person reading git history as much as for a tool calling repeatedly. Under `--oneline`
+this is the `no-change` status (`${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`).
+
+**Check before touching the filesystem, in one order: the flags, then the store, then the project.**
+Where a run cannot go on, **which check fires first decides what the user fixes first** - so the
+cheapest, most actionable one goes first: a flag the user controls, before a missing store, before
+an unresolvable project.
 
 ## Resolving a project inside the store
 

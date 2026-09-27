@@ -1,7 +1,7 @@
 ---
 description: Create the space for a work item. Optional - /nk:save mints one too.
-argument-hint: "[what] [--requirements [path]] [--project <name>] [--id <id>] [--parent <id>] [--also <id>] [--tag <name>] [--dry-run] [--caller <name>]"
-allowed-tools: Read, Glob, Grep, Write, Edit, Bash(git rev-parse:*), Bash(git status:*), Bash(git branch:*), Bash(git log:*), Bash(git diff:*)
+argument-hint: "[what] [--requirements [path]] [--project <name>] [--id <id>] [--parent <id>] [--also <id>] [--tag <name>] [--dry-run] [--oneline]"
+allowed-tools: Read, Glob, Grep, Write, Edit, Bash(git rev-parse:*), Bash(git status:*), Bash(git branch:*), Bash(git log:*), Bash(git diff:*), Bash(git -C:*)
 ---
 
 Create the space for a work item. Writes inside the store only.
@@ -16,8 +16,7 @@ which does strictly more and writes nothing - git state, discrepancies, the pare
 second folder, and do not rewrite `requirements.md`, which is write-once plus amendments. (Only
 `--id` can collide - a counter is minted from the highest existing number, so it never can.)
 
-**`--caller <name>`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`. **With no
-argument and no way to ask, refuse** rather than minting from inference alone.
+**`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
 
 **Resolve the store first**, per `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`. Everything
 below happens inside the configured store and nowhere else.
@@ -93,9 +92,7 @@ understand it, and write it into the file's format.
 **With a path, read that file. With no value, the requirements are what was pasted into this
 session** - take the most recent block of requirement-shaped material. **If there is no such paste,
 say so and ask; do not fall back to inference**, because the user has just told you a real source
-exists and silently writing a thin file instead looks like it was honoured. **Under `--caller`,
-`--requirements` requires a path** - a tool has no paste to point at, and guessing which part of the
-context was meant is exactly what the contract forbids.
+exists and silently writing a thin file instead looks like it was honoured.
 
 ### Distil; do not transcribe
 
@@ -111,7 +108,7 @@ second is the load-bearing one:
   in the first place.
 
 What the file's own exclusion rule sends elsewhere goes there rather than into the body: how you
-will do it -> `plan.md`, what you learned about the terrain -> `how.md`, what happened -> `session.md`.
+will do it -> `plan.md`, what happened and what you learned on the way -> `session.md`.
 
 ### Every statement traces to the source, and nothing is added
 

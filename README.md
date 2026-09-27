@@ -1,22 +1,24 @@
 # Notekeeping
 
-**Your session is disposable. What you learned in it is not.**
+**Notes for everything you work on.**
 
-**Every task leaves something behind.** The gotcha that cost you an afternoon, the decision nobody
-wrote down, the reason that config is the way it is. Each work item gets a folder that accumulates —
-what was asked, the plan, what happened, how it was verified — and what outlives the task is
-promoted outward: into the project, into the workspace, into knowledge you carry wherever you work.
+**Everything you work on is saved, so you can pick it up later.** Each task gets its own record:
+what was asked, the plan, what happened, and how it was checked. Close the session, come back
+tomorrow or next month, and `/nk:load` puts you back where you left off.
 
-**Because the notes exist, the session stops being precious.** A long session is a worse session:
-context fills with dead ends and superseded plans, it costs more per turn, and the agent grows
-confident about things that stopped being true an hour ago. When the record is current you can
-`/clear` and lose nothing — `/nk:load` rebuilds your context *out of the notes*, short and true.
+**Everything you learn adds up to knowledge.** The gotcha that cost you an afternoon, the decision
+nobody wrote down, the reason that config is the way it is. When something is still true after the
+task ends, it moves outward to where it applies: the project, the workspace, or everywhere you
+work. Each task leaves the next one better informed.
 
-**One step writes for both horizons, and that is the whole design.** `/nk:save` brings the record up
-to date and promotes what outlived the task at the same time: the handover that restores you
-tomorrow and the gotcha that saves you next year come out of one act of writing.
+**Both happen in one step, while you work.** `/nk:save` updates the task's record and moves what it
+taught you outward at the same time. You never have to sit down and write things up.
 
-**Markdown in a directory you own. No database, no hooks, no background capture.**
+**So your session is disposable, and what you learned in it is not.** Long sessions get worse: dead
+ends pile up, each turn costs more, and the agent stays confident about things that stopped being
+true an hour ago. When the record is current you can `/clear` and lose nothing.
+
+**Markdown in a directory you own.**
 
 ---
 
@@ -86,49 +88,57 @@ enumerate them, never to resolve one.
 |---|---|
 | `/nk:plan` | how the work will be done. Freezes once execution starts |
 | `/nk:test` | how this is verified, by machine and by hand |
-| `/nk:summary` | what happened, in plain language, for someone who was not involved |
-| `/nk:how` · `/nk:api` | the terrain you had to understand; contracts while they move. **Off by default** |
+| `/nk:summary` | what happened, in plain language, for someone who was not involved - and offers it as a page others can read and comment on |
 
 **Knowledge**
 
 | | |
 |---|---|
 | `/nk:project [name]` | report every project, or rebuild one project's digest and overview |
-| `/nk:review` | read the store's content and propose what should change. Proposes and stops; `--apply` shows each finding's diff and you pick which to apply |
+| `/nk:review` | read the store's content and propose what should change. Proposes, saves the proposal as a report, and asks; `--apply` applies a saved report - all of it, the findings you name, or one at a time |
 
 **Tooling**
 
 | | |
 |---|---|
 | `/nk:init [path]` | create a store. Naming a workspace also creates global and offers the repositories under it. Creates structure; never mines your notes |
-| `/nk:adopt [path]` | read the notes you already have and **build the store out of them**. **Nothing is written without `--apply`** - the bare command proposes and stops. Into the store it only ever copies; the one thing it removes is content it has already copied out of a context file, on a second confirmation of its own |
+| `/nk:adopt [path]` | read the notes you already have and **build the store out of them**. **Nothing is written without a yes** - the bare command proposes and asks once. Into the store it only ever copies; the one thing it removes is content it has already copied out of a context file, shown line by line in that same proposal |
 | `/nk:doctor` | what is broken, drifting, or worth doing. `--fix` repairs only the unambiguous |
-| `/nk:upgrade` | move a store to the schema version this plugin ships. **Nothing is written without `--apply`, and `--apply` still asks once** - the bare command reports the gap and the work it would do. **A store made before schema 2 has to run this before `/nk:save` will checkpoint it** |
+| `/nk:upgrade` | move a store to the schema version this plugin ships. **Nothing is written without a yes, or `--apply` on the report it saved** - the bare command reports the gap and the work it would do, and asks once. |
 | `/nk:config` | show or change settings, and say which file each value came from |
 | `/nk:budget` | what the notes actually cost you — always-loaded, on-demand, registers |
 | `/nk:index` | rebuild the work-item resolver. Rarely typed; `save` does it |
+| `/nk:run [name]` | run a command you wrote in your store's `schema/commands/`, under the store's rules - it writes only what its `writes:` declares, and only inside the store. Run bare, it lists the commands you have defined there |
 | `/nk:help` | what each command does, what each file is for, what every term means |
 
 ## Everything it writes, and where
 
-- **No hooks, and no background capture.** Notes exist because you ran `/nk:save`. That is a real
-  cost and it is the deliberate trade.
+- **Nothing runs in the background.** The plugin installs no hooks: notes exist because you ran
+  `/nk:save`. Want capture anyway? A hook of your own can run `/nk:save` headlessly with `--oneline` -
+  `reference/consumer-contract.md` says how.
 - **Nothing is created until you ask.** No store exists until `/nk:init` runs, and a non-empty
   directory is refused rather than adopted. Nothing is written on install or on first run.
 - **One thing is written without being asked each time, and here it is. The projections.**
-  `CLAUDE.local.md` is written to each repository you registered as a project, and to your workspace
-  root - **outside the store**. **It is written when you register the project**, so a repo starts
-  delivering the moment it is added; later saves rewrite only the one project you were working in,
-  and `/nk:project <name>` refreshes any of them. That is how the notes reach a session at all -
+  `CLAUDE.local.md` is written to each repository you registered as a project, to your workspace
+  root, and to your home directory for global - **outside the store**. **It is written when you
+  register the project**, or create the workspace or global, so a repo starts delivering the moment
+  it is added; later saves rewrite only the one project you were working in, plus the workspace and
+  global, and `/nk:project <name>` refreshes any project's. The home-directory one loads in every
+  session under your home directory, whether or not it touches a store. That is how the notes reach a session at all -
   nothing else the plugin writes is loaded automatically. **Delivery follows registration**, and
   **`/nk:doctor --fix` rebuilds every projection**, so deleting one costs nothing.
-- **Nothing outside the store is a file your teammates read.** Two `CLAUDE.local.md` files and one
-  `.git/info/exclude` entry, all personal and none committed. **No projection is ever written to a
+- **Nothing outside the store is a file your teammates read.** Three `CLAUDE.local.md` files, one
+  `.git/info/exclude` entry and your store roots added to your own `~/.claude/settings.json`, all
+  personal and none committed. **No projection is ever written to a
   `CLAUDE.md`.**
 - **`/nk:adopt` is the one command that edits a `CLAUDE.md`, and only downward.** When it moves
   knowledge out of a context file into the store it offers to remove what moved — **only lines that
-  are not committed, only once the content is in the store, and only on a confirmation of its own.**
-  Anything at `HEAD` is untouchable, and an instruction you obey is never treated as knowledge.
+  are not committed, only once the content is in the store, and only on a yes to a proposal that
+  showed every line.**
+  Anything at `HEAD` is untouchable. Facts go to the notes and instructions go to the scope's
+  `instructions.md` - never merged - and an instruction that does not fit its budget stays where it
+  was. Your own `~/.claude/CLAUDE.md` is read the same way: its knowledge and its instructions move
+  into global.
 - **Already have a `CLAUDE.local.md`? The block goes below it, and nothing above it is touched.**
   It is fenced by markers and labelled with what wrote it; every later save rewrites only what is
   between those markers. **Registering the project is the moment that append happens**, so you see it
@@ -144,37 +154,40 @@ The overlay is the point, not an escape hatch. Drop a file into `<store>/schema/
 the shipped definition wholesale — which files exist, what admits an entry, what each is worth in
 bytes. A plugin update never touches it.
 
-Turning something off is one line. Turning `/nk:how` on is the same line, inverted.
+Turning a shipped file off is one line, `enabled: false`, and adding a file of your own is one
+definition. A command of your own is one file too, `<store>/schema/commands/<name>.md`,
+run as `/nk:run <name>`.
 
 ## Calling it from another tool
 
-Commands accept `--caller <name>`, which declares the call came from a tool rather than a person.
-Under it a command **never asks** — it refuses, naming the argument that would satisfy it — and ends
-with a line you can parse:
+Every command accepts `--oneline`. **It changes the output and nothing else**: the command does what
+it does for you, and prints one line you can parse instead of its report:
 
 ```
 nk: <command> <status> — <detail>
 ```
 
-`ok`, `no-change` or `refused`. `no-change` is what makes retrying safe. `/nk:help --caller` reports
-the contract version and the callable list.
+`ok`, `no-change` or `refused`. Where the command would have asked you something it refuses instead,
+and the line carries the question and its options. A flag is approval whoever types it, so `--apply`
+and `--fix` work as they do for you. A report too long for one line - `review`, `doctor`, `adopt`,
+`upgrade` - is saved to a file the line names, and `--apply` applies it. `no-change` is what makes retrying safe. `/nk:help --oneline`
+reports the contract version and the command list.
 
 ## Requirements
 
-Claude Code. Git is used where it can answer and is never required — a project with no repository is
-a first-class case.
+Claude Code. Git is used where it can answer and is never required.
 
-**One setting, once.** Your store sits above your repositories, and the `Read on demand` line in
-every projection points at it by absolute path. Claude Code reads outside the working directory only
-where `additionalDirectories` allows it, so name your workspace root and `~/.notekeeping` in
-`~/.claude/settings.json`:
+**One setting, written for you.** Your store sits above your repositories, and the `Read on demand`
+line in every projection points at it by absolute path. Claude Code reads outside the working
+directory only where `additionalDirectories` allows it, so **`/nk:init` adds your workspace root and
+`~/.notekeeping` to `~/.claude/settings.json`** - adding to what is there, never replacing it:
 
 ```json
-{ "permissions": { "additionalDirectories": ["/path/to/your/workspace", "~/.notekeeping"] } }
+{ "permissions": { "additionalDirectories": ["/path/to/your/workspace", "/home/you/.notekeeping"] } }
 ```
 
-Without it the always-loaded half still arrives and the on-demand half is refused at the moment it
-is read. `/nk:doctor` reports that as an error until it is set.
+If that file cannot be parsed, `init` leaves it alone and prints the line to add by hand.
+`/nk:doctor` reports a missing entry as an error, and its repair adds it.
 
 ## Licence
 

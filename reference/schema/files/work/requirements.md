@@ -20,7 +20,7 @@ The ask itself, its rationale, its acceptance criteria, and its boundaries - wha
 of scope.
 
 ## Exclusion
-How you will do it -> plan.md. What you learned about the terrain -> how.md. What happened -> session.md.
+How you will do it -> plan.md. What happened, and what you learned on the way -> session.md.
 
 ## Source
 When the body was written from material the user supplied or a tracker issue rather than from

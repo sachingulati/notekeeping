@@ -1,19 +1,23 @@
 ---
 description: Move a store to the schema version this plugin ships. Converts only what is outstanding, and resumes.
-argument-hint: "[--apply] [--dry-run] [--page | --no-page] [--caller <name>]"
-allowed-tools: Read, Glob, Grep, Write, Edit, Artifact
+argument-hint: "[--apply [<report>] [all | <numbers>]] [--dry-run] [--page | --no-page] [--oneline]"
+allowed-tools: Read, Glob, Grep, Write, Edit, Bash(git rev-parse:*), Bash(git remote:*), Bash(git log:*), Bash(git -C:*), Artifact
 ---
 
 Move a store from an older schema version to the one this plugin ships. **Nothing is written without
-`--apply`**, and with it the migration still takes one confirmation. Writes inside the store only.
+a yes, or `--apply` on a saved report.** Writes inside the store, plus the projections step 11 regenerates.
 
-**The bare command behaves as `--dry-run`:** survey, propose the work with its counts, and **write
-nothing** - not a stamp, not `schema_version`. The form a person types first is the safe one.
-**`--dry-run` remains and means the same thing.**
+**The bare command surveys, proposes the work with its counts, saves the proposal as a report, and
+asks once.** A yes migrates exactly what was proposed, per
+`${CLAUDE_PLUGIN_ROOT}/reference/report-shape.md`'s `## A yes applies what was shown`; with no turn
+to answer in, it writes nothing - not a stamp, not `schema_version`. **`--dry-run` proposes and does
+not ask.** **`--apply [<report>] [all | <numbers>]` applies a saved report** - the latest when none is
+named - per that file's *The report is saved*. **Each item is one definition that moved**, so `all`
+is the whole migration and numbers are part of it; a partial migration is safe, because re-running is
+already how a migration resumes. **An item is stale when its definition's version, or its count of
+outstanding files, has moved since the report** - skip it and say so.
 
-**`--caller <name>`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`: **report the
-gap, and migrate nothing.** A migration rewrites knowledge the user did not just write, so it is a
-person's act, and the detail says so rather than naming an argument that would unlock it.
+**`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
 
 **Resolve the store first**, per `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`. The version
 this plugin ships, the four answers, the file stamp and the rules a migration follows are
@@ -38,6 +42,9 @@ entries could not be reached and move on.
 
 ## What it does
 
+**Under `--apply`, steps 1-8 do not run: the saved report is the proposal.** Check each chosen item
+for staleness, then go to step 10 with those items.
+
 1. **Read `schema_version` from each resolved store's `config.md`**, and compare per
    `schema-version.md`'s table.
 2. **Equal, in both?** Report `no-change` and write nothing. This is the ordinary outcome and it
@@ -58,11 +65,11 @@ entries could not be reached and move on.
    identical.
 7. **Propose the work with those counts**, before writing anything: each definition that moved, its
    step or steps, how many files are outstanding and how many are already done.
-8. **Without `--apply`, stop here.** The proposal is the output; say that `--apply` is what writes.
-9. **With `--apply`, take one confirmation for the whole migration**, then work the steps in order.
-   **The flag is the authorisation and the confirmation is the go-ahead**, and they are not the same
-   thing: one is typed before the command knows what it will find, the other is answered after the
-   counts are on the screen.
+8. **Save the proposal as a report, then ask once whether to migrate it.** Under `--dry-run` save
+   nothing and stop; with no turn to answer in, stop here - the saved report is the output.
+9. **A yes - or `--apply` on the saved report - is the go-ahead for the migration as proposed**; work
+   the steps in order. It is
+   answered after the counts are on the screen, which is what makes it an approval of them.
 10. **Convert the outstanding files one at a time**, following the `## Migration` section of the
     **resolved** definition - the user's overlay wins here as everywhere, so a migration converts
     toward the shape that store actually uses. Read each file only when it is about to be rewritten,
@@ -70,8 +77,9 @@ entries could not be reached and move on.
     the step did not name survived it** - `schema-version.md` says what to do when something else
     moved, and why a wrongly converted file is the one error a later run cannot find.
 11. **Regenerate what is derived rather than migrating it** - `index.md` per
-    `${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md`, then the projections per
-    `${CLAUDE_PLUGIN_ROOT}/reference/projections.md`. **Store first, derived last.**
+    `${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md`, then every projection of the store migrated
+    per `${CLAUDE_PLUGIN_ROOT}/reference/projections.md` - `~/CLAUDE.local.md` when that store is
+    global. **Store first, derived last.**
 12. **Write `schema_version` last**, once no definition has an outstanding file.
 13. **Report**, per below.
 
@@ -142,9 +150,8 @@ field.
 ## `--dry-run`
 
 Print the chain and, for each step, its targets and the outstanding count from the survey. Name the
-overlay files affected. **Write nothing**, including stamps and `schema_version`. **This is what the
-bare command does too** - the flag is the explicit spelling of it, and the two are not different
-behaviour.
+overlay files affected. **Write nothing**, including stamps and `schema_version`, and **do not ask** -
+this is the bare command's proposal without its question.
 
 
 **The report can be a page.** Where there is enough to choose between, offer it at the very
@@ -175,7 +182,8 @@ flags, and what the page may carry. **The terminal report is printed either way.
 
 ## Never
 
-- **Never skip a version**, and never migrate a store this command did not resolve.
+- **Never skip a version**, and never migrate a store this command neither resolved nor probed from the
+  `## Workspaces` registry and had confirmed by its absolute path.
 - **Never downgrade**, and never write into a store whose version is newer than the plugin's.
 - **Never walk the store on another command's behalf.** An ordinary command may finish the one file
   it is already writing, where the step says *on write* - `schema-version.md`'s

@@ -1,6 +1,6 @@
 ---
 description: What each command does, what each file is for, and what every term means.
-argument-hint: "[topic] [--caller <name>]"
+argument-hint: "[topic] [--oneline]"
 allowed-tools: Read, Glob
 ---
 
@@ -16,9 +16,10 @@ nowhere to write mints the bundle itself, so you can just work and save.
 
 **The commands**, grouped by family, one line each:
 - *lifecycle* - `load` `save` `work`
-- *artifact* - named exactly after the file each produces: `plan` `test` `summary` `how` `api`
+- *artifact* - named exactly after the file each produces: `plan` `test` `summary`
 - *knowledge* - `project` `review`
-- *tooling* - `config` `doctor` `help` `index` `init` `budget` `adopt` `upgrade`
+- *tooling* - `config` `doctor` `help` `index` `init` `budget` `adopt` `upgrade` `run` - and `run`
+  is how the user's own commands, in `<store>/schema/commands/`, are run: `/nk:run <name>`
 
 That is the whole set. **Name every command that ships** - a command missing from this list is a
 command nobody finds, and `help` is the only place the set is enumerated for a person.
@@ -70,22 +71,20 @@ no index that cannot be deleted and rebuilt.
 **Nothing is captured automatically.** There are no hooks. Every write is named by a human - which
 means notes only exist if they run `/nk:save`, and it is worth saying that plainly.
 
-## `--caller` - the discovery surface
+## `--oneline` - the discovery surface
 
 **`help` is the discovery surface.** A consumer asks it what it is talking to. Answer with the
 contract version and the callable list, and nothing conversational. **Read the version from
 `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md` and never state one from here.**
 
-**Derive the list; never recite one from here.** Read
-`${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md` and name **every command it accounts for** -
-which is every command that ships, because all of them accept the flag. A list typed into this file
-goes stale the next time a command is added. **Accepting the flag is what makes a command callable;
-what it then does is the contract's per-command table, not this list.**
+**Derive the list; never recite one from here.** Glob `${CLAUDE_PLUGIN_ROOT}/commands/*.md` and name
+every command found - every one of them accepts `--oneline`, and under it does what it does for a
+person. A list typed into this file goes stale the next time a command is added.
 
-The shape, with the command names filled in from that table rather than copied from here:
+The shape, with the command names filled in from that glob rather than copied from here:
 
 ```
-nk: help ok — contract <version>; <every command the contract accounts for>
+nk: help ok — contract <version>; <every command that ships>
 ```
 
 That is what lets a consumer built against an older contract find out before it calls anything.

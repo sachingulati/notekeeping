@@ -6,7 +6,7 @@ enabled:     true
 tier:        core
 shape:       document
 owner:       nk:summary
-trigger:     the item closed, or its change merged
+trigger:     only when /nk:summary is typed
 authority:   original
 budget:      3000 bytes
 env_axis:    optional
@@ -31,6 +31,10 @@ Four sections, plain human language, written so it can be pasted into a comment 
 ## How to check it
 ## What is still open
 ```
+
+Below the four sections, one line naming where the source material came from, and - once the summary
+has been published - one line `Page: <url>`. Neither is part of the summary's text, and neither counts
+as its one pointer.
 
 It must read standalone and must not assume the reader remembers the work - including when that
 reader is you, eight months later. That constraint is what keeps code references out: a path means

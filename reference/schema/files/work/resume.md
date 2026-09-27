@@ -66,8 +66,8 @@ written by `/nk:save` and read back by `/nk:load`, so both count it the same way
 
 **1 · `Covers` names its range and how it was built.** `re-derived` means this save rebuilt the
 story from `session.md`, which it had in context; `carried forward` means it did not, and the
-previous text was extended instead. A file that says *carried forward* eight saves running is a file
-drifting from the record, and `/nk:doctor` compares this line against `session.md`'s last session
+previous text was extended instead. A file that says *carried forward* **five saves running** is a file
+drifting from the record - that is the threshold, and `/nk:doctor` warns at it - and `/nk:doctor` compares this line against `session.md`'s last session
 block rather than trusting it.
 
 **2 · The rejected list may be reworded, never shortened, while the item is open.** A dead end is
@@ -84,8 +84,8 @@ resolving.
 **It is read on demand, once per load - never always-loaded**, so the ceilings in
 `${CLAUDE_PLUGIN_ROOT}/reference/projections.md` do not apply and neither does their reasoning.
 Capping a file whose job is to let the work be rebuilt knowingly would defeat the file. The notice
-threshold is three times the largest document budget that ships (`project/NOTES.md`, 12000) and is
-**a notice, not a limit**: past it, the likely cause is narrative that belongs in `session.md`, and
+threshold, 30000 bytes, is well above every document budget that ships, and is **a notice, not a
+limit**: past it, the likely cause is narrative that belongs in `session.md`, and
 that is what the notice says.
 
 ## Migration

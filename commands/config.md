@@ -1,14 +1,12 @@
 ---
 description: Show or change settings. The one file the user edits by hand.
-argument-hint: "[set <key> <value>] [set budget <scope>/<file> <value>] [budgets] [--caller <name>]"
+argument-hint: "[set <key> <value>] [set budget <scope>/<file> <value>] [budgets] [--oneline]"
 allowed-tools: Read, Glob, Write, Edit
 ---
 
 Show or change configuration. Writes only to the config files.
 
-**`--caller <name>`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`: **resolved
-values are readable, and `set` is refused.** Settings are a person's act, and the detail says so
-rather than naming an argument that would satisfy it.
+**`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
 
 ## Bare invocation
 
@@ -36,7 +34,8 @@ settings in the same places. A setting no command has read yet is a row like any
 value was.
 
 Refuse an unknown key rather than writing it - a typo that silently becomes a setting is a bug that
-surfaces much later. **`${CLAUDE_PLUGIN_ROOT}/reference/config-defaults.md` is what "known" means**;
+surfaces much later. **`schema_version` is refused too**: `/nk:init` writes it and only `/nk:upgrade`
+moves it. **`${CLAUDE_PLUGIN_ROOT}/reference/config-defaults.md` is what "known" means**;
 refusing a key listed there would refuse a setting the product documents.
 
 ### A file's budget is not a setting, and `set` writes it anyway
@@ -64,8 +63,15 @@ plugin update and a number written there would not survive one.
 the diff either way, and name the file by absolute path.
 
 **Refuse a budget key whose definition does not resolve**, and refuse one whose resolved definition
-carries no `budget:` field - an uncapped file is uncapped by design, and a ceiling invented for it is
-a rule nobody wrote. Say which, and stop.
+carries no `budget:` field **or `budget: none`** - an uncapped file is uncapped by design, and a
+ceiling invented for it is a rule nobody wrote. Say which, and stop.
+
+**A budget keeps the unit it is stated in.** A byte ceiling takes bytes; an entry count - `60 entries`
+- takes entries; a notice - `notice at 30000 bytes` - takes a new threshold and stays a notice. A
+value in another unit is refused, naming the unit. **A budget stated by reference** - an `areas.md`
+file keeping the budget of the register it came from - has no value of its own to set: refuse, and
+name the register whose budget governs it. `budgets` prints each value in its own unit, and the
+reference form as the register it points to.
 
 ## `budgets`
 
@@ -87,7 +93,8 @@ cheap, and this pays for itself when asked.**
 
 ## The two levels
 
-**Machine** - `~/.notekeeping/config.md`, **inside global's store.** One field: `schema_version`.
+**Machine** - `~/.notekeeping/config.md`, **inside global's store.** One setting, `schema_version`, plus the `## Workspaces` registry
+`/nk:init` appends to - which is not a setting, and which `set` never writes.
 
 **Store** - `<store>/config.md`, one per workspace. Everything else, so it travels with the notes:
 thresholds, `schema_version`, `context_window_tokens`, tracker patterns, projection ceilings. **A
@@ -100,8 +107,8 @@ directory holding that store's `.notekeeping/`. One walk produces both -
 
 ## Projections
 
-**Delivery follows registration**: a registered project is delivered, and a workspace store with
-content in its `NOTES.md` is delivered. What is configurable is the cost -
-`projection_project_bytes` and `projection_workspace_bytes` bound the two files separately.
+**Delivery follows registration**: a registered project is delivered, a workspace store with
+content in its `NOTES.md` is delivered, and global is delivered whenever it exists. What is
+configurable is the cost - `projection_bytes` bounds each of the three files.
 **A command never alters delivery unasked**, in either direction.
 `${CLAUDE_PLUGIN_ROOT}/reference/projections.md` is the contract for what each one writes.

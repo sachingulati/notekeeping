@@ -1,12 +1,16 @@
 ---
 description: Write plan.md - how the work will be done. Freezes once execution starts.
-argument-hint: "[id] [--dry-run] [--caller <name>]"
+argument-hint: "[id] [--dry-run] [--oneline]"
 allowed-tools: Read, Glob, Grep, Write, Edit
 ---
 
 Fill in `plan.md` for a work item. Writes inside the store only.
 
-**`--caller <name>`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
+**`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
+
+**Resolve the store first**, per `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`, then the item:
+`[id]`, or the inference `/nk:save` step 1 makes, resolved against `index.md` - acting on a confident match and asking
+where there is none, as `/nk:save` does.
 
 Resolve the `plan.md` definition per `${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md` - the
 user's overlay wins over the shipped default - and honour its admission and exclusion tests.

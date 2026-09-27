@@ -29,7 +29,7 @@ one register.
 `${CLAUDE_PLUGIN_ROOT}/reference/schema/files/project/areas.md` - the directory, the pointer the
 split leaves, the no-nesting rule, the slug reused from an existing tag, and the rebuild that makes
 an area reachable. This scope changes only which registers can split: the store's own
-`gotchas.md`, `decisions.md`, `domain.md`, `people.md` and `process.md`, which sit directly in
+`gotchas.md`, `decisions.md`, `domain.md` and `process.md`, which sit directly in
 `.notekeeping/`, so an area sits at `.notekeeping/areas/<topic>/`.
 
 **Extended, not core.** A workspace register reaches a split threshold far later than a project's,

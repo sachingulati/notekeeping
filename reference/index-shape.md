@@ -14,16 +14,16 @@ candidate list is unreadable without one. The two clauses together exclude `stat
 user-defined field that nothing resolves by earns no column, and grep remains the fallback it
 always was.
 
-**This file exists because six commands touch this one file.** `/nk:index` rebuilds it for repair,
+**This file exists because seven commands touch this one file.** `/nk:index` rebuilds it for repair,
 `/nk:save` and `/nk:work` regenerate it as a matter of course, `/nk:adopt` writes it where an
-adoption produced work items, `/nk:upgrade` regenerates it rather than migrating it, and `/nk:load`
-resolves against it. Two writers that state the shape separately drift - one rendering an empty
-project list as an empty cell and the other as `[]`. One shape, stated once, cited by all six.
+adoption produced work items, `/nk:upgrade` regenerates it rather than migrating it, `/nk:doctor --fix`
+regenerates a row, and `/nk:load` resolves against it. Two writers that state the shape separately drift - one rendering an empty
+project list as an empty cell and the other as `[]`. One shape, stated once, cited by all seven.
 
 ## The columns
 
-**Seven, in this order. Every one is derived from a `requirements.md` frontmatter field**, which
-stays authoritative.
+**Seven, in this order. Every one is derived** - six from a `requirements.md` frontmatter field,
+which stays authoritative, and `folder` from the path on disk.
 
 | Column | From | Why it earns a place |
 |---|---|---|
@@ -38,8 +38,8 @@ stays authoritative.
 ```markdown
 | id | ids | title | folder | projects | parent | tags |
 |---|---|---|---|---|---|---|
-| 0003 | TKT-482 | Scrollbar and filter usability | 2026-08/0003-scrollbar-and-filter | web-client | | usability, a11y |
-| TKT-517 | | Counter rollup | 2026-08/TKT-517-counter-rollup | repo-a, repo-b | TKT-500 | |
+| 0003 | TKT-482 | Scrollbar and filter usability | work/2026-08/0003-scrollbar-and-filter | web-client | | usability, a11y |
+| TKT-517 | | Counter rollup | work/2026-08/TKT-517-counter-rollup | repo-a, repo-b | TKT-500 | |
 ```
 
 **The three relation columns - `ids`, `parent`, `tags` - are each declared in the schema and
@@ -74,7 +74,7 @@ that exists only here, which is why narrative must never live in this file.
 ## Recency is derived
 
 **`session.md` is append-only with dated session blocks, so its newest block *is* last activity** -
-`grep -n '^## session ' | tail -1`, which is a heading match and never a read of the file.
+found by `Grep` `^## session ` with line numbers and take the last match, which is a heading match and never a read of the file.
 Nothing maintains that, and it cannot drift, because it is not a field - it is the record.
 
 **Fall back to the `work/<YYYY-MM>/` bucket** when there is no `session.md`. A just-minted item has
@@ -110,8 +110,8 @@ and a stable surface, not correctness.
 
 **Only at mint, or when an item's identity, relations or tags change.** Every other save leaves this
 file byte-identical, so the regeneration step is a genuine no-op rather than a rewrite that moves one
-date. A save that reports this file as changed when none of `id`, `title`, `projects`, `parent` or
-`tags` moved is a defect in the writer, not a property of the store.
+date. A save that reports this file as changed when none of `id`, `ids`, `title`, `projects`, `parent`
+or `tags` moved is a defect in the writer, not a property of the store.
 
 **Tags are the one column a routine save can legitimately move**, because `/nk:save` both accepts
 `--tag` and picks tags up from the session. That is a real change to identity, not churn - name it
