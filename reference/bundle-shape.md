@@ -30,7 +30,7 @@ silently.
 **An explicit `--id` is checked before it mints.** Matching `tracker_id_pattern` makes it a tracker
 key, not a local id, and it mints as given. Otherwise it is a local id and is checked against
 `local_id_pattern` (the config defaults); a mismatch asks, naming
-the pattern - refused instead under `--oneline`.
+the pattern.
 
 **The folder never renames, and ids are opaque and stable.** A tracker id is attached later with
 `/nk:work --also`. Start with a counter; add the ticket when it exists.
@@ -72,9 +72,8 @@ there is genuinely nothing to write, say what is unknown and why.
 *Resolving a project inside the store* - the folder's read line, then the registry's `dirs:`; no git is run to find a
 repo root. **Never fall back to a directory's basename.**
 
-**If it does not resolve, ask** - **except under `--oneline`, where the question comes back as a
-refusal naming `--project <name>`**
-(the consumer contract). A guessed project routes promotion to the wrong scope and reads the state of a repository
+**If it does not resolve, ask**, naming `--project <name>` as the argument that answers it. A
+guessed project routes promotion to the wrong scope and reads the state of a repository
 the work has nothing to do with.
 
 **`--project <name>` supplies the answer**, and is what a refusal names. The name must already be

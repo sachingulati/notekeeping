@@ -1,17 +1,16 @@
 ---
 name: help
 description: Explain how Notekeeping works - what each of its skills does, what each store file is for, what its terms mean. Use when the user asks how Notekeeping or one of its commands works.
-argument-hint: "[topic] [--oneline]"
+argument-hint: "[topic]"
 allowed-tools: Read, Glob, Grep
 ---
 
 Explain Notekeeping. `$ARGUMENTS` narrows to one topic - a command, a file, or a term.
 
 Before anything else, in order:
-1. **`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
-2. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`.
-3. **An overlay?** If `<store>/schema/skills/help/` exists, follow `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md`: a `SKILL.md` there replaces the rest of this file, and a file under its `references/` replaces the shipped reference of that name wherever this skill cites it.
-4. **Infer before asking**: read what the conversation already states, and ask only what is still open.
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs.
+2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
+3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
 
 ## With no argument
 
@@ -67,20 +66,3 @@ markdown in a directory the user owns, and every index is derived - it can be de
 
 Nothing is captured automatically: notes exist because `/nk:save` ran - typed, or started by Claude
 when asked.
-
-## `--oneline` - the discovery surface
-
-`help` is the discovery surface. A consumer asks it what it is talking to. Answer with the
-contract version and the callable list, and nothing conversational. **Read the version from
-`${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md` and never state one from here.**
-
-**Derive the list, as above; never recite one from here.** Every skill it finds accepts
-`--oneline`, and under it does what it does for a person.
-
-The shape, with the names filled in from that grep rather than copied from here:
-
-```
-nk: help ok — contract <version>; <every command that ships>
-```
-
-That is what lets a consumer built against an older contract find out before it calls anything.

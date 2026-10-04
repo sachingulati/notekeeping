@@ -1,22 +1,21 @@
 ---
 name: init
 description: Create a Notekeeping store - global, a workspace, or a project in one - and register its repositories. Use when the user asks to set up Notekeeping, or register a folder or project with it.
-argument-hint: "[path] [--workspace] [--project] [--oneline]"
+argument-hint: "[path] [--workspace] [--project]"
 allowed-tools: Read, Glob, Edit, Write
 ---
 
 Create a store - global or workspace - or register a project inside one. It creates structure -
 a config, the workspace's `NOTES.md`, and, for a project, the two documents it needs in order to
 exist. It
-never mines your material for content. **This skill runs no shell and no git**: what it needs from
-a repository it reads from `.git` with the file tools.
+never mines your material for content. What it needs from a repository it asks git, per
+`${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md`.
 
 Before anything else, in order:
-1. **`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
-2. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`. No store yet is
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. No store yet is
    this skill's normal case - it is the one that creates them.
-3. **An overlay?** If `<store>/schema/skills/init/` exists, follow `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md`: a `SKILL.md` there replaces the rest of this file, and a file under its `references/` replaces the shipped reference of that name wherever this skill cites it.
-4. **Infer before asking**: read what the conversation already states, and ask only what is still open.
+2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
+3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
 
 **A plain-text answer is applied by this skill, never by you.** When a question this skill asked is
 answered in words rather than a pick - *yes* included - your next action is the `Skill` call:
@@ -48,9 +47,9 @@ Each level has its own reference; read one only when this run reaches that level
 
 | Level | Follow |
 |---|---|
-| **global** | `${CLAUDE_PLUGIN_ROOT}/skills/init/references/global.md` (with `${CLAUDE_PLUGIN_ROOT}/reference/projections.md`) |
-| **a workspace**, and the offer of its repositories | `${CLAUDE_PLUGIN_ROOT}/skills/init/references/workspace.md` (with `${CLAUDE_PLUGIN_ROOT}/reference/projections.md` and `${CLAUDE_PLUGIN_ROOT}/reference/store/walk.md`) |
-| **a project** | `${CLAUDE_PLUGIN_ROOT}/skills/init/references/project.md` (with `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`, `${CLAUDE_PLUGIN_ROOT}/reference/store/walk.md`, `${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md`, the shipped `${CLAUDE_PLUGIN_ROOT}/reference/schema/files/project/NOTES.md` and `${CLAUDE_PLUGIN_ROOT}/reference/schema/files/project/overview.md`, `${CLAUDE_PLUGIN_ROOT}/reference/schema/budget-notice.md` and `${CLAUDE_PLUGIN_ROOT}/reference/projections.md`) |
+| **global** | `${CLAUDE_PLUGIN_ROOT}/skills/init/references/global.md` (with `${CLAUDE_PLUGIN_ROOT}/reference/projections.md` and `${CLAUDE_PLUGIN_ROOT}/reference/projections-writing.md`) |
+| **a workspace**, and the offer of its repositories | `${CLAUDE_PLUGIN_ROOT}/skills/init/references/workspace.md` (with `${CLAUDE_PLUGIN_ROOT}/reference/projections.md`, `${CLAUDE_PLUGIN_ROOT}/reference/projections-writing.md` and `${CLAUDE_PLUGIN_ROOT}/reference/store/walk.md`) |
+| **a project** | `${CLAUDE_PLUGIN_ROOT}/skills/init/references/project.md` (with `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`, `${CLAUDE_PLUGIN_ROOT}/reference/store/walk.md`, `${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md`, `${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md`, the shipped `${CLAUDE_PLUGIN_ROOT}/reference/schema/files/project/NOTES.md` and `${CLAUDE_PLUGIN_ROOT}/reference/schema/files/project/overview.md`, `${CLAUDE_PLUGIN_ROOT}/reference/schema/budget-notice.md`, `${CLAUDE_PLUGIN_ROOT}/reference/projections.md` and `${CLAUDE_PLUGIN_ROOT}/reference/projections-writing.md`) |
 
 Detecting is not guessing: every level except global confirms before it writes - global's path is
 fixed - and the report names everything written.
@@ -65,16 +64,17 @@ first.
 1. **Create global if it is missing** - `~/.notekeeping/`, a fixed home, no judgment, nothing to ask.
    **It is written before any question this run asks, even one nobody can answer**: no answer
    changes it, so holding it back only leaves it unwritten.
-2. **Decide the project directory.** Find the repo root by reading, as the project reference's step 2
-   does: a repository → that root is the project. No `.git` found → ask whether to treat this
+2. **Decide the project directory.** Find the repo root with git, as the project reference's step 2
+   does: a repository → that root is the project. Not a repository → ask whether to treat this
    directory as a project, and stop if the answer is no.
 3. **Resolve the workspace before creating the project.** A project cannot exist without one -
    it lives at `<workspace>/.notekeeping/projects/<name>/`, so there is nowhere to put it otherwise.
-   Walk up per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`:
+   Walk up per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - **starting at the working
+   directory itself**, not its parent:
 
-   | What is above | Do |
+   | What the walk finds | Do |
    |---|---|
-   | a workspace store already | use it. Nothing to ask |
+   | a workspace store already, here or above | use it. Nothing to ask |
    | no workspace, **and the parent is `$HOME`** | **refuse** - see below |
    | no workspace, parent is anything else | propose the parent as the workspace and ask |
 
@@ -137,7 +137,7 @@ Nor is global's `## Workspaces` registry. Creating a workspace store appends its
 there, in `~/.notekeeping/config.md`. On a fresh machine `--workspace` reaches this step with no
 file to append to, so creating global first, where it is missing, rule file and all, is part
 of the same step - that is what lets a machine's workspaces be enumerated at all. What the registry
-is and is not for is `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`. **Append; never rewrite the
+is and is not for is `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, *Knowing that other stores exist*. **Append; never rewrite the
 list**, and do not add an entry for a workspace that already has one. This is the only thing
 workspace creation writes into global.
 
@@ -152,15 +152,14 @@ on-demand read of the store is refused, so this is part of creating the store, n
 ## Asking
 
 **Every question this skill asks follows `${CLAUDE_PLUGIN_ROOT}/reference/asking.md`** - `nk:init
-needs:` and the open questions - with `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md` when nobody can
-answer. Its questions: the workspace path (proposed, or named), whether a directory with no `.git` is
+needs:` and the open questions. Its questions: the workspace path (proposed, or named), whether a directory that is not a repository is
 a project, which of the offered repositories to register, and each project's name. **Ask everything
 open at once** - in the automatic form the workspace, the offer and the name are usually known
 together - and nothing the conversation already answers.
 
 **Each write outside the store may also be asked about by the harness** - a read line, an exclude
 entry, the rule file, the settings entry. A refusal there is that file not written: report it as
-such, per the projections rule's *Failing*, never as done.
+such, per the projection-writing rule's *Failing*, never as done.
 
 ## Report
 

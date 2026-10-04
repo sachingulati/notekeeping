@@ -44,12 +44,13 @@ that covers every source that taught it** — never by counting mentions.
 ## Install
 
 ```
-/plugin marketplace add https://github.com/sachingulati/notekeeping.git
-/plugin install nk@notekeeping
+/plugin marketplace add https://github.com/sachingulati/claude-plugins.git
+/plugin install nk@sachingulati
 ```
 
-The full URL clones over HTTPS; the `owner/repo` shorthand can clone over SSH, which fails on a
-machine without a GitHub SSH key.
+Notekeeping is listed in the `sachingulati` marketplace, which fetches it from this repository. The
+full URL clones over HTTPS; the `owner/repo` shorthand can clone over SSH, which fails on a machine
+without a GitHub SSH key.
 
 ## Getting started
 
@@ -131,9 +132,7 @@ own, deny it in your Claude Code settings - `"Skill(nk:adopt)"` and `"Skill(nk:a
 
 ## Everything it writes, and where
 
-- **Notes are written by commands** - typed by you, or started by Claude when you ask. A hook of
-  your own can call `/nk:save --oneline` - `reference/consumer-contract.md` says what that flag
-  changes.
+- **Notes are written by commands** - typed by you, or started by Claude when you ask.
 - **`/nk:init` creates the first store**, in an empty directory; a directory that already holds
   notes is `/nk:adopt`'s. Installing the plugin writes nothing.
 - **A read line is the one thing written without being asked each time.**
@@ -144,6 +143,10 @@ own, deny it in your Claude Code settings - `"Skill(nk:adopt)"` and `"Skill(nk:a
   workspace or global, so a repo starts delivering the moment it is added, and it does not change
   when the notes do - a save writes none. **Delivery follows registration**, and
   **`/nk:doctor --fix` writes back any that is missing**, so deleting one costs nothing.
+- **A secret is stored only when you ask.** Ask Claude to keep a login or a token and `/nk:save`
+  writes it to `secrets.md` at the scope it belongs to, with a `.gitignore` line beside it. It is never
+  loaded into a session: the notes list it, and Claude reads it when a task needs a login rather than
+  asking you again. Nothing else ever puts a credential in a store.
 - **Everything outside the store is personal.** One `CLAUDE.local.md` per registered
   repository and one for the workspace root, the global rule file, one `.git/info/exclude` entry per
   repository, and the entries added to your own `~/.claude/settings.json` (*Requirements*, below) -
@@ -186,32 +189,17 @@ sections it names are replaced, and everything else is inherited. A plugin updat
 either form.
 
 Turning a shipped file off is one line, `enabled: false` (two, with `extends: shipped`), and adding
-a file of your own is one definition. A skill overlay, `<store>/schema/skills/<name>/SKILL.md`,
-replaces that skill's instructions whole.
-
-## Calling it from another tool
-
-Every command accepts `--oneline`. **It changes the output and nothing else**: the command does what
-it does for you, and prints one line you can parse instead of its report:
-
-```
-nk: <command> <status> — <detail>
-```
-
-The status is `ok`, `no-change`, `asks`, `refused` or `failed` - `failed` when the run broke down
-after it had already started writing, and the detail names what was and was not written. Where the
-command would have asked you something it stops with `asks`, and the line carries the question and
-its options; `refused` is a request it cannot do as asked, and the line says why. A flag is approval whoever types it, so `--apply` and `--fix` work as they do for you.
-`review`, `adopt` and `upgrade` save a report too long for one line to a file the line names, and
-`--apply` applies it; `doctor` saves one too, every run, but repairs immediately under `--fix`
-rather than through `--apply`. `no-change` is what makes retrying safe. `/nk:help --oneline`
-reports the contract version and the command list.
+a file of your own is one definition. Overlays cover definitions only; to change how a skill behaves,
+fork the plugin and install your copy.
 
 ## Requirements
 
 Claude Code, with Sonnet or Opus: notes reach a session through an instruction to read them, which
-those models follow. **Git is optional** - a repository's branch, commit and remote are read from the
-files inside its `.git`.
+those models follow. **Git is optional.** Where it is installed, commands ask it for a repository's
+root, branch, commit, remote, ignore state and recent commits; pointed at a folder other than the
+one you are in, Claude Code asks you once before it runs there. Without it, a run says what it
+skipped: no commit lists, a stamp written *unverified*, staleness not checked, no file trimmed by
+`/nk:adopt`, and no exclude line - add `/CLAUDE.local.md` to your `.gitignore` instead.
 
 **Settings, written for you.** Your store sits above your repositories, and the read line in every
 repository points at it by absolute path. Claude Code reads outside the working directory only where

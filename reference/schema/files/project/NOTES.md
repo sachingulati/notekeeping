@@ -47,8 +47,8 @@ gotchas.md - <its definition's ## Question, as one line>
 ```
 
 **A stamp's date is the day it was written** - the session's date when the stamp went on, never a
-commit's date. The sha is read from the repository's `.git`, never run for; unreadable leaves the
-repo half unstamped.
+commit's date. The sha is read per the repo-facts rule's *the commit*; unreadable writes the repo
+half *unverified*.
 
 **The read lines are written whole, with absolute paths, and only for a file that exists.** Each
 is worded *before answering anything or starting any task here, read ...* - a line worded *before

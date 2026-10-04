@@ -1,7 +1,7 @@
 ---
 name: config
 description: Show or change Notekeeping settings, and set a store file's budget, naming the file each value came from. Use when the user asks to see or change a Notekeeping setting.
-argument-hint: "[set <key> <value>] [set budget <scope>/<file> <value>] [budgets] [--oneline]"
+argument-hint: "[set <key> <value>] [set budget <scope>/<file> <value>] [budgets]"
 allowed-tools: Read, Glob, Write, Edit
 ---
 
@@ -9,10 +9,9 @@ Show or change configuration. Writes only to the config files, and to the store'
 for `set budget`.
 
 Before anything else, in order:
-1. **`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
-2. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`.
-3. **An overlay?** If `<store>/schema/skills/config/` exists, follow `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md`: a `SKILL.md` there replaces the rest of this file, and a file under its `references/` replaces the shipped reference of that name wherever this skill cites it.
-4. **Infer before asking**: read what the conversation already states, and ask only what is still open.
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs.
+2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
+3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
 
 ## Bare invocation
 

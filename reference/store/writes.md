@@ -28,7 +28,7 @@ over: by where the file is, and by the content already existing somewhere else.
 The adopt command's trim rule holds the invariant.
 
 **No read line is written by `save`, `project`, `adopt` or `upgrade`** - the read line does not change
-when the notes do. The projection rule holds what each line says and how it is written without clobbering.
+when the notes do. The projections rule holds what each line says; the projection-writing rule, how it is written without clobbering.
 
 ### The read permission
 
@@ -75,8 +75,7 @@ that *inside a store* stays checkable rather than approximately true.
 disk writes nothing and says so - *nothing new since the last save*. Compare the rendered file to the
 file, never the sources to their last generation. A second `/nk:save` straight after the first leaves
 `resume.md` and `session.md` untouched: an empty diff and a fresh date that say nothing new are
-churn, for a person reading git history as much as for a tool calling repeatedly. Under `--oneline`
-this is the `no-change` status (the consumer contract).
+churn, for a person reading git history as much as for a tool calling repeatedly.
 
 **Check before touching the filesystem, in one order: the flags, then the store, then the project.**
 Where a run cannot go on, **which check fires first decides what the user fixes first** - so the

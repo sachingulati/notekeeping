@@ -15,8 +15,8 @@ A workspace is a directory holding connected projects. **The user names it; neve
 of the workspace read line, so it exists from the start: its `# <workspace>` title and its header
 comments, per the `NOTES.md` definition, and **no empty heading**. The three directories are the
 shape the store takes, **not a list to create**: nothing in this skill's `allowed-tools` makes an
-empty directory - `Write` creates parents only on the way to a file - and this plugin runs no shell
-to do it. **Each appears when something is first written into it**, as the store's knowledge files
+empty directory - `Write` creates parents only on the way to a file - and no shell command is
+run to do it. **Each appears when something is first written into it**, as the store's knowledge files
 do. **Do not report them as
 created, and do not treat their absence as a failed init.**
 
@@ -36,11 +36,12 @@ line last.
 
 **Whenever a workspace is created - by either route - offer the repositories under it.** The
 workspace is the one decision; the projects under it are a consequence, and the sibling clones are
-already in front of you. **Find them by reading and listing; never run git.**
+already in front of you. **Ask git about the named path; list its children.**
 
-1. **The named path itself.** `Read` `<workspace>/.git/HEAD`; if it does not exist, `Read`
-   `<workspace>/.git`, which in a worktree or a submodule is a file holding a `gitdir:` line. Either
-   one read → the named path is a repository - a monorepo root - and it is offered with the rest.
+1. **The named path itself.** The repo-facts rule's *the root*, from `<workspace>`: a root equal to
+   `<workspace>` → the named path is a repository - a monorepo root - and it is offered with the rest.
+   A root above it is a repository the workspace sits inside, not one to offer; git unavailable skips
+   this step, said.
    **Registered, its one `CLAUDE.local.md` delivers both scopes**: one block, the workspace's line
    first, then the project's, per the projections rule.
 2. **Its *direct* children - one `Glob`, this exact pattern:** `<workspace>/*/{.git,.git/HEAD}`. A
@@ -63,5 +64,4 @@ already in front of you. **Find them by reading and listing; never run git.**
    its step 5 - do not offer it twice, and do not register it twice.
 
 **This stays inside the no-scanning rule.** It lists directory entries one level below a path the
-user just named, asks about each, and reads nothing inside any of them but the `.git` that makes it a
-repository. Reading a user's material and inferring a project map from it is `/nk:adopt`'s job.
+user just named, asks about each, and reads nothing inside any of them but the `.git` the listing matched. Reading a user's material and inferring a project map from it is `/nk:adopt`'s job.

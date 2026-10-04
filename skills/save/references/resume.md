@@ -32,7 +32,6 @@ say so - that is what `carried forward` is for, and `/nk:doctor` is what notices
 
 ## The branch line
 
-**The branch is `.git/HEAD`'s `ref:` line**, read as a file - in a worktree
-through the `gitdir:` line, as the walk rule says - never from git. A detached `HEAD` names no branch:
-write `detached`. **The dirty count and the commits ahead of origin are not recorded** - both came
-from git, and this plugin runs none. Write the branch alone.
+**The branch is the repo-facts rule's *the branch*.** A detached `HEAD` names no branch: write
+`detached`; unknown - git unavailable and the fallback empty - write `unknown`. **The dirty count and
+the commits ahead of origin are not recorded.** Write the branch alone.

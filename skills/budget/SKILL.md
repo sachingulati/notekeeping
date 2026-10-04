@@ -1,19 +1,16 @@
 ---
 name: budget
 description: Show what the recorded notes cost in context - always loaded, read on demand, and registers - per scope and file. Use when the user asks how much context the notes use or what they cost.
-argument-hint: "[project] [--all] [--oneline]"
+argument-hint: "[project] [--all]"
 allowed-tools: Read, Glob, Grep
 ---
 
 Report what is actually being spent. **Reads only - this command writes nothing.**
 
 Before anything else, in order:
-1. **`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
-2. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`.
-3. **An overlay?** If `<store>/schema/skills/budget/` exists, follow `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md`: a `SKILL.md` there replaces the rest of this file, and a file under its `references/` replaces the shipped reference of that name wherever this skill cites it.
-4. **Infer before asking**: read what the conversation already states, and ask only what is still open.
-
-This command only reads, so it behaves normally under `--oneline` - compress the figures into the outcome line's detail.
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs.
+2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
+3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
 
 What is
 measured is the store, plus the three read-line targets and the always-loaded content they sit beside

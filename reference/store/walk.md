@@ -7,39 +7,12 @@ title: Staying inside the store
 
 | | |
 |---|---|
-| Reads | the resolved workspace store and global; a registered repository's own `CLAUDE.md` or `README.md` as a source; what `/nk:adopt` was pointed at and the context files it reads; and, where a skill needs a repository fact, the file under `.git` that holds it - *Reading a repository's facts*, below. Read these files directly; never run git. |
+| Reads | the resolved workspace store and global; a registered repository's own `CLAUDE.md` or `README.md` as a source; what `/nk:adopt` was pointed at and the context files it reads; and, where a skill needs a repository fact, git - the repo-facts rule. |
 | Writes | **inside a store, plus the named targets outside a store - and that list is closed. Every one of them is personal and local; none is a file anyone else reads.** The machine config is `~/.notekeeping/config.md`, which is a store |
 | Grep and glob | rooted at a resolved store - never at `~`, never at the working directory. **Three exceptions**: `/nk:adopt` inventories the roots it was given and the references they name; `/nk:save` globs `*/memory/*.md` under `~/.claude/projects` to find the store it is draining, which is the only way to address a directory keyed by a slug; and `/nk:init`'s workspace offer globs `<ws>/*/{.git,.git/HEAD}` - the direct children of a path the user just named - to find the repositories under it |
 | A path in a query | resolved relative to the store, and refused if it escapes it |
 
-## Reading a repository's facts
-
-**Which repository.** `<repo>` is the nearest folder - from a starting folder up to the filesystem
-root - where step 1 or step 2 below finds a `.git`. **For a project, start from the working
-directory when it resolves to that project** - by its read line or a `dirs:` match, per the
-store-resolution rule's *Resolving a project inside the store* - **and from the project's `dirs:` entry when it does
-not**: a project you are not standing in is reachable only through its registered path. Where no
-project is involved - `/nk:init` finding the root it will register - start from the working
-directory. A subdirectory of a repo is not its root: never read `<cwd>/.git/...` without walking up.
-
-**The branch, in order.**
-1. `Read` `<repo>/.git/HEAD`.
-2. **If it does not exist, `.git` may be a file** - a worktree or a submodule. `Read` `<repo>/.git`
-   itself: its `gitdir: <path>` line names the git directory, and the branch is in `<path>/HEAD`.
-   **A relative `<path>` resolves against `<repo>`**, the folder holding the `.git` file -
-   a submodule's is usually `../.git/modules/<name>`.
-3. `ref: refs/heads/<branch>` names the branch. A bare sha is a detached HEAD, and names none.
-
-**A branch you did not read from one of these files is not known** - say there is none; never take
-one from a folder, an item or a guess.
-
-**The commit a branch points at** (a verified stamp): read `<gitdir>/refs/heads/<branch>`; where the
-git directory holds a `commondir` file - a worktree - read the ref under `<gitdir>/<commondir>/`
-instead. Not there, search `packed-refs` in the same directory for the line ending in
-`refs/heads/<branch>`. A detached HEAD's sha is its own commit. **Unreadable means unknown** - leave
-that half of the stamp empty rather than guess.
-
-### A pattern that matches nothing
+## A pattern that matches nothing
 
 **A `*` segment followed by a literal filename can return zero with the file present.**
 `<store>/projects/*/overview.md` can return nothing against a store holding that file, while

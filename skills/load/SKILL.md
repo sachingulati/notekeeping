@@ -1,17 +1,16 @@
 ---
 name: load
 description: "Resume a work item - read its record and say where things stand and what is next. Reads only. Use when the user asks to resume or pick up earlier work, or what they were last doing on it."
-argument-hint: "[query] [--full] [--quick] [--oneline]"
+argument-hint: "[query] [--full] [--quick]"
 allowed-tools: Read, Glob, Grep
 ---
 
 Resume where you left off. **This command reads. It never writes anything, anywhere.**
 
 Before anything else, in order:
-1. **`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
-2. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`.
-3. **An overlay?** If `<store>/schema/skills/load/` exists, follow `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md`: a `SKILL.md` there replaces the rest of this file, and a file under its `references/` replaces the shipped reference of that name wherever this skill cites it.
-4. **Infer before asking**: read what the conversation already states, and ask only what is still open.
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs.
+2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
+3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
 
 ## 1. Resolve the store, then the query
 
@@ -87,14 +86,13 @@ and reads only what is missing.
 Fetch every id in `ids:`, per `${CLAUDE_PLUGIN_ROOT}/reference/tracker.md` - only through access this session
 already has, and a tracker it cannot reach is named, never guessed.
 
-## 4. The branch
+## 4. The branch and the commits
 
-**This skill runs no shell and no git.** For each project in the item's `project:` list and their
-declared dependencies, read the branch of its repository, found per
-`${CLAUDE_PLUGIN_ROOT}/reference/store/walk.md`, *Which repository*: `.git/HEAD`'s `ref:`
-line - in a worktree, through `.git`'s `gitdir:`. The branch
-exists when its ref file is there, or `packed-refs` holds a line for it. A detached `HEAD` names no
-branch: say so. **Nothing else of git is read** - no stashes, no diff, no commits.
+For each project in the item's `project:` list and their declared dependencies, ask git, per
+`${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md`: **the branch**, and **the commits since the
+last save** - `--since` the date on `resume.md`'s *Covers* line, the save's own day included. A detached `HEAD`
+names no branch: say so. **Nothing else of git is read** - no stashes, no diff, no remote. Git
+unavailable: the branch from the fallback, and the commits not listed - say so.
 
 ## 5. Parent roll-up
 
@@ -112,17 +110,7 @@ lookups**, and nothing is fetched on this plugin's behalf.
 
 ## Output
 
-Under `--oneline`: one line, and nothing else. Follow
-`${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md` - the outcome line is the output.
-Compress what matters into its detail: the item, the project, the branch, which
-artifacts exist, and the single most important discrepancy if there is one.
-The screen below is the human path and does not apply.
-
-```
-nk: load ok — TKT-482 (repo-a); branch main; requirements only, no plan/test; 1 discrepancy
-```
-
-Otherwise - one screen, in this order, filled from the run and never copied from here. It is
+One screen, in this order, filled from the run and never copied from here. It is
 rendered from `resume.md`, which already holds the story; this is the shape it is reported in, not a
 second act of synthesis:
 
@@ -132,7 +120,8 @@ resolved          <store path>; matched by <id | ids | title | tags | folder>
 where it stands   <where the handover left it>
 next actions      <the next thing, and the one after>
 blockers          <what is in the way> | none
-code state        branch <branch> | detached | no repository
+code state        branch <branch> | detached | unknown | no repository
+                  <n> commits since <date>: <oneline, newest first, at most ten> | none | not checked
 instructions      <n> arrived by the read line | <n> read from the store | none
 children          <child id - one line each> | none
 discrepancies     <source> disagrees with <source>: <what>, and <which you think is right>
@@ -151,8 +140,7 @@ think is right.
 ## Asking
 
 **Every question this skill asks follows `${CLAUDE_PLUGIN_ROOT}/reference/asking.md`** - `nk:load
-needs:` and the open questions - with `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md` when nobody can
-answer. **Asking is the one thing a load may add**: it still writes nothing.
+needs:` and the open questions. **Asking is the one thing a load may add**: it still writes nothing.
 
 **A plain-text answer is applied by this skill, never by you.** When a question this skill asked is
 answered in words rather than a pick - *yes* included - your next action is the `Skill` call:

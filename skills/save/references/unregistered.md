@@ -4,13 +4,10 @@
 on the difference: the store resolves, the save is correct, and the repository you are in is not a
 registered project of it - so nothing is ever delivered there and nothing ever says why.
 
-**Find the repo root by reading, never by running git.** It is the nearest folder, from the working
-directory up to the filesystem root, where reading `.git/HEAD` - or `.git` itself, a file in a
-worktree or a submodule - succeeds, in the walk rule's order. **Never `Glob` for `.git`**: a glob
-returns files, so it misses every ordinary repository, whose `.git` is a folder. Resolve that
-root to a project exactly as the store-resolution rule's *Resolving a project inside the store*
-does - its read line first, then the store's `dirs:` entries. **If no
-`.git` is found, say nothing** - you do not know where you are, so never offer to register a
+**Find the repo root with git** - the repo-facts rule's *the root*, from the working directory.
+Resolve that root to a project exactly as the store-resolution rule's *Resolving a project inside the store*
+does - its read line first, then the store's `dirs:` entries. **Not a repository, or git
+unavailable, say nothing** - you do not know where you are, so never offer to register a
 directory you inferred.
 
 **Infer before offering anything.** The working directory is **not** the project: a user can be
@@ -38,12 +35,3 @@ line.
 
 **Never register it yourself.** Initialising is `/nk:init`'s job - it resolves the workspace, refuses
 `$HOME`, proposes the name and writes the read line.
-
-**Under `--oneline`, make no offer** - an offer is a question with nowhere to go, per the
-consumer contract - and record nothing. The status stays `ok` - the store
-resolved and the item saved, so this is a detail, not a failure - and the repo rides in the detail:
-
-```
-nk: save ok — work/2026-09/spike-auth, 3 files; repo web-client not registered
-nk: save ok — work/2026-09/spike-auth, 3 files; app moved
-```

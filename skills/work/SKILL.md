@@ -1,17 +1,16 @@
 ---
 name: work
 description: Create the record for a new work item, with requirements from a ticket, a file or the conversation. Use when the user asks to open, register or track a task or ticket in the notes.
-argument-hint: "[what] [--requirements [path]] [--project <name>] [--id <id>] [--parent <id>] [--also <id>] [--tag <name>] [--dry-run] [--oneline]"
+argument-hint: "[what] [--requirements [path]] [--project <name>] [--id <id>] [--parent <id>] [--also <id>] [--tag <name>] [--dry-run]"
 allowed-tools: Read, Glob, Grep, Write, Edit
 ---
 
 Create the space for a work item. Writes inside the store only.
 
 Before anything else, in order:
-1. **`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
-2. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`.
-3. **An overlay?** If `<store>/schema/skills/work/` exists, follow `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md`: a `SKILL.md` there replaces the rest of this file, and a file under its `references/` replaces the shipped reference of that name wherever this skill cites it.
-4. **Infer before asking**: read what the conversation already states, and ask only what is still open.
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs.
+2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
+3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
 
 This command mints. It does not switch. Resuming an item that already exists is `/nk:load`,
 which does strictly more and writes nothing - the branch, discrepancies, the parent roll-up. **If
@@ -46,8 +45,8 @@ misfire on any store whose tracker pattern is loose.
 Ask for nothing that can be read.
 
 1. **Infer from what is already here** - what this session has discussed and the files it touched
-   lead; then the argument if one was given, and the current branch, read from `.git/HEAD` per
-   `${CLAUDE_PLUGIN_ROOT}/reference/store/walk.md`. **This skill runs no shell and no git.**
+   lead; then the argument if one was given, and the current branch, per
+   `${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md` - unknown, it is simply not an input.
 2. **Propose a title and an id**, then form the folder per
    `${CLAUDE_PLUGIN_ROOT}/reference/bundle-shape.md` (with `${CLAUDE_PLUGIN_ROOT}/reference/config-defaults.md` and `${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md`) - which owns the id, the counter, the slug rule
    and the bucket. Say where the folder will go.
@@ -61,7 +60,7 @@ Ask for nothing that can be read.
 5. **Create the bundle**, per that same file. A thin `requirements.md` is worth more than no bundle;
    an absent one means no folder.
 6. **Regenerate `index.md`**, per
-   `${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md`.
+   `${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md` and `${CLAUDE_PLUGIN_ROOT}/reference/index-writing.md`.
 
 | Flag | Does |
 |---|---|
@@ -95,8 +94,7 @@ needs none of it.
 ## Asking
 
 **Every question this skill asks follows `${CLAUDE_PLUGIN_ROOT}/reference/asking.md`** - `nk:work
-needs:` and the open questions - with `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md` when nobody can
-answer.
+needs:` and the open questions.
 
 **A plain-text answer is applied by this skill, never by you.** When a question this skill asked is
 answered in words rather than a pick - *yes* included - your next action is the `Skill` call:

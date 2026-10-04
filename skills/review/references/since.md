@@ -5,9 +5,12 @@ date are what the pass is about. Two things follow, and both must be said out lo
 discovered by the user.
 
 **First, what it saves.** Cost falls only where something can be skipped **without reading it**,
-and one bound does that: **the bucket path** - `work/<bucket>/` is the period of first work, so
-buckets before the date's period hold no newer work item. **The changed set is not known without
-git, so every file in the window's buckets is read - say so before the pass.** A register's entries
+and two bounds do that. **The bucket path** - `work/<bucket>/` is the period of first work, so
+buckets before the date's period hold no newer work item. **The changed set** - where the store is
+inside a repository, git names the files changed since the date: the repo-facts rule's *files
+changed since*, run `-C` on the store, kept to paths under it. Only those are read. **Not a
+repository, or git unavailable: every file in the window's buckets is read - say so before the
+pass.** A register's entries
 carry their dates *inside* it, so narrowing to recent entries still costs the whole file. **Say what
 was skipped and what still had to be read**, and never report a narrowed pass as though it were
 cheap when it was not.

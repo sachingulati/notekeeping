@@ -1,17 +1,16 @@
 ---
 name: plan
 description: Write the work item's plan.md - how the work will be done - from what the session has settled. Use when the user asks to record the agreed plan for a tracked piece of work.
-argument-hint: "[id] [--dry-run] [--oneline]"
+argument-hint: "[id] [--dry-run]"
 allowed-tools: Read, Glob, Grep, Write, Edit
 ---
 
 Fill in `plan.md` for a work item. Writes inside the store only.
 
 Before anything else, in order:
-1. **`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
-2. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`.
-3. **An overlay?** If `<store>/schema/skills/plan/` exists, follow `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md`: a `SKILL.md` there replaces the rest of this file, and a file under its `references/` replaces the shipped reference of that name wherever this skill cites it.
-4. **Infer before asking**: read what the conversation already states, and ask only what is still open.
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs.
+2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
+3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
 
 Then the item:
 `[id]`, or the item resolved per `${CLAUDE_PLUGIN_ROOT}/reference/item.md` -
@@ -37,8 +36,7 @@ Always rewrite `plan.md`. The only question this skill asks is which item (`## A
 ## Asking
 
 **Every question this skill asks follows `${CLAUDE_PLUGIN_ROOT}/reference/asking.md`** - `nk:plan
-needs:` and the open questions - with `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md` when nobody can
-answer.
+needs:` and the open questions.
 
 **A plain-text answer is applied by this skill, never by you.** When a question this skill asked is
 answered in words rather than a pick - *yes* included - your next action is the `Skill` call:

@@ -17,8 +17,8 @@ tokens · a new one*. Ask everything still open at once, and nothing the convers
   the skill. That run infers from the conversation, where the answer now is, and asks only what is
   still open. **A typed *yes* is plain text too**: it re-enters like any other answer. A skill that
   saves a report says what its re-entry reads instead of starting over.
-- **Under `--oneline`, or nobody to ask** → write nothing; return the question and its options as
-  `asks`, per the consumer contract.
+- **Nobody to ask** - a one-turn run, or no question tool → write nothing; end the report with the
+  question in this shape, its options, and the argument that answers it where there is one.
 
 **An answer binds the run that asked.** A later run infers fresh. A guess is never an inference, and
 a question lost to compaction is asked again.

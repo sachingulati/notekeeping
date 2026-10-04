@@ -34,13 +34,11 @@ list** - that list is what makes the authority claim honest.
 
 ### The repository link
 
-**Read `[remote "origin"] url` from `<repo>/.git/config`.** Where `.git` is a file - a worktree or a
-submodule - follow its `gitdir:` line, and where that directory holds a `commondir` file, read
-`config` under `<gitdir>/<commondir>/`. **Strip any `user[:password]@` from the URL before writing
+**The origin URL is git's**, per the repo-facts rule's *the origin*. **Strip any `user[:password]@` from the URL before writing
 it** - an HTTPS token in a remote is common, and credentials are never copied into the store. A
 scp-style remote - `git@host:org/repo` - is written as it is, labelled a remote, not a link. **A
-remote not named `origin`, and `[include]` files, are not read**; no origin means no link, and the
-report says so. **It goes in the `Repos` field**, the repositories the project spans - never `Links`, which is for tracker, pipeline and dashboards. Record `.git/config` in `sources:` when
+remote not named `origin` is not read**; no origin means no link, and the report says so - and git
+unavailable means no link this time, said as that. **It goes in the `Repos` field**, the repositories the project spans - never `Links`, which is for tracker, pipeline and dashboards. Record `git config remote.origin.url` in `sources:` when
 it gave the link.
 
 ## The stamp
@@ -49,9 +47,9 @@ it gave the link.
 <!-- verified: repo <sha> (<date>) - env <name> <build> (<date>) -->
 ```
 
-`overview.md` carries the repo half only. **The sha is read**, the way the store walk's *The commit a
-branch points at* reads it - `.git/HEAD`, then the ref it names or `packed-refs` - and from nowhere
-else. **Unreadable means the repo half is unstamped**, never guessed. **The date is the day the stamp
+`overview.md` carries the repo half only. **The sha is read** per the repo-facts rule's *the commit* -
+git, else its fallback - and from nowhere else. **Unreadable means the repo half is written
+*unverified***, never guessed. **The date is the day the stamp
 is written** - the session's date.
 
 **Never invent the env half**: it cannot be derived from a repository. Carry forward what the file

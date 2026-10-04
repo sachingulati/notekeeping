@@ -11,12 +11,6 @@ it to (never a `bookkeeping` file), what is the narrowest scope covering every s
 skipped or held back and why. Promotion does not wait for a yes: the report is how you see it, and a
 wrong entry is corrected like any other. `--dry-run` shows the verdicts and writes nothing.
 
-**Under `--oneline` nobody sees that report**, so every entry this run promotes carries `unseen` as
-the last part of its provenance stamp - `(0012 - 2026-09-28 - unseen)`. It is the one thing
-`--oneline` changes in what is written, and it is there so an entry no person has read never looks
-like one someone curated. **Reading it is what clears it**: whoever has read the entry deletes the
-word by hand. `/nk:doctor` counts what is still unseen.
-
 **A scope the user named is the scope.** Where the session shows the user asking for a fact to go to
 a particular level - *put this in the workspace notes*, *this is global* - route it there and propose
 no other, even where the narrowest-scope rule would pick a nearer one. That is the user's decision,
@@ -30,12 +24,14 @@ below - never silently.
 
 **An area takes its topic's entries.** Where the scope holds `areas/INDEX.md`, read it before
 routing: a candidate that touches a row's keys goes to that area's file of the same type -
-`areas/<topic>/gotchas.md`, an instruction to `areas/<topic>/instructions.md` - never to the
-scope's register, where the area's keys would not send a session. A candidate touching no row goes
+`areas/<topic>/gotchas.md`, an instruction to `areas/<topic>/instructions.md`, **creating that file
+where the area has none** - never to the scope's register, where the area's keys would not send a
+session. A candidate touching no row goes
 to the register; one touching two rows goes to the closer, and the report names the other.
 ***Already there* checks the area's file too.** **A promotion that gives a topic its third entry at a
 scope with no area for it says so in one report line** - *3 entries on refunds - `/nk:review` would
-make it an area* - and files the entry as usual.
+make it an area* - and files the entry as usual. **Count across every register at that scope**,
+whatever the entries' kind: a gotcha and a pattern on refunds are two.
 
 ### A contradiction
 
@@ -45,9 +41,9 @@ never by picking the newer claim**. **For `save`**, take the first row that appl
 | The contradiction | Do |
 |---|---|
 | **The session already verified the new claim** - it read the file, ran the command, saw the value | **That is the check; do not run it again.** Write the new entry and mark the old one superseded, citing what the session saw |
-| **A cheap check you can run now** - a file to read, a pattern to grep, a file under `.git` to read - never a command | **Run it.** Mark the losing entry superseded with what was checked and what it returned |
+| **A cheap check you can run now** - a file to read, a pattern to grep, a read-only git command - never one that changes anything | **Run it.** Mark the losing entry superseded with what was checked and what it returned |
 | **Checkable, but not now** - needs a running environment, a deploy, credentials | **Write the new entry and mark both unsettled**, naming the check verbatim |
-| **Not mechanically decidable** - a policy, an intent, someone's plan | **Ask** which holds, as one of the run's open questions. Under `--oneline`, mark both unsettled with `Check: the user's call` |
+| **Not mechanically decidable** - a policy, an intent, someone's plan | **The user stated it in this session as decided?** That is their call, made: write the new entry and mark the old one superseded, citing them. **Otherwise ask** which holds, as one of the run's open questions. Where nobody can answer, mark both unsettled with `Check: the user's call` |
 
 **For `adopt`**, which is setting the store up and may be in no state to check anything: **write
 both claims.** Where the material being adopted, or the store's own notes, settles the pair, mark the
@@ -85,3 +81,9 @@ caution.
 4. **An excluded line is never removed from where it is.** It did not reach a store, so nothing that
    finishes a move has licence to touch it - and a secret deleted from the only file holding it is the
    worst outcome available.
+
+**The one exception is the user asking, in this session, for a credential to be kept** - *save the QA
+login*, *remember this token*. Then it goes to `secrets.md` at the narrowest scope it applies to - a
+project's test login to that project, a machine-wide token to global - and to nowhere else, per that
+file's definition. **Asked means asked**: a credential the session saw or used, a request from an
+earlier session, a memory item and a yes to a proposal are not requests, and stay excluded.

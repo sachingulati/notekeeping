@@ -1,7 +1,7 @@
 ---
 name: doctor
 description: Check the Notekeeping setup and store for what is broken, drifting or worth doing, and repair the unambiguous with --fix. Use when the user asks to check, diagnose or repair the notes setup.
-argument-hint: "[--fix [<text>]] [--baseline] [--page | --no-page] [--oneline]"
+argument-hint: "[--fix [<text>]] [--baseline] [--page | --no-page]"
 allowed-tools: Read, Glob, Grep, Write, Edit, Artifact
 ---
 
@@ -9,15 +9,15 @@ Check the store. Reports by default, saves the report, then asks once whether to
 unambiguous - *Apply / Apply and publish / Change answers / Not now*. `--fix` repairs only the
 unambiguous, in the same run, and `--baseline` records the findings as acknowledged; nothing else
 writes to the store. Every run saves its report to `.notekeeping/tmp/`, per
-`${CLAUDE_PLUGIN_ROOT}/reference/report-shape.md`'s *The report is saved* - output, not a store write.
-**This skill runs no shell and no git**: what it needs from a repository it reads from `.git` with
-the file tools.
+`${CLAUDE_PLUGIN_ROOT}/reference/report-apply.md`'s *The report is saved* - output, not a store write.
+What it needs from a repository it asks git, per
+`${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md`; git unavailable, each check that needs it is
+reported *not checked* with the reason - never passed.
 
 Before anything else, in order:
-1. **`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
-2. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`.
-3. **An overlay?** If `<store>/schema/skills/doctor/` exists, follow `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md`: a `SKILL.md` there replaces the rest of this file, and a file under its `references/` replaces the shipped reference of that name wherever this skill cites it.
-4. **Infer before asking**: read what the conversation already states, and ask only what is still open.
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs.
+2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
+3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
 
 **A plain-text answer is applied by this skill, never by you.** When a question this skill asked is
 answered in words rather than a pick - *yes* included - your next action is the `Skill` call:
@@ -31,9 +31,6 @@ runs**: read that report, append the answer as `## Answers` keyed by finding num
 finding's resolved repair, and ask the report question again - the report shape's rules, with the
 findings as the items. Otherwise the run is fresh.
 
-Under `--oneline` the counts
-go in the outcome line's detail, and the findings go to the report file it names.
-
 Check only
 what is inside the resolved store. A store you found rather than resolved is the wrong store.
 
@@ -45,7 +42,7 @@ what is inside the resolved store. A store you found rather than resolved is the
 
 `--fix` repairs a finding at any severity when the repair is unambiguous - a read line or the rule file
 to write, an ignore entry to add, or an index row to regenerate in the shape
-`${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md` states, which every writer of that file follows.
+`${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md` and `${CLAUDE_PLUGIN_ROOT}/reference/index-writing.md` state, which every writer of that file follows.
 Anything needing a judgment call is reported and left alone. Severity is not the test: it says
 how bad a finding is, and
 repairability says how certain the fix is. A missing ignore entry is a `warn` with an exact repair; a
@@ -58,10 +55,9 @@ entry.**
 ### The report question
 
 Where the saved report holds a repairable finding, end with the report question -
-`${CLAUDE_PLUGIN_ROOT}/reference/report-shape.md`'s `## A yes applies what was shown` - so list each
+`${CLAUDE_PLUGIN_ROOT}/reference/report-apply.md`'s `## A yes applies what was shown` - so list each
 repair as what it will write, not only as what is wrong. It is asked per
-`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`, with
-`${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md` when nobody can answer. There is no
+`${CLAUDE_PLUGIN_ROOT}/reference/asking.md`. There is no
 `--apply`:
 
 | Pick | Do |
@@ -78,35 +74,23 @@ page is offered as a line of its own where `report-pages.md` says there is enoug
 
 ### `--fix <text>`
 
-The flag takes free text, and what the text can do is bounded by the report this run just
-printed. It narrows and it disambiguates:
-
-- **Narrow** - *"only the read lines"*, *"skip the ignore entries"*. It picks from the findings in
-  front of it.
-- **Disambiguate** - supply the judgement a repair was missing, which is what makes a finding that
-  was *reported and left alone* repairable in this run.
-
-It cannot reach past the finding list. A repair for something this run did not report is not
-authorised by any wording, and neither is anything the four prohibitions forbid - text that asks for
-one is refused by name, and the rest of the instruction is still honoured.
-
-The report is the contract: everything this flag does is something the same run printed. Say
-which repairs were unambiguous on their own and which the text authorised, as two groups, so the
-user can see what their sentence actually bought.
+The flag takes free text, bounded by the report this run just printed - it narrows and it
+disambiguates, and never reaches past the finding list. With text, or an answer in words, follow
+`${CLAUDE_PLUGIN_ROOT}/skills/doctor/references/fix-text.md`.
 
 ## Errors
 
 - The store resolves, exists, and is readable - naming the directories the walk actually covered.
-- **Each project resolves to a real directory.** A registered directory that holds no `.git` any
-  more is reported, never removed - and `--fix` writes nothing into it, per
-  `${CLAUDE_PLUGIN_ROOT}/reference/projections.md`. Where this run stands in a folder whose read line
-  names that project, say so and name `/nk:init` here, per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`,
+- **Each project resolves to a real directory.** A registered directory that is gone, or that git
+  says is not a repository, is reported, never removed - and `--fix` writes nothing into it, per
+  `${CLAUDE_PLUGIN_ROOT}/reference/projections-writing.md`. Where this run stands in a folder whose read line
+  names that project, say so and name `/nk:init` here, per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`,
   *A folder the registry has lost*.
 - **A read line resolution would not follow** - one naming another store, or a project the store
   does not hold - on the path from the working directory up, per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`,
   *Resolving a project inside the store*. Name the file and the line.
 - **Each workspace in global's `## Workspaces` registry has a store at that path** - probed, per
-  `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`. **Report a stale entry; never remove one, and
+  `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, *Knowing that other stores exist*. **Report a stale entry; never remove one, and
   `--fix` must not**: an absent path is as likely to be an unmounted volume as a deleted store, and
   the two cannot be told apart from here. A workspace store with no entry is also a finding,
   filed as an error.
@@ -123,20 +107,14 @@ user can see what their sentence actually bought.
   the same finding as an absent one - the notes are not delivered either way. The rule file has no
   markers by design: check it by its content, never for a marker. The rule file is expected
   wherever `~/.notekeeping/` exists. Name the remedy: `/nk:doctor --fix`, which writes each
-  one per `projections.md` - except into a registered directory that is gone, above - the ignore step first, the no-clobber check on every target. Do not
+  one per `${CLAUDE_PLUGIN_ROOT}/reference/projections-writing.md` - except into a registered directory that is gone, above - the ignore step first, the no-clobber check on every target. Do not
   say the next save will write one; a save writes none.
 - **An unfinished migration.** A file whose stamp is below its own definition's `schema:` while
   the store's `schema_version` already claims that release, or a store left mid-run. Name
   `/nk:upgrade` and say that re-running resumes it, with the outstanding count per definition.
   Found by resolving each definition and grepping the stamp - never by reading the files -
-  `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (with `${CLAUDE_PLUGIN_ROOT}/reference/store/walk.md`). **`--fix` does not finish it**: a migration
+  `${CLAUDE_PLUGIN_ROOT}/reference/migration.md` (with `${CLAUDE_PLUGIN_ROOT}/reference/store/walk.md`). **`--fix` does not finish it**: a migration
   takes a person's confirmation.
-- **A migration step that declares neither `on write` nor `upgrade only`.** A command holding the
-  file cannot tell whether finishing it is within its remit, so the file is stuck between the two
-  paths. An overlay check too.
-- **A definition whose `schema:` is above 1 with no `## Migration` section.** The files are known to
-  be outstanding and there is no way to convert them. This is the version-shaped twin of the missing
-  `## Exclusion` check below, and it is an overlay check too.
 - **A file stamped above its definition's version.** It is excluded from migration by the only
   test there is, so it will never be converted again. Two causes and you do not guess between them:
   the plugin is older than the store, or the stamp was raised by hand. **Report both, and repair
@@ -154,32 +132,20 @@ user can see what their sentence actually bought.
   - rather than by parsing settings; where the working directory is under the root being tested, the
   read proves nothing, so check the settings entry for that root instead. A refusal is this finding:
   the read line points at notes the session cannot read. The repair adds each missing root, under the rule in `${CLAUDE_PLUGIN_ROOT}/reference/store/writes.md`, *The read permission*.
-- A user-defined file definition with no `## Exclusion` section.
-- **An overlay definition that replaces the shipped one whole and omits a load-bearing field** -
-  `schema`, `enabled` or `budget`. A whole replacement stands alone, so an omitted field
-  is switched off, not inherited: `schema` takes that file out of every migration, `enabled`
-  takes the file out of the store. Say which are missing and what each now means for that file,
-  and repair none of them - filling one in is the merge `resolution.md` forbids. Name `extends:`
-  as the remedy where inheriting was what the user meant.
-- **An overlay whose `extends:` does not resolve.** The only value is `shipped`, and it extends the
-  shipped definition of the same `file` and `scope`. Anything else - another overlay, a definition
-  at a different scope, a name that does not exist - is an error: name the file and resolve nothing.
-  `extends:` in a skill overlay is the same finding; only a file definition extends.
-- **A fragment naming a field the definition format does not have.** Its table is closed
-  (`resolution.md`, *What a definition carries*), and a typo in a fragment is silent in a way a typo
-  in a whole replacement is not: the misspelt field is ignored and the inherited value stands, so
-  the override the user wrote does nothing. Name the field, and the one it was probably meant to be.
+- **The overlay checks**, where step 2 found an overlay - every overlay definition, per
+  `${CLAUDE_PLUGIN_ROOT}/skills/doctor/references/overlay-checks.md`.
 
-The overlay checks resolve definitions through
-`${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md`, and skill overlays per `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md`, so you are checking the definition this store
-actually uses rather than the shipped default.
+- **A `secrets.md` that would be committed** - inside a repository, git's *ignored* says no; outside
+  one, or git unavailable, no `.gitignore` beside it names it, since a store put under git later would
+  commit every secret in it. `--fix` adds the line, to a `.gitignore` that exists or a new one.
+  **Check it by the file's path; never read `secrets.md`'s content**, here or anywhere in this
+  run, and never quote it.
 
 ## Warnings
 
-- A registered repo with no `.git/info/exclude` entry for its read line - the exclude file located
-  and the entry matched as `${CLAUDE_PLUGIN_ROOT}/reference/projections.md`'s ignore step does,
-  through `gitdir:` and `commondir` - unless the repository root's `.gitignore` already ignores the
-  file, per the same rule. Say why it matters: the read line is there and unignored, so a
+- A registered repo whose read line git does not ignore - the repo-facts rule's *ignored* on its
+  `CLAUDE.local.md`; `--fix` appends the entry as
+  `${CLAUDE_PLUGIN_ROOT}/reference/projections-writing.md`'s ignore step does. Say why it matters: the read line is there and unignored, so a
   `git add -A` would commit it. `.gitignore` is never a finding - the plugin does not write it.
 - **A key in a store's `config.md` that `${CLAUDE_PLUGIN_ROOT}/reference/config-defaults.md` does not
   list** - a retired setting or a typo. It does nothing,
@@ -188,10 +154,10 @@ actually uses rather than the shipped default.
   rows are known.
 - **Two project lines on the path** from the working directory up - a block in a subfolder as well
   as at the repository root - so a session there reads both projects' notes. Name both files; the
-  nearer resolves, per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`. Repair neither.
+  nearer resolves, per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, *Two project lines on the path*. Repair neither.
 - `NOTES.md` missing for an active project or for the workspace, or over budget.
 - A knowledge file past `staleness_warn_days`, on the repo or the env axis - days since the stamp
-  are the only trip, per `${CLAUDE_PLUGIN_ROOT}/reference/staleness.md`. *HEAD moved* is never a
+  are the only trip, per `${CLAUDE_PLUGIN_ROOT}/reference/staleness.md` (with `${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md`). *HEAD moved* is never a
   warning.
   Resolve it per `${CLAUDE_PLUGIN_ROOT}/reference/config-defaults.md`; do not assume a threshold.
 - **A memory store this project's directories resolve to that still holds items** - an empty file
@@ -222,6 +188,8 @@ actually uses rather than the shipped default.
 
 - **An area directory with no row in that scope's `areas/INDEX.md`.** No key sends a session into
   it, so it is never read.
+- **A `secrets.md` its scope's `NOTES.md` does not list under `## Read on demand`** - a session
+  would ask the user for a login it already has. `--fix` adds the line, per `secrets.md`'s definition.
 - **A read line missing from `NOTES.md`**: the scope has `instructions.md` or `areas/INDEX.md` and its
   `NOTES.md` carries no line reading it (global: no area lines, where `areas/INDEX.md` exists) - per
   that scope's `NOTES.md` definition. Nothing points a session at the file, so it is never read.
@@ -253,11 +221,8 @@ actually uses rather than the shipped default.
   path for that. Merging is a hand edit: only the user knows which spelling they meant, and `--fix`
   must not touch a label they chose.
 - A work-item tree nested more than two deep.
-- **Entries still marked `unseen`** - promoted in a `--oneline` run, so no person has read them
-  (`${CLAUDE_PLUGIN_ROOT}/reference/promotion.md`). Count them per scope and name the files.
-  **Never clear the mark**: reading the entry is what clears it, and that is a person's hand edit.
 - **Saved reports in `.notekeeping/tmp/` that have been applied, or are more than a week old**
-  (`${CLAUDE_PLUGIN_ROOT}/reference/report-shape.md`, *The report is saved*). **`--fix` writes
+  (`${CLAUDE_PLUGIN_ROOT}/reference/report-apply.md`, *The report is saved*). **`--fix` writes
   each one empty** - nothing this command is granted removes a file - never one from today, which
   someone may still be reading or about to apply, and leaves `tmp/.gitignore`. An empty report is
   a removed one: never count it here. The files themselves the user may delete by hand. **The
@@ -291,9 +256,8 @@ path from the working directory up, the ignore entry, a registered project's dir
 path being probed, the harness memory stores this project's directories resolve to, the harness
 instructions file (read for the contradiction check and never written),
 `~/.claude/settings.json` (read and added to by the read-permission repair), and **a registered
-repository's `.git`, read and never written** - `HEAD`, the ref it names or `packed-refs` for
-staleness, and `info/exclude` (with `gitdir:` and `commondir`) for the ignore entry, which the
-ignore-entry repair appends to.
+repository, through git's reads only** - the commit for staleness, *ignored* for the ignore entry -
+and its exclude file, which the ignore-entry repair appends to.
 
 **Everything else outside `.notekeeping/` belongs to the user.** Loose files, scratch, and anything
 else the user put there are theirs, and none of them is a finding.

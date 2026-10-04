@@ -5,12 +5,10 @@ directory's basename.
 
 1. **Resolve the workspace store.** No store above this directory means **refuse** and point at a
    workspace init - do not create one silently.
-2. **Find the repo root by reading, never by running git** - the walk rule's *Which repository*:
-   from `[path]` up to the filesystem root, the nearest folder where `Read` `<folder>/.git/HEAD`
-   succeeds, or where `<folder>/.git` is itself a file with a `gitdir:` line - a worktree or a
-   submodule. **Never `Glob` for `.git` alone**: a glob returns files, so it misses every ordinary
-   repository, whose `.git` is a folder. Two outcomes: **a root**, or **no `.git` found** - say so,
-   and record no root. **Record a root only from a `.git` you read**, never from a folder name. **A
+2. **Find the repo root with git** - the repo-facts rule's *the root*, run from `[path]`. Three
+   outcomes: **a root**; **not a git repository** - say so, and record no root; **git unavailable** -
+   offer `[path]` itself as the root and let the user confirm it or name another, saying git could not
+   be asked. **Record a root only from git or the user's answer**, never from a folder name. **A
    project with no root resolves only through `--project <name>` or the item's `project:` field** -
    never by directory name, which resolution never falls back to.
 3. **A project already here?** Before proposing a name, resolve the root per the
@@ -37,7 +35,7 @@ directory's basename.
    nothing rather than describing a file that is not there.
 5. **Register the repo root** - its `dirs:` in the store config's `## Projects` - so later sessions
    resolve without asking again.
-6. **Write the repo read line**, per the projections rule - the file, and the ignore entry it orders.
+6. **Write the repo read line**, per the projections and projection-writing rules - the file, and the ignore entry it orders.
    **Registration is what writes the line, not the first save**, so a project that has just been
    registered is already delivering. **Never report a file you did not write.**
 

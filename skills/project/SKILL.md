@@ -1,7 +1,7 @@
 ---
 name: project
 description: Report every project registered in the notes, or rebuild one project's NOTES.md and overview.md. Use when the user asks for the state of the registered projects, or to rebuild a project's notes overview.
-argument-hint: "[name] [--dry-run] [--oneline]"
+argument-hint: "[name] [--dry-run]"
 allowed-tools: Read, Glob, Grep, Write, Edit
 ---
 
@@ -9,10 +9,9 @@ Report the store's projects, or rebuild one project's documents. It owns exactly
 `NOTES.md` and `overview.md` - and writes no other file in any project.
 
 Before anything else, in order:
-1. **`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
-2. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`.
-3. **An overlay?** If `<store>/schema/skills/project/` exists, follow `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md`: a `SKILL.md` there replaces the rest of this file, and a file under its `references/` replaces the shipped reference of that name wherever this skill cites it.
-4. **Infer before asking**: read what the conversation already states, and ask only what is still open.
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs.
+2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
+3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
 
 Resolve
 `<name>` against the projects registered in the store. **Never invent a project.** Resolve both file
@@ -20,15 +19,13 @@ definitions through `${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md` befor
 A write that leaves either file at or past `budget_notice_pct` of its `budget:` says so, per
 `${CLAUDE_PLUGIN_ROOT}/reference/schema/budget-notice.md`.
 
-The rebuild is a migration-on-write carrier, and it is the only carrier `overview.md` has. Where
-a resolved definition's `## Migration` declares a step on write, convert the file and stamp it
-in the same write - `<!-- nk: schema N -->`, per
-`${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (with `${CLAUDE_PLUGIN_ROOT}/reference/report-shape.md`) - and name the conversion in the report. Where
-it declares upgrade only, do not convert and do not write that file: report it outstanding and
-name `/nk:upgrade`. A conversion without its stamp is the worst of both - the file is at the new
-shape, every run still reads it as outstanding, and the next rebuild converts it again for ever.
-Never walk the store for files you were not already writing, and **never move `schema_version`**:
-this command finishes the files in its hands and nothing else.
+**The rebuild writes the current shape and its stamp** - `<!-- nk: schema N -->`, per
+`${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` - including over an `overview.md` that was behind its definition,
+because a whole rebuild is a fresh write, not a conversion; name that in the report. A rebuild
+without its stamp is the worst of both - the file is at the new shape, every run still reads it as
+outstanding. `NOTES.md` is rebuilt only in its derived sections, so an outstanding one is not
+written: report it and name `/nk:upgrade`. Never walk the store, and **never move
+`schema_version`**.
 
 | Mode | Does | Writes |
 |---|---|---|
@@ -66,7 +63,7 @@ Every project in the store.
 | Reported | What counts |
 |---|---|
 | **Inventory** | which of the scope's files exist, which are missing, and any registered project with no directory |
-| **Staleness, on both axes** | per `${CLAUDE_PLUGIN_ROOT}/reference/staleness.md` (with `${CLAUDE_PLUGIN_ROOT}/reference/store/walk.md` for the sha, and `staleness_warn_days` per `${CLAUDE_PLUGIN_ROOT}/reference/config-defaults.md`) - read off each file's `verified:` stamp. Only days trip; *HEAD moved* is shown, never tripped |
+| **Staleness, on both axes** | per `${CLAUDE_PLUGIN_ROOT}/reference/staleness.md` (with `${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md` for the sha, and `staleness_warn_days` per `${CLAUDE_PLUGIN_ROOT}/reference/config-defaults.md`) - read off each file's `verified:` stamp. Only days trip; *HEAD moved* is shown, never tripped |
 | **Authority violations** | a file declaring `authority: derived` that carries no refresh recipe |
 | **`NOTES.md` against budget** | its size against the resolved definition's `budget`, per project |
 
@@ -90,7 +87,7 @@ available for any of them, and a report nobody can get to green teaches that the
 ## `<name>` - the rebuild
 
 Rebuild both files per `${CLAUDE_PLUGIN_ROOT}/reference/overview.md` (with
-`${CLAUDE_PLUGIN_ROOT}/reference/store/walk.md` for the sha and the git directory, and
+`${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md` for the sha and the origin, and
 `${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md` for `## Active`) - which sections are derived and
 which preserved, the repository link, the stamp, and the no-op. The stamp's date is today's, the
 day it is written.
@@ -105,6 +102,6 @@ across verbatim and a link left out. Nothing outside the store is written.
 Write any file in the project other than `NOTES.md` and `overview.md`. Write outside the store at
 all - **and nothing this command writes is a file
 anyone else reads.** Commit anything. Regenerate a register. Invent a project, a setting name, an environment, or a repo root. Report on anything
-outside the store **beyond the files under the project's repository's `.git` that the stamp and the
-link read** - everything else outside `.notekeeping/` belongs to the user. Run git, or any command:
-this skill reads files.
+outside the store **beyond the commit and the origin git gives for the stamp and the link** -
+everything else outside `.notekeeping/` belongs to the user. Run a git command that changes
+anything, or any command but the repo-facts rule's reads.

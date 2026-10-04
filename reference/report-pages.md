@@ -26,7 +26,7 @@ That is 14 findings. Want them as a page you can tick through? (y)
 ```
 
 **Where the report ends in the report question, the offer is not a line of its own.** It is that
-question's *Apply and publish* (`report-shape.md`, *A yes applies what was shown*): one question,
+question's *Apply and publish* (`report-apply.md`, *A yes applies what was shown*): one question,
 one pick, and the page goes out only on that pick. *Apply* publishes nothing. Where the offer would not be
 made - one finding, `--no-page` - the question has no *Apply and publish*.
 
@@ -77,8 +77,7 @@ applyable finding in the saved report, and `/nk:doctor --fix` takes every unambi
 
 `/nk:summary` writes a document meant for people who were not involved, so its page is for reading
 and commenting on, not for choosing from. What holds from above: terminal first, one line at the end,
-nothing published until asked, `--page` and `--no-page`, the same one-line failure, and no page under
-`--oneline`. What differs:
+nothing published until asked, `--page` and `--no-page`, and the same one-line failure. What differs:
 
 - **Ask after every write, with `AskUserQuestion`: *Publish / Not now*.** A summary has no count to
   fall short of, and no proposal to apply, so this is its whole question. Not under `--dry-run`,
@@ -94,7 +93,3 @@ nothing published until asked, `--page` and `--no-page`, the same one-line failu
   account, say so in one line and ask again, *Publish* now making a new page, which replaces the line.
 - **`summary.md` is the source, and the page follows it.** A change made on the page and not in
   `summary.md` is replaced by the next update. Say so once when offering to update.
-
-## Under `--oneline`
-
-**No page, and no offer.** An offer is a question with nowhere to go, per the consumer contract.

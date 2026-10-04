@@ -1,17 +1,16 @@
 ---
 name: summary
 description: Write the work item's summary.md - what happened, in plain language, for someone not involved - and offer it as a page. Use when the user asks to write up a tracked piece of work for others.
-argument-hint: "[id] [--dry-run] [--page | --no-page] [--oneline]"
+argument-hint: "[id] [--dry-run] [--page | --no-page]"
 allowed-tools: Read, Glob, Grep, Write, Edit, Artifact
 ---
 
 Generate `summary.md` for a work item. Writes inside the store only.
 
 Before anything else, in order:
-1. **`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
-2. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`.
-3. **An overlay?** If `<store>/schema/skills/summary/` exists, follow `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md`: a `SKILL.md` there replaces the rest of this file, and a file under its `references/` replaces the shipped reference of that name wherever this skill cites it.
-4. **Infer before asking**: read what the conversation already states, and ask only what is still open.
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs.
+2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
+3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
 
 Then the item:
 `[id]`, or the item resolved per `${CLAUDE_PLUGIN_ROOT}/reference/item.md` -
@@ -43,8 +42,9 @@ A write at or past `budget_notice_pct` of that budget says so, per
 `${CLAUDE_PLUGIN_ROOT}/reference/schema/budget-notice.md`.
 
 State where the source material came from - the bundle, the conversation, and the merge request
-where the session reaches the tracker - so the summary can be rebuilt when the work moves on. **This
-skill runs no shell and no git**: the commits are not a source.
+where the session reaches the tracker, and **the commits since the item's first session** in each
+of its projects' repositories, per `${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md` - so the
+summary can be rebuilt when the work moves on. Git unavailable: the commits are not a source, said.
 
 **`--dry-run`** prints what would be written and writes nothing.
 
@@ -58,8 +58,7 @@ two flags, the `Page:` line this command keeps in `summary.md`, and updating tha
 ## Asking
 
 **Every question this skill asks follows `${CLAUDE_PLUGIN_ROOT}/reference/asking.md`** - `nk:summary
-needs:` and the open questions - with `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md` when nobody can
-answer.
+needs:` and the open questions.
 
 **A re-entry after *Publish / Not now* finds the summary already written** in this conversation: it
 publishes or leaves it as the answer says, and writes `summary.md` only to add the `Page:` line.

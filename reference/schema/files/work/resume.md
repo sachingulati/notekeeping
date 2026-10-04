@@ -57,8 +57,8 @@ save because it is only ever about now. Everything below it is the story, and it
 <what remains, in the order it should be taken>
 ```
 
-**The branch is read from `.git/HEAD`, never from git.** No dirty count and no commits-ahead count
-are recorded: both need git, and the plugin runs none. A position block that carries either is left
+**The branch is read per the repo-facts rule**, `unknown` when it could not be. No dirty count and
+no commits-ahead count are recorded. A position block that carries either is left
 as it is - the next save rewrites the position.
 
 ## Rules

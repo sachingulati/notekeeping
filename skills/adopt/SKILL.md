@@ -1,21 +1,19 @@
 ---
 name: adopt
 description: Read the notes and context files the user already has - CLAUDE.md files, docs, memory - build the store from them, and trim what moved. Use when the user asks to import or adopt existing notes into Notekeeping.
-argument-hint: "[path] [--apply [<report>] [all | <numbers> | <text>]] [--dry-run] [--page | --no-page] [--oneline]"
+argument-hint: "[path] [--apply [<report>] [all | <numbers> | <text>]] [--dry-run] [--page | --no-page]"
 allowed-tools: Read, Glob, Grep, Write, Edit, Artifact
 ---
 
 Read what you already have - a notes folder, a wiki export, another tool's store, your `CLAUDE.md`
 files - and build the store out of it. Every question this skill asks - the narrowing, a wave
-of new roots, the report question, the walk - follows `${CLAUDE_PLUGIN_ROOT}/reference/asking.md`,
-with `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md` when nobody can answer. **This skill runs
-no shell and no git**: what it needs from a repository it reads from `.git` with the file tools.
+of new roots, the report question, the walk - follows `${CLAUDE_PLUGIN_ROOT}/reference/asking.md`. What it needs from a repository
+it asks git, per `${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md`.
 
 Before anything else, in order:
-1. **`--oneline`?** Follow `${CLAUDE_PLUGIN_ROOT}/reference/consumer-contract.md`.
-2. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`.
-3. **An overlay?** If `<store>/schema/skills/adopt/` exists, follow `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md`: a `SKILL.md` there replaces the rest of this file, and a file under its `references/` replaces the shipped reference of that name wherever this skill cites it.
-4. **Infer before asking**: read what the conversation already states, and ask only what is still open.
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs.
+2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
+3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
 
 **A plain-text answer is applied by this skill, never by you.** When a question this skill asked is
 answered in words rather than a pick - *yes* included - your next action is the `Skill` call:
@@ -53,8 +51,8 @@ inferring from the filesystem, and it holds here. Every root is either typed by 
 in something you read.
 
 **Started by Claude rather than typed, a read outside the working directory asks for permission** -
-the context files above it, the walk for `.git`, `~/.claude/CLAUDE.md`. That is expected: let each
-prompt come, and never work around one - no shell, no other path to the same file. A refused read is
+the context files above it, `~/.claude/CLAUDE.md` - and so does git pointed at another folder. That
+is expected: let each prompt come, and never work around one - no other path to the same file. A refused read is
 a file this run did not read, named in the report.
 
 ## One confirmation
@@ -72,7 +70,7 @@ every trimmed file is copied whole into the store's `tmp/` before it is touched.
 The bare command reports the inventory and lets you narrow it (phase 1), then reads, classifies,
 shows both halves - what would be written into the store, and what would be trimmed - saves that as
 a report, and asks the report question once - *Apply / Apply and publish / Change answers / Not
-now*, per `${CLAUDE_PLUGIN_ROOT}/reference/report-shape.md`'s `## A yes applies what was shown`.
+now*, per `${CLAUDE_PLUGIN_ROOT}/reference/report-apply.md`'s `## A yes applies what was shown`.
 *Apply* writes both halves exactly as the report holds them, its `## Answers` included. *Not now*
 leaves the report for a later `--apply`. With no turn to answer in, it writes nothing, and the saved
 report is what a later `--apply` applies.
@@ -81,7 +79,7 @@ report is what a later `--apply` applies.
 unfamiliar pile, to see the plan before committing to it.
 
 `--apply [<report>] [all | <numbers> | <text>]` applies a saved report, per
-`${CLAUDE_PLUGIN_ROOT}/reference/report-shape.md`'s *The report is saved* - the latest when none is
+`${CLAUDE_PLUGIN_ROOT}/reference/report-apply.md`'s *The report is saved* - the latest when none is
 named; with no selection it walks the items, one `AskUserQuestion` each. It never reads your material
 again: the report is what gets written.
 
@@ -119,7 +117,7 @@ text authorised.
 | Phase | Does | Writes |
 |---|---|---|
 | **1 · Inventory** | Walk what you were pointed at, plus the context files below - and collect the references they name. Files, sizes, formats. Do not assume markdown | no |
-| **2 · Classify** | Read content, and test every file and every section against each definition's admission and exclusion tests - never a `bookkeeping` one | no |
+| **2 · Classify** | Read content, and test every file and every section against each definition's admission and exclusion tests - never a `bookkeeping` one. **Read what the store already holds at every target** - a duplicate and a contradiction with the store are found here, not at the build | no |
 | **3 · Plan** | The store you are about to build: every target, its entry count, everything excluded - and the trim, listed separately, with each file's trimmability | no |
 | **4 · Confirm** | The report saved, then the report question, covering the store and the trim as shown | the report only |
 | **5 · Build** | Create the files and write the entries | **yes, in the store** |
@@ -157,7 +155,7 @@ never guessed.
 A write that leaves a file with a numeric `budget:` at or past `budget_notice_pct` of it says so, per
 `${CLAUDE_PLUGIN_ROOT}/reference/schema/budget-notice.md`.
 
-Then `index.md` per `${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md` if any work item was
+Then `index.md` per `${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md` and `${CLAUDE_PLUGIN_ROOT}/reference/index-writing.md` if any work item was
 written. This command writes no read line: registration does, and the notes it builds are what the lines point at.
 
 ## Context files - the other source, and the only edit this command makes
@@ -186,7 +184,7 @@ half comes back.
 
 **An entry about a project this store does not hold stays where it is, untrimmed.** Say where it
 belongs - a workspace in global's `## Workspaces` and that store's `## Projects`, probed before it is
-named per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`, or *no store holds it* - and suggest
+named per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, *Knowing that other stores exist*, or *no store holds it* - and suggest
 the next step: `/nk:init` to register the workspace or the project if it is not, then `/nk:adopt`
 there. **A suggestion only**: this command never writes outside this store, and nothing but `/nk:init`
 creates a project. An entry that names no project is placed by content as any other.
@@ -249,7 +247,7 @@ the way in**: a reworded rule is a different rule, and nobody approved it.
 to.** Nothing here is ever deleted - a trim only finishes a move. Content that mapped nowhere
 stays exactly where it is, and so does anything you could not place with confidence.
 
-Whether a file can be trimmed depends on where it is, decided by reading, never by running git:
+Whether a file can be trimmed depends on where it is, and git decides it:
 
 | Where the file is | Trimmed? |
 |---|---|
@@ -257,18 +255,11 @@ Whether a file can be trimmed depends on where it is, decided by reading, never 
 | **In a work tree**, named `CLAUDE.md` or `CLAUDE.local.md`, and **ignored** | **yes** |
 | **In a work tree**, anything else | **never** - the report quotes the lines that moved and says the file is yours to trim |
 
-The work tree is found from the file's own directory by walking up, per
-`${CLAUDE_PLUGIN_ROOT}/reference/store/walk.md`'s *Which repository* - `Read` `<dir>/.git/HEAD`, else
-`<dir>/.git` as a file, at each level to the filesystem root. **Never `Glob` for it**: a `Glob` rooted at
-the filesystem root searches the whole disk. Found nothing to the root: the file is in no work tree.
-
-Ignored means: `.git/info/exclude` - located as `${CLAUDE_PLUGIN_ROOT}/reference/projections.md`'s
-ignore step locates it, through `gitdir:` and `commondir` - or the repository root's `.gitignore`
-holds a line equal to `/<path from the repo root>`, or the bare file name for a file at the root,
-and neither file holds any `!` line. A pattern, a nested `.gitignore`, `core.excludesFile` and the
-global ignore file are not read: the file is untrimmable, and the report says why. `/nk:init` writes
-`/CLAUDE.local.md` - or `/<rel>/CLAUDE.local.md` - which this recognises. A file committed and later
-ignored is trimmed: in the working tree, where the diff shows it.
+The work tree is the repo-facts rule's *the root*, run on the file's own directory: *not a git
+repository* is no work tree. **Ignored** is its *ignored*, run on the file - git's own answer, every
+ignore file and pattern included. A file committed and later ignored is trimmed: in the working tree,
+where the diff shows it. **Git unavailable: the file is not trimmed** - the lines are quoted and the
+report says git could not be asked.
 
 **A read that is refused, or a walk that cannot finish, makes the file untrimmable** - say which, and
 why. Never trim on a guess.
@@ -302,8 +293,7 @@ numbers from the same saved report.
    trim removes, never rewrites. Content that maps nowhere is named in the report, never dropped
    and never silently merged.
 4. **Only what a root or a reference names is read** - `[path]`, the context files, and the
-   reference graph out of them, root by approved root - plus the `.git` files the trim's walk
-   reads. **Never a file nothing pointed at**, and nothing outside the store is ever a target for an
+   reference graph out of them, root by approved root. **Never a file nothing pointed at**, and nothing outside the store is ever a target for an
    entry.
 
 ## Credentials are never copied
@@ -349,8 +339,6 @@ The report can be a page - the report question's *Apply and publish*, per
 `${CLAUDE_PLUGIN_ROOT}/reference/report-pages.md`, which owns the two flags and what the page may
 carry. The terminal report is printed either way.
 
-Under `--oneline` this report goes to the file the outcome line names, per the contract.
-
 ## Never
 
 - **Never trim a file in a work tree** other than an ignored `CLAUDE.md` or `CLAUDE.local.md`, and
@@ -367,5 +355,4 @@ Under `--oneline` this report goes to the file the outcome line names, per the c
   anything inside a followed pile.**
 - **Never classify by filename**, and never present an inference as a measurement.
 - **Never invent provenance, a date, or a confidence.**
-- Never read outside what you were pointed at, the context files the session loads, and the `.git`
-  files the trim's walk needs.
+- Never read outside what you were pointed at and the context files the session loads.

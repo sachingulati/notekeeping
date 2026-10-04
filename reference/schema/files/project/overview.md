@@ -65,9 +65,9 @@ rebuild sets the header's `authority:` to match**: `original` when it carried an
 
 ## Migration
 
-**1 -> 2 - on write** - the fields gain their bold labels. **It is rebuilt rather than converted**:
-`/nk:project <name>` reassembles it from the sources named in its header, in the shape above, and the
-stamp goes on that write.
+**1 -> 2 - rebuild** - the fields gain their bold labels. **It is rebuilt rather than converted**:
+`/nk:upgrade`, or `/nk:project <name>`, reassembles it from the sources named in its header, in the
+shape above, and the stamp goes on that write.
 
 **This file is `derived` only where every field came from a recorded source**, which is what its
 `authority:` says and what makes the rebuild safe. **Where any field did not, the file is `original`

@@ -19,7 +19,7 @@
   live contradiction, and it goes to a human as-is.
 - **5 - retire.** The path must be *gone*, verified against the repository now, not inferred from an
   old entry. **Gone is one answer**: neither `Read` nor `Glob` finds the path in the registered
-  repository. Whether it is tracked is not asked - that needs git, and this command runs none. **Never delete**: retirement marks superseded and leaves the text.
+  repository. Whether it is tracked is not asked. **Never delete**: retirement marks superseded and leaves the text.
 - **6 - demote.** The demote test in the content tests.
 - **7 - promote.** The promote test in the content tests.
 - **8 - flag.** The *Would reopen if* test in the content tests.

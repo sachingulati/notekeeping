@@ -25,9 +25,7 @@ counted from the stamp's date to the session's date. **Only days trip**, on eith
 
 ## Moved
 
-**Read the sha now** the way the store walk's *The commit a branch points at* reads it: `.git/HEAD`,
-then the ref it names - under `commondir` in a worktree - or the matching line of `packed-refs`. A
-detached HEAD holds its own sha. **Compare it with the stamped sha**: equal is `no`; different is
+**Read the sha now** per the repo-facts rule's *the commit*. **Compare it with the stamped sha**: equal is `no`; different is
 *HEAD moved since `<sha7>`*, the stamped sha's first seven characters.
 
 **Moved trips nothing.** A commit since the stamp is a fact worth seeing, not a verdict: one commit
@@ -37,26 +35,26 @@ never folded into `tripped:`.
 ## Unknowns
 
 **Unknown is never fresh.** Each of these reads **moved: unknown**:
-- a stamped sha reading `unknown`, `<could not determine>`, or nothing - `/nk:init` writes
+- a stamped sha reading `unknown`, `unverified`, `<could not determine>`, or nothing - `/nk:init` writes
   `overview.md` with no sha, so a new project's is unknown until its first rebuild;
-- a HEAD that cannot be read - the file is missing or unreadable, or its ref is in neither the ref
-  file nor `packed-refs`.
+- a commit that cannot be read now - git unavailable and the fallback empty.
 
-**The repository itself has three outcomes**, and the last two are different claims:
+**The repository itself has four outcomes**, and no two are the same claim:
 
 | Found | The repo axis reads |
 |---|---|
-| a `.git`, and HEAD's sha read | `repo <sha7> (<date>)` |
-| no `.git` from the starting folder up to the filesystem root | `not a repository` |
-| a `.git`, its HEAD unreadable | `could not determine` - and moved is unknown |
+| a repository, and its commit read | `repo <sha7> (<date>)` |
+| git answers *not a git repository* | `not a repository` |
+| a repository, its commit unreadable | `could not determine` - and moved is unknown |
+| git unavailable and the fallback empty | `not checked` - say why, per the repo-facts rule's *Git unavailable* |
 
-The repository is the project's, found per the walk rule's *Which repository*; a workspace or
+The repository is the project's, found per the repo-facts rule's *Which repository*; a workspace or
 global store has none, and its files carry the env axis or nothing.
 
 ## The lines
 
 ```
-  staleness     repo <sha7> (<date>) | not a repository | could not determine | unknown
+  staleness     repo <sha7> (<date>) | not a repository | could not determine | not checked | unknown
                 env <name> <build> (<date>) | unstamped
                 moved: no | HEAD moved since <sha7> | unknown
                 tripped: <axis> at <days> days against <threshold> | none
