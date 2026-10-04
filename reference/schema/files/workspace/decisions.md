@@ -9,7 +9,6 @@ owner:       promotion
 trigger:     always
 authority:   original
 budget:      none - a ledger is never trimmed
-env_axis:    optional
 ---
 
 ## Question

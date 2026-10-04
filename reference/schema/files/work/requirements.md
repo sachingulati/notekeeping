@@ -9,7 +9,6 @@ owner:       nk:work
 trigger:     always - the bundle is this file
 authority:   original
 budget:      none
-env_axis:    optional
 ---
 
 ## Question
@@ -49,33 +48,28 @@ empty.
 | `tags` | no | **a list.** Free-text labels this item shares with others - a recurring effort, a theme, a push |
 | `created` | yes | date |
 
-**`tags` is plural on both sides, and that is deliberate.** The frontmatter key is `tags:` and the
-resolver's column is `tags` - **the same word**, unlike the `project:`/`projects` asymmetry below,
-which is a documented trap and is not reproduced here.
+**`tags` is plural on both sides.** The frontmatter key is `tags:` and the resolver's column is
+`tags` - the same word.
 
 **A tag is a flat label, not a relation.** It has no owner, no requirement of its own and no
 lifecycle - it is a name several items happen to share. An item may carry any number of them, and
 two items sharing one are not otherwise connected.
 
-**No `updated` field.** Last activity is **derived, never stored** - the newest dated block in
-`session.md`, which is append-only and therefore cannot drift, falling back to the `work/<YYYY-MM>/`
-bucket for an item too new to have one
-(`${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md`). A stored date would have to be
-maintained by every writer, and a field that nothing maintains is worse than no field: it reads as
-authoritative while being wrong.
+**No `updated` field.** Last activity is derived, never stored, per
+the index shape's *Recency is derived* - a field that nothing
+maintains is worse than no field: it reads as authoritative while being wrong.
 
 **`project` is singular and its value is a list.** The resolver's column is `projects`, plural, and
-holds this list verbatim - the two names are different on purpose and must not be swapped. Every
-command that reports git state reads `project:`, so writing `projects:` here silently breaks them.
+holds this list verbatim, per the index shape - the two names are
+different on purpose and must not be swapped.
 
 **Never invent a project**, and never fall back to a directory's basename. How it resolves, and
 what to write when it does not, is
-`${CLAUDE_PLUGIN_ROOT}/reference/bundle-shape.md`.
+the bundle shape.
 
-**No status field, and the resolver carries no `status` column either.** A work item holds no
-workflow state - see the trigger note above. Where the session reaches the tracker, `/nk:load` reads
-live status at read time; it is never cached in the store, because cached live state carries an
-authoritative look while going stale the moment somebody *else* acts.
+**No status field.** A work item holds no workflow state, and the resolver carries no `status`
+column either, per the index shape. Where the session reaches the
+tracker, `/nk:load` reads live status at read time; it is never cached in the store.
 
 ## Entry format
 The body is written once and is never rewritten by any command - that is what makes this file
@@ -104,6 +98,8 @@ Two amendment kinds, because two different things change:
 files that quietly became wrong because of it, and doctor reads it.
 
 ## Read modes
-`active` resolves the chain to current and is the default. `latest` returns the most recent
-amendment alone. `full_history` returns the body plus every amendment in order - that mode is what
-makes this file evidence.
+`active` resolves the chain to current, and is the only mode anything reads.
+
+## Who writes it
+`/nk:work` creates the body. `/nk:save` also writes this file - amending `tags:` per its own rules,
+never touching the body.

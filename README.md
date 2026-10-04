@@ -37,14 +37,24 @@ you work      ──▶  work/<id>/                 bounded by one task
                    ~/.notekeeping/            your working life
 ```
 
-Knowledge moves **one way: outward.** Nothing flows back in. A fact is promoted when it outlives the
-thing that taught it, and it lands at the **narrowest scope that covers every source that taught
-it** — never by counting mentions.
+Knowledge moves **one way: outward** — review can propose a move back, but nothing moves on its own.
+A fact is promoted when it outlives the thing that taught it, and it lands at the **narrowest scope
+that covers every source that taught it** — never by counting mentions.
+
+## Install
+
+```
+/plugin marketplace add https://github.com/sachingulati/notekeeping.git
+/plugin install nk@notekeeping
+```
+
+The full URL clones over HTTPS; the `owner/repo` shorthand can clone over SSH, which fails on a
+machine without a GitHub SSH key.
 
 ## Getting started
 
 ```bash
-/nk:init --workspace ~/projects   # names your workspace - creates it, plus global, and offers the repos in it
+/nk:init --workspace              # the folder you are in becomes your workspace; or name one: --workspace ~/projects
 /nk:work                          # start a work item up front — optional; /nk:save mints one too
 /nk:save                          # checkpoint: handover, promotion, memory drain
 /clear
@@ -69,8 +79,11 @@ enumerate them, never to resolve one.
   index.md                      the work-item resolver — regenerated, never hand-written
   schema/                       your overlay — wins over everything shipped
   projects/<name>/              NOTES.md, overview.md, and registers as they earn their place
-  work/<YYYY-MM>/<id>/          requirements, plan, resume, session, test, summary
+  work/<bucket>/<id>/           requirements, plan, resume, session, test, test-manual, instructions, summary
 ```
+
+`<bucket>` is the period of first work - `YYYY-MM` by default (`work_bucket: month`), e.g.
+`work/2026-09/0007-scrollbar-fix/`.
 
 ## Commands
 
@@ -78,15 +91,15 @@ enumerate them, never to resolve one.
 
 | | |
 |---|---|
-| `/nk:work [what]` | start a work item. **Optional** — `/nk:save` mints one too. The argument is context, never an id: an item takes the next counter unless `--id` names one |
+| `/nk:work [what]` | start a work item, with requirements from a ticket, a file (`--requirements`) or the conversation. **Optional** — `/nk:save` mints one too. The argument is context, never an id: an item takes the next counter unless `--id` names one |
 | `/nk:save` | checkpoint — rewrites the handover, promotes what outlived the task, drains memory |
-| `/nk:load [query]` | resume. **Reads only** — it declares no write tool at all |
+| `/nk:load [query]` | resume. **Reads only** |
 
 **Artifacts**, each written into the current work item
 
 | | |
 |---|---|
-| `/nk:plan` | how the work will be done. Freezes once execution starts |
+| `/nk:plan` | how the work will be done |
 | `/nk:test` | how this is verified, by machine and by hand |
 | `/nk:summary` | what happened, in plain language, for someone who was not involved - and offers it as a page others can read and comment on |
 
@@ -102,61 +115,79 @@ enumerate them, never to resolve one.
 | | |
 |---|---|
 | `/nk:init [path]` | create a store. Naming a workspace also creates global and offers the repositories under it. Creates structure; never mines your notes |
-| `/nk:adopt [path]` | read the notes you already have and **build the store out of them**. **Nothing is written without a yes** - the bare command proposes and asks once. Into the store it only ever copies; the one thing it removes is content it has already copied out of a context file, shown line by line in that same proposal |
+| `/nk:adopt [path]` | read the notes you already have and **build the store out of them**. **Nothing is written without a yes** - the bare command may ask to narrow what it reads, then proposes, saves the proposal as a report, and asks once before it writes; `--apply` applies a saved report. Into the store it only ever copies; the one thing it removes is content it has already copied out of a context file, shown line by line in that same proposal |
 | `/nk:doctor` | what is broken, drifting, or worth doing. `--fix` repairs only the unambiguous |
 | `/nk:upgrade` | move a store to the schema version this plugin ships. **Nothing is written without a yes, or `--apply` on the report it saved** - the bare command reports the gap and the work it would do, and asks once. |
-| `/nk:config` | show or change settings, and say which file each value came from |
-| `/nk:budget` | what the notes actually cost you — always-loaded, on-demand, registers |
-| `/nk:index` | rebuild the work-item resolver. Rarely typed; `save` does it |
-| `/nk:run [name]` | run a command you wrote in your store's `schema/commands/`, under the store's rules - it writes only what its `writes:` declares, and only inside the store. Run bare, it lists the commands you have defined there |
-| `/nk:help` | what each command does, what each file is for, what every term means |
+| `/nk:config` | show or change settings and a store file's budget, and say which file each value came from |
+| `/nk:budget` | what the notes actually cost you — always-loaded, on-demand, registers. **Reads only** |
+| `/nk:index` | rebuild the work-item resolver. Rarely typed; `save` and `work` keep it current |
+| `/nk:help` | what each command does, what each file is for, what every term means. **Reads only** |
+
+**Claude can run these too.** Ask in plain words - *save where we are*, *load the payments work* -
+and Claude may start the command itself. It may also approve what it proposed: a flag such as
+`--apply` or `--fix` is approval whoever passes it. To keep Claude from starting a command on its
+own, deny it in your Claude Code settings - `"Skill(nk:adopt)"` and `"Skill(nk:adopt *)"` under
+`permissions.deny` - and typing `/nk:adopt` yourself still works.
 
 ## Everything it writes, and where
 
-- **Nothing runs in the background.** The plugin installs no hooks: notes exist because you ran
-  `/nk:save`. Want capture anyway? A hook of your own can run `/nk:save` headlessly with `--oneline` -
-  `reference/consumer-contract.md` says how.
-- **Nothing is created until you ask.** No store exists until `/nk:init` runs, and a non-empty
-  directory is refused rather than adopted. Nothing is written on install or on first run.
-- **One thing is written without being asked each time, and here it is. The projections.**
-  `CLAUDE.local.md` is written to each repository you registered as a project, to your workspace
-  root, and to your home directory for global - **outside the store**. **It is written when you
-  register the project**, or create the workspace or global, so a repo starts delivering the moment
-  it is added; later saves rewrite only the one project you were working in, plus the workspace and
-  global, and `/nk:project <name>` refreshes any project's. The home-directory one loads in every
-  session under your home directory, whether or not it touches a store. That is how the notes reach a session at all -
-  nothing else the plugin writes is loaded automatically. **Delivery follows registration**, and
-  **`/nk:doctor --fix` rebuilds every projection**, so deleting one costs nothing.
-- **Nothing outside the store is a file your teammates read.** Three `CLAUDE.local.md` files, one
-  `.git/info/exclude` entry and your store roots added to your own `~/.claude/settings.json`, all
-  personal and none committed. **No projection is ever written to a
-  `CLAUDE.md`.**
+- **Notes are written by commands** - typed by you, or started by Claude when you ask. A hook of
+  your own can call `/nk:save --oneline` - `reference/consumer-contract.md` says what that flag
+  changes.
+- **`/nk:init` creates the first store**, in an empty directory; a directory that already holds
+  notes is `/nk:adopt`'s. Installing the plugin writes nothing.
+- **A read line is the one thing written without being asked each time.**
+  `CLAUDE.local.md` gets one line in each repository you registered as a project and in your
+  workspace root - **outside the store** - and global gets a rule file,
+  `~/.claude/rules/notekeeping.md`. The line tells a session to read that scope's `NOTES.md`; the
+  notes themselves stay in the store. **It is written when you register the project**, or create the
+  workspace or global, so a repo starts delivering the moment it is added, and it does not change
+  when the notes do - a save writes none. **Delivery follows registration**, and
+  **`/nk:doctor --fix` writes back any that is missing**, so deleting one costs nothing.
+- **Everything outside the store is personal.** One `CLAUDE.local.md` per registered
+  repository and one for the workspace root, the global rule file, one `.git/info/exclude` entry per
+  repository, and the entries added to your own `~/.claude/settings.json` (*Requirements*, below) -
+  all personal and none committed. **Read lines go only into `CLAUDE.local.md` and the global rule
+  file.**
 - **`/nk:adopt` is the one command that edits a `CLAUDE.md`, and only downward.** When it moves
-  knowledge out of a context file into the store it offers to remove what moved — **only lines that
-  are not committed, only once the content is in the store, and only on a yes to a proposal that
-  showed every line.**
-  Anything at `HEAD` is untouchable. Facts go to the notes and instructions go to the scope's
-  `instructions.md` - never merged - and an instruction that does not fit its budget stays where it
-  was. Your own `~/.claude/CLAUDE.md` is read the same way: its knowledge and its instructions move
-  into global.
-- **Already have a `CLAUDE.local.md`? The block goes below it, and nothing above it is touched.**
-  It is fenced by markers and labelled with what wrote it; every later save rewrites only what is
-  between those markers. **Registering the project is the moment that append happens**, so you see it
-  in that command's report. Delete the block and `/nk:project <name>` or `/nk:doctor --fix` writes it
+  knowledge out of a context file into the store it offers to remove what moved — **only from a
+  file in no work tree (your `~/.claude/CLAUDE.md`, usually) or a `CLAUDE.md`/`CLAUDE.local.md` the
+  repository ignores, only once the content is in the store, and only on a yes to a proposal that
+  showed every line.** Each file is copied whole into the store's `tmp/` first, so a trim can be
+  reverted. Any other file in a repository is never touched. Facts go to the notes and instructions
+  go to the scope's `instructions.md` - never merged, and never held back by a budget: one past it is
+  reported, not left behind. Every entry is placed by what it is about: most of your
+  `~/.claude/CLAUDE.md` lands in global, but a line about one project goes to that project.
+- **Already have a `CLAUDE.local.md`? The line goes below it, and nothing above it is touched.**
+  It is fenced by markers and labelled with what wrote it; only what is between those markers is
+  ever rewritten. **Registering the project is the moment that append happens**, so you see it
+  in that command's report. Delete the block and `/nk:doctor --fix` writes it
   back: it is maintained for as long as the project is registered.
-- **No tracked file is touched.** The projection is ignored through one appended line in
+- **Rename or move a repository inside its workspace and its notes keep working.** The line moves
+  with the folder, and it is also how every command tells which project a folder is, so loading
+  and saving carry on. The store's record of the old path goes stale: `/nk:save` and `/nk:doctor`
+  say so in one line, and `/nk:init` from the folder updates it.
+- **Tracked files stay as they are.** The line's file is ignored through one appended line in
   `.git/info/exclude`, which is local to your clone and never committed. Your `.gitignore` stays
   yours — that one lands in your team's review.
+- **Registering a repository asks you once.** Claude Code treats anything under `.git` as a
+  sensitive file, so the `.git/info/exclude` line is approved by you each time, whatever your
+  settings allow. Decline it and the read line is still written - without it the repository gets
+  none of its notes - but the file is then untracked and not ignored, so the report warns that a
+  `git add -A` would commit it. `/nk:doctor --fix` retries the exclude, or add `/CLAUDE.local.md` to
+  your `.gitignore`.
 
 ## Make it yours
 
-The overlay is the point, not an escape hatch. Drop a file into `<store>/schema/` and it **replaces**
-the shipped definition wholesale — which files exist, what admits an entry, what each is worth in
-bytes. A plugin update never touches it.
+The overlay is the point, not an escape hatch. Drop a file into `<store>/schema/` and by default it
+**replaces** the shipped definition wholesale — which files exist, what admits an entry, what each
+is worth in bytes. Carrying `extends: shipped` instead makes it a **fragment**: only the fields or
+sections it names are replaced, and everything else is inherited. A plugin update never touches
+either form.
 
-Turning a shipped file off is one line, `enabled: false`, and adding a file of your own is one
-definition. A command of your own is one file too, `<store>/schema/commands/<name>.md`,
-run as `/nk:run <name>`.
+Turning a shipped file off is one line, `enabled: false` (two, with `extends: shipped`), and adding
+a file of your own is one definition. A skill overlay, `<store>/schema/skills/<name>/SKILL.md`,
+replaces that skill's instructions whole.
 
 ## Calling it from another tool
 
@@ -167,24 +198,30 @@ it does for you, and prints one line you can parse instead of its report:
 nk: <command> <status> — <detail>
 ```
 
-`ok`, `no-change` or `refused`. Where the command would have asked you something it refuses instead,
-and the line carries the question and its options. A flag is approval whoever types it, so `--apply`
-and `--fix` work as they do for you. A report too long for one line - `review`, `doctor`, `adopt`,
-`upgrade` - is saved to a file the line names, and `--apply` applies it. `no-change` is what makes retrying safe. `/nk:help --oneline`
+The status is `ok`, `no-change`, `asks`, `refused` or `failed` - `failed` when the run broke down
+after it had already started writing, and the detail names what was and was not written. Where the
+command would have asked you something it stops with `asks`, and the line carries the question and
+its options; `refused` is a request it cannot do as asked, and the line says why. A flag is approval whoever types it, so `--apply` and `--fix` work as they do for you.
+`review`, `adopt` and `upgrade` save a report too long for one line to a file the line names, and
+`--apply` applies it; `doctor` saves one too, every run, but repairs immediately under `--fix`
+rather than through `--apply`. `no-change` is what makes retrying safe. `/nk:help --oneline`
 reports the contract version and the command list.
 
 ## Requirements
 
-Claude Code. Git is used where it can answer and is never required.
+Claude Code, with Sonnet or Opus: notes reach a session through an instruction to read them, which
+those models follow. **Git is optional** - a repository's branch, commit and remote are read from the
+files inside its `.git`.
 
-**One setting, written for you.** Your store sits above your repositories, and the `Read on demand`
-line in every projection points at it by absolute path. Claude Code reads outside the working
-directory only where `additionalDirectories` allows it, so **`/nk:init` adds your workspace root and
-`~/.notekeeping` to `~/.claude/settings.json`** - adding to what is there, never replacing it:
+**Settings, written for you.** Your store sits above your repositories, and the read line in every
+repository points at it by absolute path. Claude Code reads outside the working directory only where
+`additionalDirectories` allows it, so **`/nk:init` adds to `~/.claude/settings.json`** - adding to
+what is there, never replacing it:
 
-```json
-{ "permissions": { "additionalDirectories": ["/path/to/your/workspace", "/home/you/.notekeeping"] } }
-```
+- `permissions.additionalDirectories`: your workspace root, `~/.notekeeping`, and the plugin's own
+  folder, so the notes and the plugin's rules are readable from any repository.
+- `permissions.allow`: `Skill(nk:*)`, and `Edit(<store>/**)` for each store, so a command Claude
+  starts, and its writes inside a store, run without a prompt. Writes outside a store still ask.
 
 If that file cannot be parsed, `init` leaves it alone and prints the line to add by hand.
 `/nk:doctor` reports a missing entry as an error, and its repair adds it.

@@ -9,15 +9,13 @@ owner:       nk:save
 trigger:     work actually starts
 authority:   original
 budget:      none - a ledger is never trimmed
-env_axis:    optional
 ---
 
 ## Question
 What happened, in order?
 
 ## Admission
-Anything that happened, dated. **Current state does not live here** - that is `resume.md`, and two
-homes for one answer is the drift this split exists to end.
+Anything that happened, dated. **Current state does not live here** - that is `resume.md`.
 
 ## Exclusion
 A fact that outlives this item -> promote it. A conclusion about where the work now stands ->
@@ -30,16 +28,18 @@ account of this work is checked against.
 
 ```markdown
 ## session <date>
+session: <session id>
 - what happened, in order
 ```
+
+**One `session:` line per session the block covers**, added once when that session first writes the
+block. It is recorded, never read.
 
 Re-running save on the same day extends today's block rather than opening a second one.
 
 **Every block names its kind first, and that is what makes this file greppable.** Two kinds share it
-- the sessions and the closing blocks - so a heading that carried only a date told a reader nothing
-and told a `grep` even less. **The last `^## session ` match, from `Grep` with line numbers, is the latest session
-block**, which is the half a `--quick` load needs and the one thing a date-only heading could not
-give it.
+- the sessions and the closing blocks. **The last `^## session ` match, from `Grep` with line
+numbers, is the latest session block.**
 
 ## Closing, and staying open
 
@@ -67,10 +67,6 @@ block supersedes an earlier one, so reopening is a new `## open <date>` rather t
 holds no workflow state (`requirements.md`, *no status field*). This is a dated entry in an
 append-only region, exactly like every other block here, and it is read by looking at the last one.
 
-**Who writes it.** `/nk:save` when the user says the work is done, and `/nk:review --apply` for
-finding 9. **Never a command acting on its own judgement**: staleness proposes, a person decides.
-
-## Migration
-
-**None.** This definition ships at release 1 like every other at birth. It replaces half of the old
-`dev.md`, which no store was ever written with, so there is nothing to convert.
+**Who writes it.** `/nk:save` when the user says the work is done, and `/nk:review --apply`, when it
+applies a close it proposed. **Never a command acting on its own judgement**: staleness proposes, a
+person decides.

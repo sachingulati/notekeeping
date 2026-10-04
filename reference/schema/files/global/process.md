@@ -9,7 +9,6 @@ owner:       promotion
 trigger:     always
 authority:   original
 budget:      60 entries
-env_axis:    optional
 ---
 
 ## Question
@@ -32,7 +31,6 @@ inline and never overwrite: the wrong answer is what a future session would othe
 About 120 words per entry; longer means the narrative belongs in a work bundle, and the entry cites
 it. No manual numbering.
 
-**Extended, not core.** A solo store has no team and no colleagues, and a file that is definitionally
-empty is a stub. Most of this is also **workspace-scoped rather than global** - an employer's
+**Extended, not core**: a store with no team has nothing to put here. Most of this is also **workspace-scoped rather than global** - an employer's
 process belongs to the workspace holding that employer's projects. See
-`${CLAUDE_PLUGIN_ROOT}/reference/schema/files/workspace/process.md`.
+the workspace process definition.

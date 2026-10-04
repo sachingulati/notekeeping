@@ -9,7 +9,6 @@ owner:       promotion
 trigger:     always
 authority:   original
 budget:      6000 bytes
-env_axis:    optional
 ---
 
 ## Question
@@ -38,10 +37,9 @@ than anywhere: a version with no date is a guess. Corrections are inline and nev
 50 words per entry; a procedure longer than that belongs in a work bundle or an area, and the entry
 cites it. No manual numbering.
 
-**Projected, so it is budgeted in bytes.** This file is rendered into `~/CLAUDE.local.md` under
-`## Environment`, beside `NOTES.md`, and loads in every session under the home directory - the user's
+**Always loaded, so it is budgeted in bytes.** This file is imported by the global rule file,
+`~/.claude/rules/notekeeping.md`, beside `NOTES.md`, and loads in every session - the user's
 call, so the agent never has to think to look up where a tool lives. It is the one register with a
 byte ceiling rather than an entry count, because an entry count cannot bound what is charged on
-every prompt. **It degrades first**: past the projection ceiling this section becomes a pointer
-before `## Always needed here` does. Keep entries to the fact you come here for; a procedure goes to
+every prompt. Keep entries to the fact you come here for; a procedure goes to
 a work bundle or an area and the entry cites it.

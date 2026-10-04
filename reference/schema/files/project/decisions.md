@@ -8,8 +8,7 @@ shape:       ledger
 owner:       promotion
 trigger:     always
 authority:   original
-budget:      none
-env_axis:    optional
+budget:      none - a ledger is never trimmed
 ---
 
 ## Question
@@ -23,8 +22,8 @@ The practice that resulted -> patterns.md. The trap that resulted -> gotchas.md.
 will question -> it fails the gate; it does not belong in the store at all.
 
 ## Entry format
-**A ledger. Entries are never edited.** A changed decision is a new dated entry marking the old one
-superseded, and both halves stay visible.
+**A ledger. Entries are never edited.** A decision that changes gets a new entry that supersedes the
+old one by name and date; both stay visible.
 
 ```markdown
 - **Chose X over Y.** Rejected: Y, Z. Because <the reason that actually decided it>.

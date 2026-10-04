@@ -6,14 +6,18 @@ title: Every setting, and the value it has when nobody set one
 # Config defaults
 
 **This file is the shipped default layer.** `/nk:config` reports a setting's *effective value* and
-*where that value came from* - machine config, store config, or the shipped default - and the third
-of those is here. **Without it a command asked for a default has nothing to read and will invent
-one.**
+*where that value came from* - store config, or the shipped default - and the second of those is
+here.
 
 ## Resolution order
 
-**Store config → machine config → this file.** The first hit wins, and `/nk:config` names which one
-it was. A setting absent from all three is absent, not zero.
+**Store config → this file.** The first hit wins, and `/nk:config` names which one it was. A setting
+absent from both is absent, not zero.
+
+**`schema_version` is the one exception**: it is read from the store being resolved - the workspace
+store's own `config.md`, or global's own `config.md` when the scope being resolved is global - and
+never falls back to this file. An absent version is never assumed to be the current one; it stops and
+asks, per the schema-version rule.
 
 **A `project` row is read from the store config's `## Projects` registry**, against that project's
 entry, and takes no part in the order above: it is a property of one project rather than a setting
@@ -23,55 +27,33 @@ with a default to fall back to.
 
 | Setting | Default | Level |
 |---|---|---|
-| `schema_version` | **no default** - written by `/nk:init` at creation, from `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` | store + machine |
-| `tracker_id_pattern` | **none** - key formats differ per tracker, so there is nothing safe to assume | store |
+| `schema_version` | **no default** - written by `/nk:init` at creation, from the schema-version rule | store (each store reads its own) |
+| `tracker_id_pattern` | **none** - the pattern that recognises a tracker's issue-key format, so `--id` can tell a tracker key from a counter. Key formats differ per tracker, so there is nothing safe to assume | store |
 | `local_id_pattern` | `^[a-z0-9][a-z0-9._-]*$` | store |
-| `month_bucket` | `YYYY-MM` | store |
-| `ignore_dirty` | **none** - no path is excluded from dirty-file reporting | store |
-| `staleness_warn_commits` | `50` | store |
-| `staleness_warn_days` | `90` | store |
+| `work_bucket` | `month` - `quarter` and `year` also valid | store |
+| `staleness_warn_days` | `90` - days since a stamp's date, on the repo and env axes alike; the only staleness threshold | store |
 | `context_window_tokens` | `1000000` | store |
 | `load_depth` | `quick` - `/nk:load` reads `resume.md` and the latest session block. `full` reads all of `session.md`, which lets the next save re-derive rather than carry forward | store |
 | `budget_notice_pct` | `80` | store |
-| `projection_bytes` | `26000` | store |
-| `dirs:` | **no default** - written by `/nk:init` from `git rev-parse --show-toplevel`, never inferred | project |
+| `dirs:` | **no default** - written by `/nk:init` from the repository root it found by reading `.git`, never inferred. **How a project is reached from outside its folder**; a folder you stand in resolves by its read line first, per the store-resolution rule | project |
 | `depends_on:` | none | project |
 
-**`staleness_warn_commits` and `staleness_warn_days` are an either-trips pair** - a knowledge file
-is stale when it passes *either* threshold, not both.
+**`local_id_pattern` bounds a hand-chosen id, and only that.** An explicit `--id` that matches this
+store's `tracker_id_pattern` is a tracker key, not a local id, and is never checked against this
+setting - the two patterns test different things, and a mismatch on either is named as itself, never
+as the other. Where `--id` matches neither, it is named as neither a tracker key nor a valid local
+id; the bundle shape, *The id*, has the check and what follows it.
 
-**`projection_bytes` is a ceiling, and what happens at a ceiling is not a default** -
-a slice past its ceiling degrades to a pointer whole, and that rule lives in
-`${CLAUDE_PLUGIN_ROOT}/reference/projections.md`. Only the numbers are here.
+**`work_bucket` sets which period a newly minted item's folder is grouped under** - `month`,
+`quarter` or `year`; the folder name each produces, and everything else about the bucket, is
+the bundle shape's. **Changing it affects only items minted after
+the change** - an existing item's bucket folder never moves, and every command that finds items
+accepts any bucket folder, so it finds items under either shape.
 
-**One ceiling bounds all three projections, sized for the largest.** A `NOTES.md` is 12000 bytes
-and an `instructions.md` is 2000 at every scope; global adds `environment.md` at 6000. One number
-sized for global's three sources holds the other two with room to spare, and a second number would
-only let one of them fall below what its sources may produce.
+**`budget_notice_pct` applies to every `budget:` in the schema** - the rule is
+stated once, beside the field, in the budget-notice rule.
 
-**A projection ceiling is never below what its sources may produce, and that is the whole rule.**
-It is a **sum**: 12000 plus 6000 plus 2000, with headroom for the generation header, the fixed
-line and the area lines, is **26000**. A user who fills every source to its ceiling does not silently
-lose the end of one on the way into the projection, which is the defect this rule exists to prevent.
-
-**Instructions are not budgeted against the facts, and raising these is what makes that true.** At
-the old ceilings an instruction could only be afforded by a `NOTES.md` that was under its own
-budget, so the two competed for one number and the trade was invisible at write time. Each source
-now has its own ceiling and the projection holds them all.
-
-**They are not one pool.** The 26000 here measures one rendered slice; the 12000 on the
-definition measures that scope's `NOTES.md` across all three of its sections, so `## Active` eats
-into the source budget while contributing nothing to this one. **Neither sees content hand-written
-above the block** in a `CLAUDE.local.md`.
-
-**All three projections can load in one session**, so the worst case a session pays is the ceiling
-three times - 78000 bytes, about 19500 tokens. That is a ceiling rather than an observed size: the
-largest block any run has produced is under 1600 bytes, and a projection costs what its sources hold.
-
-**`budget_notice_pct` applies to every `budget:` in the schema, not to projections** - the rule is
-stated once, beside the field, in `${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md`.
-
-## Two rules that make this file worth having
+## Rules
 
 **Never report a default you did not read from here.** A number that looks plausible is exactly the
 failure this file exists to stop: two commands guessing in one run disagree, and neither says it
@@ -83,7 +65,7 @@ that is not here is not a setting.
 
 **A file's own ceiling is not here.** Every budget and every register's split threshold lives in its
 definition's `budget:` field, beside the admission test it bounds -
-`${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md`. Say that when someone asks for a budget
+the file-definition rule. Say that when someone asks for a budget
 setting, rather than refusing the key and stopping, and **name the form that sets one**:
 `/nk:config set budget <scope>/<file> <value>`, which writes the overlay fragment so the value
 survives a plugin update. `/nk:config budgets` lists them all.

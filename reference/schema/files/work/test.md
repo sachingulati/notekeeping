@@ -9,7 +9,6 @@ owner:       nk:test
 trigger:     verification was designed or run
 authority:   original
 budget:      none
-env_axis:    required
 pairs_with:  test-manual.md
 ---
 

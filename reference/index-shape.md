@@ -8,17 +8,7 @@ title: The shape of index.md, and the one rule that decides what earns a column
 > **The resolver carries what a command resolves *by*, plus what is needed to choose between
 > candidates without opening a file. Nothing else.**
 
-**Two clauses, because one does not justify every column.** Nothing resolves *by* a project, but a
-candidate list is unreadable without one. The two clauses together exclude `status`, `type` and
-`created` at once, and they answer the overlay case by principle rather than by enumeration: a
-user-defined field that nothing resolves by earns no column, and grep remains the fallback it
-always was.
-
-**This file exists because seven commands touch this one file.** `/nk:index` rebuilds it for repair,
-`/nk:save` and `/nk:work` regenerate it as a matter of course, `/nk:adopt` writes it where an
-adoption produced work items, `/nk:upgrade` regenerates it rather than migrating it, `/nk:doctor --fix`
-regenerates a row, and `/nk:load` resolves against it. Two writers that state the shape separately drift - one rendering an empty
-project list as an empty cell and the other as `[]`. One shape, stated once, cited by all seven.
+A user-defined field that nothing resolves by earns no column; grep finds it.
 
 ## The columns
 
@@ -52,16 +42,17 @@ can be set and never walked.
 column silently drops the second repository of every multi-repo item.
 
 **The frontmatter key it reads is `project`, singular, with a list value.** The two names differ on
-purpose and must not be swapped: every command that reports git state reads `project:`, so a bundle
-written with `projects:` breaks them silently.
+purpose and must not be swapped: every command that reads a project's repository reads `project:`,
+so a bundle written with `projects:` breaks them silently.
 
 **Render an empty value as an empty cell - never as `[]`, `none` or `-`.** Two commands regenerate
 this file routinely; if they render the same value differently the file churns on every save and
-produces a diff that means nothing - the drift named at the top of this file.
+produces a diff that means nothing.
 
-**Before overwriting, check for content that is not derivable from frontmatter.** If there is any,
-**stop and report it** rather than destroying it. Regenerating from frontmatter deletes anything
-that exists only here, which is why narrative must never live in this file.
+**Before overwriting, check for content that is not derivable from frontmatter** - `Grep` for lines
+that are not table rows (do not start with `|`). If there is any, **stop and report it** rather than
+destroying it. Regenerating from frontmatter deletes anything that exists only here, which is why
+narrative must never live in this file.
 
 ## What is not here
 
@@ -77,8 +68,8 @@ that exists only here, which is why narrative must never live in this file.
 found by `Grep` `^## session ` with line numbers and take the last match, which is a heading match and never a read of the file.
 Nothing maintains that, and it cannot drift, because it is not a field - it is the record.
 
-**Fall back to the `work/<YYYY-MM>/` bucket** when there is no `session.md`. A just-minted item has
-`requirements.md` and nothing else, so there is no session block to read; the bucket is the month of
+**Fall back to the `work/<bucket>/` bucket** when there is no `session.md`. A just-minted item has
+`requirements.md` and nothing else, so there is no session block to read; the bucket is the period of
 first work, and for a fresh item it is the newest thing anyway.
 
 **Order candidates newest first.** That costs one cheap read per *candidate*, not per item, and the
@@ -97,8 +88,8 @@ linearly with the store.
 | a tag, or a project | the cell holds a **list**, so match the whole token between delimiters - never a bare substring |
 | anything else | unanchored, then read only the rows it returned |
 
-**The list columns are `projects` and `tags`, and a bare substring match on either is wrong.**
-`auth` must not match `oauth`, and `a11y` must not match `a11y-audit`. The cell is
+**The list columns are `projects`, `tags` and `ids`, and a bare substring match on any of them is
+wrong.** `auth` must not match `oauth`, and `a11y` must not match `a11y-audit`. The cell is
 comma-and-space separated, so a token is bounded by `|`, `,` or the cell edge - match on that
 boundary, and when in doubt read the row and decide there rather than tightening the regex.
 

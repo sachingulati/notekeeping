@@ -9,7 +9,6 @@ owner:       nk:save
 trigger:     always
 authority:   original
 budget:      12000 bytes
-env_axis:    optional
 ---
 
 ## Question
@@ -28,13 +27,17 @@ workspace or global.
 ## Entry format
 The same shape as a project's NOTES.md, and the same 12000-byte ceiling.
 
-**This file is projected into `~/CLAUDE.local.md`**, and loads in every session whose directory is
-under the home directory - including every session that touches no store at all
-(`${CLAUDE_PLUGIN_ROOT}/reference/projections.md`). That reach is what earns a place here: a fact
+**This file is imported by the global rule file, `~/.claude/rules/notekeeping.md`**, and loads in
+every session - including every session that touches no store at all (the projection rule). That reach is what earns a place here: a fact
 that is not true everywhere is delivered everywhere anyway, and makes every other entry less
 trustworthy.
 
-Instructions are not knowledge, and they have their own file here: `instructions.md`, rendered
-beside this one under `## Standing instructions`. Neither file replaces or absorbs your harness
-instructions file; one narrow class moves here - facts in that file that are *looked up* rather than
-*obeyed*, which are knowledge paying always-loaded cost with no append point.
+Instructions are not knowledge, and they have their own file here: `instructions.md`, imported
+beside this one - so this file carries **no read line to it**, only the two area lines, where
+`areas/INDEX.md` exists. Neither file replaces or absorbs your harness
+instructions file; `/nk:adopt` moves both out of it - facts that are *looked up* rather than
+*obeyed* come here, and what you must *do* goes to `instructions.md`, whose exclusion states the
+trim rule.
+
+**`/nk:save` writes this file when promotion first reaches it, and maintains it after.**
+`/nk:adopt` writes it while building the store, and `/nk:review` can demote an entry out of it.

@@ -9,7 +9,6 @@ owner:       promotion
 trigger:     always
 authority:   original
 budget:      60 entries
-env_axis:    optional
 ---
 
 ## Question
@@ -34,7 +33,6 @@ inline and never overwrite: the wrong answer is what a future session would othe
 About 120 words per entry; longer means the narrative belongs in a work bundle, and the entry cites
 it. No manual numbering.
 
-**Extended, not core.** On a solo workspace with no team and no release process there is nothing to
-put here, and shipping it enabled-but-disableable is honest where shipping it as core produces a stub.
-Most process is **workspace-scoped rather than global**: an employer's review and release rules belong
+**Extended, not core**: a workspace with no team or release process has nothing to put here. Most
+process is **workspace-scoped rather than global**: an employer's review and release rules belong
 to the workspace that holds that employer's projects, not to your working life in general.

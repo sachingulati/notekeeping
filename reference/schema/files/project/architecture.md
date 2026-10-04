@@ -9,7 +9,6 @@ owner:       promotion
 trigger:     always
 authority:   original
 budget:      60 entries
-env_axis:    optional
 ---
 
 ## Question
@@ -20,7 +19,7 @@ A structural fact that **changes how you would approach a task**, and is not der
 directory layout.
 
 ## Exclusion
-"Where the code lives" -> overview.md's map. "Why we chose this structure" -> decisions.md. "This
+"Where the code lives" -> overview.md's diagram. "Why we chose this structure" -> decisions.md. "This
 structure will bite you" -> gotchas.md.
 
 ## Entry format
@@ -33,6 +32,3 @@ source is a work-item id, `meeting <slug>`, `session`, or a source you defined. 
 inline and never overwrite: the wrong answer is what a future session would otherwise re-derive.
 About 120 words per entry; longer means the narrative belongs in a work bundle, and the entry cites
 it. No manual numbering.
-
-Authority is **original** by rule. No generator produces a structural reading, and marking this file
-derived from a team document would reinstate the dependency the design exists to remove.

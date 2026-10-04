@@ -9,7 +9,6 @@ owner:       nk:test
 trigger:     the same trigger as test.md - a pair by policy
 authority:   original
 budget:      none
-env_axis:    required
 pairs_with:  test.md
 ---
 

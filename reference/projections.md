@@ -1,82 +1,90 @@
 ---
 doc:   projections
-title: Writing a projection, and never clobbering what you did not create
+title: The read line - what reaches a session, who writes it, and never clobbering what you did not create
 ---
 
 # Projections
 
-**A projection is a copy of store content, generated into a file the harness loads by itself.** It
-is never a source. Losing every projection loses nothing - `/nk:doctor --fix` rebuilds them all.
+**A projection is the line that makes a session read its notes**, written into a file the harness
+loads by itself. It is never a source, and it carries no content: the notes stay in the store, and
+the line tells the session to read them. Losing every projection loses nothing - `/nk:doctor --fix`
+rewrites them all.
 
-**Every target is `CLAUDE.local.md`. Never write a file named `CLAUDE.md`, at any level.** That
+**Every repo and workspace target is `CLAUDE.local.md`, and global is a rule file. Never write a file named `CLAUDE.md`, at any level.** That
 file belongs to somebody at every level it appears - the team at a repo root, the user everywhere
-else - and `CLAUDE.local.md` is the platform's own slot for uncommitted personal content. **No
-projection is ever written to a `CLAUDE.md`, at any level.** The one command that may edit one is
-`/nk:adopt`, which removes uncommitted lines whose content it has already written into the store,
-on the yes to the proposal that showed the lines - and never a byte that is at `HEAD`.
+else - and `CLAUDE.local.md` is the platform's own slot for uncommitted personal content. **The one
+command that may edit a `CLAUDE.md`** is `/nk:adopt`, which removes lines whose content it has
+already written into the store, on the yes to the proposal that showed the lines - and only from a
+file in no work tree, or one the repository ignores by its exact path.
 
-| Projection | Target | Source | Delivers |
-|---|---|---|---|
-| **repo** | `<repo>/CLAUDE.local.md` | `<store>/projects/<p>/NOTES.md` **and that project's `instructions.md`** | project |
-| **workspace** | `<workspace-root>/CLAUDE.local.md` | the workspace store's own `NOTES.md` **and its `instructions.md`** | workspace |
-| **global** | `~/CLAUDE.local.md` | `~/.notekeeping/NOTES.md`, **`environment.md`** and **`instructions.md`** | global |
+## What goes in
 
-**The repo projection carries the project and nothing else, always.** It does not walk on to the
-workspace, because the workspace has a projection of its own and both files load in the same session
-- so carrying it in both delivers every workspace fact twice, in the one place where bytes are
-charged on every prompt. **Deliver each scope exactly once.** The same holds one level out: the
-workspace projection never carries global, because `~/CLAUDE.local.md` loads beside it.
+| Target | Holds |
+|---|---|
+| **repo** - `<repo>/CLAUDE.local.md` | one line, between the markers: `Before answering anything or starting any task here, read <abs store path>/projects/<name>/NOTES.md.` |
+| **workspace** - `<workspace-root>/CLAUDE.local.md` | one line, between the markers: `Before answering anything or starting any task here, read <abs store path>/NOTES.md.` |
+| **global** - `~/.claude/rules/notekeeping.md` | the fixed line, then the imports - below |
 
-## Six commands write a projection, and each owns a different moment
+**The path is absolute, with forward slashes** - `/abs/path/to/ws/.notekeeping/projects/app/NOTES.md`,
+with the drive letter in front on Windows. **Nothing else goes between the markers.** **A target
+that delivers two scopes carries both lines in its one block** - a workspace root that is itself a
+registered repository, the monorepo below: the workspace's line first, then the project's. It is
+still one `notes:begin` block per file. The content stays in the store; a repo's or the workspace's `NOTES.md`
+reads on to that scope's `instructions.md` and `areas/INDEX.md` itself, by lines its definition
+carries. Global imports its `instructions.md` directly, below. **The line does not change when the notes do**, so nothing rewrites it after registration
+except a repair.
 
-| Command | When | What it writes |
-|---|---|---|
-| **`/nk:init`** | **registration** - a project is added, or a workspace or the global store created | that project's projection, the workspace one, or the global one. **This is what creates a projection**; a registered project is delivering before any save has run |
-| **`/nk:save`** | every checkpoint | the **active work item's project**, the workspace projection, and the global one. No other project, ever - it carries the project alone, so no other project's content can have changed |
-| **`/nk:project`** | a rebuild | **the named project's, and only when a name is given.** Bare mode reports and writes nothing. **The repair path** for one project, and the only thing that writes a newly added area's cue into `NOTES.md` |
-| **`/nk:adopt`** | after the store build | the projection of **every registered project it wrote into**, the workspace projection where it wrote workspace scope, and the global one where it wrote global scope. Never a repository that is not registered - adoption fills a store, it does not register anything |
-| **`/nk:upgrade`** | after a migration | **every projection of the store it migrated**, regenerated rather than migrated - a projection is derived, so it is rebuilt from the store it was just converted from, never converted in place |
-| **`/nk:doctor --fix`** | a repair | **every** projection in one run, where `/nk:project` repairs them one at a time. Without `--fix` it reports and writes nothing |
-
-**Existence is registration's job; freshness is the save's.** Keeping those apart is what gives
-`doctor`'s missing-projection finding a remedy: a registered project is delivering before any save
-has run, and `/nk:project <name>` rebuilds a projection that has gone missing.
+**Each scope is delivered once.** The repo line reads the project's `NOTES.md` and nothing else; the
+workspace line, loaded by the same ancestor walk, reads the workspace's; global is a rule file every
+session loads. Never point one scope's line at another scope's file.
 
 `<workspace-root>` is **the directory holding that store's `.notekeeping/`** - the same walk that
 resolved the store already produced it. It is never configured and never guessed.
 
-**The global projection sits beside `~/.notekeeping/`, in the home directory**, and the harness
-loads it by the same ancestor walk that loads the workspace one. **Its reach is every session whose
-directory is under `~`, and nothing else**: a session on another drive, or under `/opt` or `/srv`,
-walks no ancestor that holds it. It is charged in every session it reaches, including ones that
-touch no store - that cost is chosen, not incidental.
+## Global
 
-**The global block opens with one fixed line**, before `## Always needed here`:
+**`~/.claude/rules/notekeeping.md` is the plugin's file, whole** - nobody else writes it, so it has
+no markers and no header block; it is rewritten entire. It holds, in order:
 
 ```
 Notes are kept with Notekeeping. When the user asks in plain words to save, resume, record something or look it up in the notes, use the matching /nk: command. Never write a notekeeping file directly when a command covers it - run the command.
+
+@<abs home>/.notekeeping/NOTES.md
+@<abs home>/.notekeeping/instructions.md
+@<abs home>/.notekeeping/environment.md
 ```
 
-It is the only shipped text in any projection, and it is there so a request made without a command
-name still reaches one - and reaches it *through* the command, because a note written by hand skips
-the admission test, the entry format and the duplicate check the command applies. It renders whether or not the sources have content.
+**Each import is `@` and an absolute path with forward slashes** - the form that loads from a
+user-scope rule with no approval. **Write all three imports, always** - whether
+or not each file exists yet. A missing file's import is skipped silently and loads the moment the
+file is created, so the rule file is written once, at registration, and never needs a save to touch
+it. **The fixed line is there** so a request made without a command name still
+reaches one - and reaches it *through* the command, because a note written by hand skips the
+admission test, the entry format and the duplicate check the command applies.
+
+**A `CLAUDE.local.md` in the home directory is not a target.** A file there is not the plugin's to
+touch.
+
+## Who writes it, and when
+
+| Skill | When | What |
+|---|---|---|
+| **`/nk:init`** | **registration** - a project is added, the workspace store created, the global store created | that project's line, the workspace's line, or the global rule file. **This is what makes a scope deliver**; a registered project is delivering before any save has run |
+| **`/nk:doctor --fix`** | a repair | every line or rule file that is missing or wrong, in one run. Without `--fix` it reports and writes nothing |
+
+**Nothing else writes one.** `/nk:save`, `/nk:project`, `/nk:adopt` and `/nk:upgrade` write no
+projection: the line points at the notes, and the notes are what they change.
 
 ## Before writing anything
 
 1. **Registration is the switch.** A registered project is delivered, always; a repository nobody
-   registered gets no projection.
-2. **Is there anything to render?** The workspace projection is written whenever its scope has
-   content, whatever the project count - a non-empty `NOTES.md` or `instructions.md`, **or any
-   on-demand file in the store's listing**. A register with no `NOTES.md` beside it still gets its
-   `## Read on demand` line, from the listing alone: that line is what makes it reachable, and
-   promotion routinely creates a register before anyone writes a `NOTES.md`. With none of those
-   there is nothing to render and no file appears - an empty render, not a failure. **The global projection is the
-   exception**: its fixed line always renders, so the file is always written. **The other exception
-   is the moment the workspace is created**, where `/nk:init` writes the file empty on purpose: the markers are
-   what every later save updates in place, and they have to exist before there is anything to put
-   between them.
-3. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store-boundary.md`, and the file
-   definitions per `${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md`.
+   registered gets no line. **The line is also how a skill tells which project a folder is** - the
+   store-resolution rule reads it before the registry - so it keeps working when the folder is
+   renamed or moved, and the registry's `dirs:` records where it was written.
+   **Never write one into a registered directory that no longer exists** - `Write` would create the
+   folder; the store-resolution rule's *A folder the registry has lost* says what to say instead.
+2. **The no-clobber check** on the target, below.
+3. **The ignore step first**, for a target inside a git work tree, below.
 
 ## The no-clobber rule
 
@@ -85,34 +93,27 @@ the admission test, the entry format and the duplicate check the command applies
 | The target | Do |
 |---|---|
 | **does not exist** | Create it. The whole file is the plugin's; the markers are just a generation boundary |
-| **exists and has the markers** | Rewrite the generation header and what is between the markers. Everything else is preserved verbatim |
+| **exists and has the markers** | Render the block; if it differs from what is between the markers, rewrite the header and the block. Everything else is preserved verbatim |
 | **exists without them** | **Append the block at the end.** Never modify a byte above it |
 
 **Detection keys on the markers appearing anywhere in the file - never on the file starting with the
 generation header.** Once a block has been appended, that header no longer sits at the top, so a
-top-of-file test fails to recognise a block already written and appends a second one on every save.
+top-of-file test fails to recognise a block already written and appends a second one on every write.
 Search the whole file for `notes:begin`; that, and only that, decides between case 2 and case 3.
 
-**Case 2 rewrites the block every time. Never compare the source to its last generation and
-skip.** The block is rendered from the project directory as well as from `NOTES.md` - the
-`Read on demand` line *is* the directory listing - so a source-file comparison misses a register
-appearing or disappearing, and the projection under-delivers from then on. **Compare the rendered
-block to what is between the markers**, which is both idempotent and correct: unchanged inputs
-write nothing, and any input change lands.
+**Render the block - a line for every scope this target delivers - compare it to what is between
+the markers, and write only if they differ** -
+unchanged, it writes nothing; a moved store or a renamed project lands.
 
 **The third case appends rather than refusing, and the rule it protects is unchanged: never clobber
-a file this plugin did not create.** Some people hand-write a `CLAUDE.local.md`; some other tool may
-create one. Neither is the plugin's to *overwrite*, and refusing outright would deliver no notes at
-all in that repository, which is the one thing the projection exists to do. Appending keeps both:
-**every byte above the block is untouched**, and the block converts the file into an ordinary case-2
-target from the next save onward.
+a file this plugin did not create.** Every byte above the block stays untouched, and the block
+converts the file into an ordinary case-2 target from then on.
 
-**The notice goes in the header comment, not the body.** A projection is always-loaded content
-charged on every prompt, so the body carries facts and nothing else; the header is where
+**The notice goes in the header comment, not the body.** The body is the read line and nothing else; the header is where
 *do not edit* already lives and is what a person editing the file actually reads:
 
 ```
-<!-- GENERATED by the Notekeeping plugin from <source> - <date>
+<!-- GENERATED by the Notekeeping plugin - reads <source> - <date>
      Do not edit or delete this block; edits are overwritten. To get it back after deleting
      it, run <remedy>. Everything above it is yours and is never modified. It is rewritten
      for as long as <lifetime>. -->
@@ -120,17 +121,19 @@ charged on every prompt, so the body carries facts and nothing else; the header 
 
 | Target | `<remedy>` | `<lifetime>` |
 |---|---|---|
-| a repo | `/nk:project <name> or /nk:doctor --fix` | `this project is registered` |
+| a repo | `/nk:doctor --fix` | `this project is registered` |
 | the workspace root | `/nk:doctor --fix` | `this workspace store exists` |
-| the home directory (global) | `/nk:doctor --fix` | `the global store exists` |
 
-**This is the header, stated once.** It is written the same way in every target, with the two slots
+`<source>` is the store file the line points at. **A block carrying both lines** names both files
+in `<source>`, workspace first, and joins the two rows' `<lifetime>` with *or*. **This is the header, stated once.** It is written
+the same way in both targets, with the two slots
 filled from the row for that target and nothing else changed. **The rewrite covers the header as well as the block** -
 it carries the source and the date, so leaving it in place while the block changes underneath it
-publishes a generation date that is no longer true.
+publishes a generation date that is no longer true. **Global has no header**: the rule file is the
+plugin's whole.
 
-**A repo in this case still gets the ignore step.** The file now carries generated content, so it is
-ignored exactly as one created here - see below.
+**A repo whose file already existed without the markers (case 3) still gets the ignore step.** The
+file now carries generated content, so it is ignored exactly as one created here - see below.
 
 ## The ignore step, and its ordering
 
@@ -139,193 +142,40 @@ line and no setting that adds one**. `.gitignore` is tracked and team-owned; the
 the team's file. The exclude is local, untracked and immediate, which are the projected file's own
 properties.
 
+**The line is `/CLAUDE.local.md` for a projection at the repository root, or the path relative to
+the repo root with a leading `/` for one below it** - a workspace root that sits under the repo root,
+not at it. Match on that exact line before appending, so the same entry is never added twice.
+
+**Locate the exclude file by reading:** `<repo>/.git/info/exclude`, or - where `.git` is a file -
+`<gitdir>/info/exclude`, and where that directory holds a `commondir` file,
+`<gitdir>/<commondir>/info/exclude`. No git is run.
+
 **Read the file, and append only if the entry is absent.** That file is the user's own, it usually
 already holds their local excludes and git's shipped comment header, and **a write that replaces it
 destroys all of them**. Appending without the check is the other half of the same defect: the entry
-accumulates a copy per save. One read, one match, at most one appended line.
+accumulates a copy per write. One read, one match, at most one appended line.
 
-**Ordering is load-bearing:** the `.git/info/exclude` entry **first**, and **then** write the file.
-Creating the file first leaves a personal file untracked in a team repo, which is how stray files get
-committed by somebody else's `git add -A`.
+**Ordering:** the `.git/info/exclude` entry **first**, and **then** write the file - so in the
+ordinary case there is no moment when the file exists unignored.
 
-**If the exclude entry cannot be written, do not write the projection.** A write under `.git/` is
-one a harness may ask about or refuse. Refused, declined or failed, the answer is the same: leave
-that repository's `CLAUDE.local.md` as it was, report both - the exclude that did not land and the
-projection held back because of it - and name `/nk:project <name>` as the retry. A projection
-written past a failed exclude is the stray file the ordering exists to prevent.
+**If the exclude entry cannot be written, write the projection anyway.** A write under `.git/` is
+one a harness may ask about or refuse, and without the line the repository gets none of its notes -
+the plugin does not work there. Refused, declined or failed, the answer is the same: write
+`CLAUDE.local.md`, and **unless the repository root's `.gitignore` holds the line `/CLAUDE.local.md`
+or `CLAUDE.local.md`, warn in the report** - the file is untracked and not ignored, so a
+`git add -A` there would commit it, absolute path to your notes and all; name `/nk:doctor --fix` as
+the retry for the exclude, or a `.gitignore` line as the user's own alternative. **The warning is
+not optional**: it is what stands in for the ignore that did not land.
 
 **The rule keys on the target, not on which projection it is.** Apply it whenever the directory
 being written to is inside a git work tree; skip it otherwise. A workspace root is usually not a
 repo and needs nothing. A workspace root that *is* a repo - a monorepo - gets exactly the same
-treatment as any other repo.
-
-**Nothing here is committable, which is the point.** `.git/info/exclude` is not tracked, so there is
-no diff to raise, nothing for doctor to chase, and no state where an ignore is written but not yet
-committed. A team that wants `CLAUDE.local.md` in its `.gitignore` adds the line itself; the plugin
-never commits, so writing it for them would have saved nobody anything.
-
-## What goes in
-
-```markdown
-<!-- GENERATED by the Notekeeping plugin from /abs/path/to/ws/.notekeeping/projects/repo-a/
-     NOTES.md and instructions.md - <date> - the header above, in full, from the repo row -->
-<!-- notes:begin -->
-
-# repo-a - local (not committed)
-
-## Always needed here
-The facts you need on most tasks here
-
-## Standing instructions
-- **Do X, not Y.** The condition under which it applies.
-- **When the work touches <topic> - <the cues that identify it> - read
-  /abs/path/to/ws/.notekeeping/projects/repo-a/areas/<topic>/ first.**
-
-## Read on demand - /abs/path/to/ws/.notekeeping/projects/repo-a/
-overview - gotchas - patterns - decisions - domain - runbook - architecture
-
-### Areas
-- **<topic>** - the cues that identify it -> areas/<topic>/
-
-Work in flight is not projected. Run `/nk:load` to restore it.
-
-<!-- notes:end -->
-```
-
-**Two files, one scope - and the invariant is the scope, not the count.** The repo projection
-renders from that project's `NOTES.md` and that project's `instructions.md`, and from nothing else;
-the workspace projection renders from the store root's two; the global projection renders from
-global's three, with `environment.md` under its own `## Environment` heading between the facts and
-the instructions. **A source from another scope is the
-defect** - that is what delivers a fact twice in one session, which is the thing
-*deliver each scope exactly once* forbids. The header names every file it read.
-
-**`## Standing instructions` renders only where there is something to render.** An empty or absent
-`instructions.md` produces no heading - an empty render, not a failure, exactly as an empty
-`NOTES.md` produces no file.
-
-**The heading is a literal, and detection keys on it.** `## Standing instructions`, spelled exactly
-that way in every target: it is what tells a reader which half is obeyed, and what
-`/nk:doctor` greps to decide whether a scope's instructions reached the block at all. **Never by
-reading the file** - the idiom the stamp checks already use. The same holds for `### Areas`, which
-is what makes the rendered catalogue checkable against the directory listing that produced it. A
-renamed heading is a silent delivery failure: the block still looks complete, and nothing that
-looks for it finds it.
-
-**The render carries the imperative and its condition, and drops `Retire when:` and the
-provenance.** Both are real parts of the entry and neither is wanted on every prompt: the trigger is
-what `doctor` greps in the store, and the source and date are what someone deciding whether to keep
-an entry reads there. **A projection charged on every prompt carries what is to be obeyed and
-nothing else** - the same reason the *do not edit* notice sits in the header rather than the body.
-
-**The two halves are kept visibly apart, because they are read differently.** What is under
-`## Always needed here` is true and may be wrong; what is under `## Standing instructions` is to be
-obeyed. Merging them costs both: a fact stated as a command is unfalsifiable, and an instruction
-stated as a fact is optional.
-
-**Every path written into a projection is absolute.** Not store-relative, not repo-relative. The
-projection lives in the repo and the store lives above it, so a path like
-`.notekeeping/projects/repo-a/` resolves to nothing from where the file sits. **This covers paths
-written inside an instruction**, which is where it is easiest to miss: the entry is authored short
-in the store, and the render is what writes it in full.
-
-**This matters most for the `Read on demand` line, which is the whole on-demand half of delivery.**
-It is an instruction that causes a read; a path that does not resolve produces the worst failure
-shape there is - the instruction is followed, the read is refused, and the model improvises, which
-is worse than an error because the output looks like it had notes behind it.
-
-**The path is absolute because the store sits above the repository, which is also why the store root
-has to be in `additionalDirectories`.** That setting is what makes the read succeed rather than the
-path that is written; `/nk:init` adds it and `/nk:doctor --fix` adds a missing one.
-The header's path is merely documentation, but it is written the same way for the same reason.
-
-## What the on-demand half renders
-
-**One line per area, never a bare `areas/`.** Naming the container says only that shelves exist and
-leaves choosing between them to relevance recall - and relevance recall is the mechanism measured as
-**silently failing** in the same test where a named-path instruction was followed correctly on
-haiku/low. A shelf nothing names by name is reachable only by luck, which is why
-`${CLAUDE_PLUGIN_ROOT}/reference/schema/files/project/areas.md` calls a split finished by the
-rebuild that renders it.
-
-**The heading carries the absolute directory; the names beneath it are relative to that heading** -
-the convention the register names already use, and an area line is one of those names. What the absolute-path rule
-governs is a path written **outside** that heading's reach, which is exactly what an instruction
-carries and why the render writes those in full.
-
-**Which areas appear is the directory listing; what each line says comes from `NOTES.md`.** The
-listing is authoritative for existence - an area created by a split appears at the next rebuild
-without anyone editing a pointer. The cues that identify the topic are authored in `NOTES.md`'s
-`## Read on demand` heading, which already requires a one-line description per on-demand file.
-**The same holds for registers, at every scope, and with no `NOTES.md` at all**: the listing puts
-each on-demand file on the line, bare where `NOTES.md` has nothing to say about it. Global's
-`gotchas.md` written by `/nk:adopt` into a store with no `NOTES.md` is otherwise in no file that
-loads.
-
-**Where `NOTES.md` has no line for an area, `/nk:project` derives the cue from that area's own
-registers and writes it into `NOTES.md`** - not into the projection alone, or the next rebuild
-derives it again. **This stays inside the scope**: an area of this project is this project's, so
-reading it to describe it breaks nothing the *one scope* rule protects. **Say in the report that the
-cue was derived**, because a described shelf and a described-by-us shelf are not the same claim.
-Every other renderer - `save`, `doctor --fix`, `upgrade` - renders the line `NOTES.md` holds and
-derives nothing: one command owns the rebuild, and a cue invented in passing by a checkpoint would
-differ from the one beside it.
-
-**An area with no line and no way to derive one renders as its slug alone**, and `/nk:doctor`
-reports it: a slug is a guess about what the shelf holds, and the split that made it knew better.
-
-**The catalogue is not the trigger.** Rendering an area by name makes it *findable* by a session
-already wondering about that topic; it does not make it *load* when the topic is in play and nobody
-wondered. That is what an entry in `instructions.md` does - *when the work touches X, read `<area>`
-first* - and it is the deliberate upgrade for the areas that earn their always-loaded bytes, not a
-line the render mints for every area on its own.
-
-**Every projection carries a generation header** naming its source, the command that wrote it, and
-the date - so anyone who finds one knows not to hand-edit it.
-
-**Current work state is never projected.** `CLAUDE.local.md` wins on conflict and loads on every
-prompt, so a stale *"you are on branch X"* is not a stale note somebody chose to read - it is an
-authoritative false claim outranking the team's own file, and it goes stale the moment the branch
-changes rather than at the pace knowledge decays. State lives in the active work item's `resume.md`;
-the projection ends with the one line that gets you there.
-
-**A projection is never the only copy of anything.** A fact that exists only here is a bug in the
-promoting step, not a feature of the projection.
-
-## Budgets, and what to drop
-
-**One setting bounds all three slices - `projection_bytes`** - because one number sized for
-global's three sources holds the other two (`config-defaults.md`).
-
-**The value lives in `${CLAUDE_PLUGIN_ROOT}/reference/config-defaults.md`**, with every other
-default, so that `/nk:config` has one place to read and this file has one job. **Read it; do not
-assume it** - a ceiling guessed wrong is a projection silently truncated or silently oversized.
-
-**Over budget, degrade - never truncate.** A slice past its ceiling is delivered as a pointer and
-its size, not as a silently shortened version.
-
-**Each file carries one scope in two sections - three at global - and the ordering between them is
-fixed: the facts degrade first, the instructions degrade last.** At global, `## Environment`
-degrades before `## Always needed here`. A fact delivered as a pointer is a read away from
-being had; an instruction delivered as a pointer is one nobody is told to follow, and a dropped
-instruction is **silently disobeyed** while the block still looks complete. So past the ceiling
-`## Always needed here` degrades to a pointer whole, and `## Standing instructions` is the last
-thing to go.
-
-**If the instructions alone are past the slice's ceiling, say that in those words.** It is a
-different condition from a large `NOTES.md` and it has a different remedy - retire an entry, or move
-a conditional one into the area it belongs to - and reporting it as *over budget* sends the user to
-trim the wrong file.
-
-**The sources are budgeted separately and none can evict another.**
-
-**Say what was dropped** - a projection that quietly lost half its content is worse than one that
-was never written.
+treatment as any other repo: one exclude entry, `/CLAUDE.local.md`, whichever of its two lines is
+written first.
 
 ## Failing
 
-**Store first, projections last.** A failed store write aborts the save. A failed projection is a
-**warning**, never an abort, because a projection is derivable and `/nk:doctor --fix` rebuilds it.
+**Registration writes the store first and the line last.** A failed line is a **warning**, never a
+reason to undo the registration: the line is derivable, and `/nk:doctor --fix` writes it.
 
-**Name what was and was not written.** A projection step that reports files it did not write is the
-defect class this step is most prone to.
+**Name what was and was not written**, and never report a line that was not written.

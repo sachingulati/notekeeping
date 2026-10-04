@@ -9,7 +9,6 @@ owner:       promotion
 trigger:     always
 authority:   original
 budget:      60 entries
-env_axis:    required
 ---
 
 ## Question
@@ -32,7 +31,7 @@ inline and never overwrite: the wrong answer is what a future session would othe
 About 120 words per entry; longer means the narrative belongs in a work bundle, and the entry cites
 it. No manual numbering.
 
-**The environment axis on the verified stamp is mandatory here**, as it is on `test.md` and
-`test-manual.md`, and optional everywhere else.
+**The environment axis on the verified stamp is mandatory here**, as it is on `test.md`, and
+optional everywhere else.
 Operational commands break because the cluster moved, not because the code did, so a runbook entry
 that does not name where it was verified is not verified.

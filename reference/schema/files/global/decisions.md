@@ -8,8 +8,7 @@ shape:       ledger
 owner:       promotion
 trigger:     always
 authority:   original
-budget:      none
-env_axis:    optional
+budget:      none - a ledger is never trimmed
 ---
 
 ## Question
@@ -24,5 +23,5 @@ Specific to one project -> that project's decisions.md. A preference with no alt
 it is not a decision.
 
 ## Entry format
-A ledger, exactly as at project scope. Entries are never edited; a changed decision is a new dated
-entry marking the old one superseded. `Would reopen if:` is required.
+A ledger, exactly as at project scope. Entries are never edited; a changed decision gets a new entry
+that supersedes the old one by name and date. `Would reopen if:` is required.

@@ -9,7 +9,6 @@ owner:       promotion
 trigger:     always
 authority:   original
 budget:      60 entries
-env_axis:    optional
 ---
 
 ## Question

@@ -1,14 +1,14 @@
 {
   "name": "nk",
   "displayName": "Notekeeping",
-  "description": "A knowledge base built out of your work rather than beside it. Every piece of work gets a folder that accumulates, and what outlives the task is promoted into project, workspace or global knowledge. The same checkpoint makes the session disposable - save, clear, load. Markdown in a directory you own; no database, no hooks, no background capture.",
+  "description": "A knowledge base built out of your work rather than beside it. Every piece of work gets a folder that accumulates, and what outlives the task is promoted into project, workspace or global knowledge. The same checkpoint makes the session disposable - save, clear, load. Plain Markdown in a directory you own, written only by commands you or Claude run.",
   "author": {
     "name": "Sachin Gulati"
   },
   "version": "0.1.0",
   "license": "MIT",
-  "homepage": "https://github.com/dexterslaboratories/notekeeping",
-  "repository": "https://github.com/dexterslaboratories/notekeeping",
+  "homepage": "https://github.com/sachingulati/notekeeping",
+  "repository": "https://github.com/sachingulati/notekeeping",
   "keywords": [
     "notes",
     "knowledge",
