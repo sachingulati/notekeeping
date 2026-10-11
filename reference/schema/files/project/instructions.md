@@ -3,7 +3,6 @@ file:        instructions.md
 scope:       project
 schema:      1
 enabled:     true
-tier:        core
 shape:       document+append
 owner:       promotion
 trigger:     always
@@ -29,13 +28,13 @@ the repository's committed `CLAUDE.md`**, which the plugin never edits.
 
 ## Entry format
 ```markdown
-- **Do X, not Y.** The condition under which it applies. `(source - date)`
 - **Do X, not Y.** The condition under which it applies.
-  **Retire when:** <the observable that ends it>. `(source - date)`
+- **Do X, not Y.** The condition under which it applies.
+  **Retire when:** <the observable that ends it>.
 ```
 
 **Imperative first**, the same reason a register puts the claim first: what is scanned here is what
-to do. Provenance on every entry, as everywhere else.
+to do. No source or date on an entry, as everywhere else.
 
 **`Retire when:` is optional - written only when the instruction has an end.** The user or the
 source states one, or the instruction is plainly temporary: *until the migration lands*, *for now*,

@@ -3,7 +3,6 @@ file:        areas/INDEX.md
 scope:       workspace
 schema:      1
 enabled:     true
-tier:        extended
 shape:       register
 owner:       nk:review creates it; promotion appends to it
 trigger:     an area is created

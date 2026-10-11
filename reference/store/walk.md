@@ -7,9 +7,9 @@ title: Staying inside the store
 
 | | |
 |---|---|
-| Reads | the resolved workspace store and global; a registered repository's own `CLAUDE.md` or `README.md` as a source; what `/nk:adopt` was pointed at and the context files it reads; and, where a skill needs a repository fact, git - the repo-facts rule. |
+| Reads | the resolved workspace store, any workspace enclosing it, and global; a registered repository's own `CLAUDE.md`, `README.md` or build file as a source; what `/nk:adopt` was pointed at and the context files it reads; and, where a skill needs a repository fact, git - the repo-facts rule. |
 | Writes | **inside a store, plus the named targets outside a store - and that list is closed. Every one of them is personal and local; none is a file anyone else reads.** The machine config is `~/.notekeeping/config.md`, which is a store |
-| Grep and glob | rooted at a resolved store - never at `~`, never at the working directory. **Three exceptions**: `/nk:adopt` inventories the roots it was given and the references they name; `/nk:save` globs `*/memory/*.md` under `~/.claude/projects` to find the store it is draining, which is the only way to address a directory keyed by a slug; and `/nk:init`'s workspace offer globs `<ws>/*/{.git,.git/HEAD}` - the direct children of a path the user just named - to find the repositories under it |
+| Grep and glob | rooted at a resolved store - never at `~`, never at the working directory. **Three exceptions**: `/nk:adopt` inventories the roots it was given and the references they name; `/nk:save`, `/nk:adopt` and `/nk:doctor` glob `*/memory/*.md` under `~/.claude/projects` to find a harness memory store, which is the only way to address a directory keyed by a slug; and `/nk:init`'s workspace offer globs `<ws>/*/{.git,.git/HEAD}` - the direct children of a path the user just named - to find the repositories under it |
 | A path in a query | resolved relative to the store, and refused if it escapes it |
 
 ## A pattern that matches nothing

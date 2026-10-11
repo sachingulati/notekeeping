@@ -3,7 +3,6 @@ file:        instructions.md
 scope:       global
 schema:      1
 enabled:     true
-tier:        core
 shape:       document+append
 owner:       promotion
 trigger:     always
@@ -21,10 +20,7 @@ lives outside the registers.
 
 ## Exclusion
 True of one workspace -> that workspace's `instructions.md`. True of one project -> that project's.
-A fact that is true -> `NOTES.md`, or the register it belongs to. `/nk:adopt` moves both facts and
-instructions out of your harness instructions file (`~/.claude/CLAUDE.md`) into global - never
-merged, and never written into. Its own trim is the one exception to `--apply all`: a line only
-comes out when named by number, because the harness instructions file is the user's own.
+A fact that is true -> `NOTES.md`, or the register it belongs to.
 
 ## Entry format
 The same shape as a project's `instructions.md`, and **the same ceiling** - 2000 bytes, as at every

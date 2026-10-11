@@ -1,12 +1,11 @@
 ---
 file:        NOTES.md
 scope:       project
-schema:      1
+schema:      3
 enabled:     true
-tier:        core
 shape:       document
 owner:       nk:project
-trigger:     always, per active project
+trigger:     always, per registered project
 authority:   original
 budget:      12000 bytes
 ---
@@ -20,7 +19,8 @@ enabled definition with a file on disk, `overview.md` included - each with its d
 
 ## Exclusion
 Needed on one task in ten -> the on-demand file it belongs to, cited from here. Current work state ->
-`## Where things stand` in resume.md, **pointed at, never copied**. **Something to do rather than
+the work item's `resume.md`, or the latest `next:` line in its `session.md` before there is one,
+**reached by `/nk:load`, never copied or pointed at from here** - which item is current is derived. **Something to do rather than
 something that is true** -> `instructions.md` at this scope, which this file's read line points at. An
 area's own content -> the area; `areas/INDEX.md` maps the keys to it.
 
@@ -34,9 +34,6 @@ area's own content -> the area; `areas/INDEX.md` maps the keys to it.
 ## Read first
 Before answering anything or starting any task here, read <store>/projects/<project>/instructions.md.
 Before answering anything or starting any task here, read <store>/projects/<project>/areas/INDEX.md - it lists which topics have an area of their own, by key. Whenever the work touches one of those keys - at the start or partway through - read that area's files before going on.
-
-## Active
-<work-item id> -> <folder>/resume.md          <- one line, the one current work item; `folder` is `index.md`'s own column
 
 ## Always needed
 build - run - ports - naming - the one or two traps that bite every time
@@ -62,16 +59,22 @@ in full, never store-relative.** A session reads this file from the repository, 
 read line, so a store-relative path would not resolve from where it sits - and a path that does not
 resolve produces a read that is refused and then improvised around.
 
-**A write past this file's own ceiling triggers the budget notice**, per
+**A write that leaves this file at or past `budget_notice_pct` of its ceiling says so**, per
 the budget-notice rule.
 
 **`/nk:project <name>` rebuilds this file.** `/nk:init` creates it and `/nk:adopt` writes it while
-building the store; `/nk:save` maintains its `## Active` pointer and its verified stamp, and
+building the store; `/nk:save` maintains its verified stamp, and
 promotes into `## Always needed`; `/nk:review` can demote an entry out of it. **A person, or an agent
 outside the plugin, may edit it too**: a rebuild re-derives only the derived sections and carries
-everything else across. **`## Active` is the one current work item, everywhere it is written**: a rebuild
-keeps `/nk:save`'s pointer, and only picks one itself where the file carries none - the project's
-open item with the newest session block.
+everything else across.
 
 The governing test is content, not size. The ceiling exists only so this file cannot quietly become
 the notes.
+
+## Migration
+
+**1 -> 2** - nothing changes; this file's shape did not move at release 2.
+
+**2 -> 3** - remove the `## Active` heading and the lines under it, up to the next `## ` heading or
+the end; change nothing else. A file with no `## Active` section only gains its stamp. A file whose
+sections cannot be told apart is left alone, unstamped, and named in the report.

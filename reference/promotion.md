@@ -5,8 +5,17 @@ title: Promotion, contradictions and credentials
 
 ## Promotion
 
-For each candidate fact: does it belong in the store at all, which file does its admission test send
+For each candidate fact: does it belong in the store at all - *Worth recording*, below - which file does its admission test send
 it to (never a `bookkeeping` file), what is the narrowest scope covering every source that taught it, and is it already there.
+
+**The scope is the narrowest store enclosing every source** - the project, the workspace, a
+workspace enclosing it, or global. **A wider rung is earned twice**: the sources must span it, and
+the entry must pass *Worth recording* judged for every session that rung loads - would a session
+anywhere beneath it do worse without it? **An entry that fails is not stored** - there is no fallback
+to a narrower rung, which would cover only some of its sources. Being about no codebase is never a
+reason to widen: global is paid for in every session on the machine. **For a workspace that encloses
+others, *here* and *this workspace* in its definitions mean everything beneath it** - its own
+projects and every project of every workspace inside it; its admission tests are otherwise the same.
 **Apply the verdicts, then report every one of them** - what was written, where, and what was
 skipped or held back and why. Promotion does not wait for a yes: the report is how you see it, and a
 wrong entry is corrected like any other. `--dry-run` shows the verdicts and writes nothing.
@@ -32,6 +41,27 @@ to the register; one touching two rows goes to the closer, and the report names 
 scope with no area for it says so in one report line** - *3 entries on refunds - `/nk:review` would
 make it an area* - and files the entry as usual. **Count across every register at that scope**,
 whatever the entries' kind: a gotcha and a pattern on refunds are two.
+
+### Worth recording
+
+**An entry earns its place only if a later session would do worse without it** - take a wrong turn,
+redo work, ask the user again, or miss something it had no way to know to look for. Admission says
+which file a fact belongs in; this says whether it belongs anywhere. Each of these fails it:
+
+| Not worth recording | Because | Instead |
+|---|---|---|
+| **Derivable when it is needed** - a version a command prints, a value a config file holds, what a script or alias does, what the code or git shows | the source is current and a copy goes stale | nothing - or, where a session would not know to look, one line saying **when** to reach for it and what for: *interrupted transfers: `sync-retry` (`~/bin`) resumes where the last run stopped* |
+| **A list with nothing to act on** - names of aliases, files or tools with no when and no why | a line nobody acts on is paid for on every read | drop it, or give each item its *when* |
+| **One-off** - the conclusion of one session, one investigation or one note, binding nothing beyond it | it is history, not what the next task needs | the note or work item it came from, where it already is |
+| **What any capable session does anyway** - generic good practice | it restates the default | drop |
+| **Said elsewhere** - the same fact in another file or scope | two copies drift | the one place it fits, merged |
+| **Loaded always, needed only when a task reaches it** | paid on every prompt for one task in ten | its on-demand register, and a trigger line where the agent would not otherwise look |
+| **About the record itself** - what a file was, when it was written, that it loads | it describes the container, not the work | drop |
+
+**Derivable means cheap and obvious to derive.** A trap the config hides, why a setting is what it
+is, a constraint between two versions (*the 3.x client needs server 2.4 or later*) - none is derivable in
+this sense, and each stays. **Where it is unclear, move it on-demand rather than drop it**: a drop is
+for what clearly fails.
 
 ### A contradiction
 

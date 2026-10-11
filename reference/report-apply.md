@@ -14,14 +14,18 @@ was shown is the report's resolved list - every item, with the answer each was g
 is what gets written. Nobody re-runs the pass to act on what they just read.
 
 **The question.** After the report is saved (below), ask once, with `AskUserQuestion`:
-**Apply / Apply and publish / Change answers / Not now.** *Apply and publish* appears only where the
-skill offers its report as a page. An item with a question of its own - *merge into which entry?* -
-shows it in the report, numbered with its item, before the question.
+**Apply / Publish as a page / Change answers / Not now.** *Publish as a page* appears only where the
+skill offers its report as a page, and before anything is applied: it publishes the saved report and
+asks this question again, with *Apply the page's selection* in its place. An item with a question of its own - *merge into which entry?* -
+shows it in the report, numbered with its item, before the question. **`/nk:adopt` asks two
+questions instead** - a view question, then *Apply / Apply and trim / Trim only / Not now* - per its
+skill; everything below holds for its report question as for this one.
 
 | Pick | Do |
 |---|---|
 | **Apply** | read the report - its items and its `## Answers` - **never the conversation**; check each item before its write (below); append `## Applied` |
-| **Apply and publish** | *Apply*, then publish the report as a page |
+| **Publish as a page** | publish the saved report, per the report-pages rule; then ask again, with the next pick in its place |
+| **Apply the page's selection** | read the selection the page kept (the report-pages rule, *The selection comes back*); write it into the report as `## Answers` - the items picked, everything else *skip* - show it, then *Apply*. A typed answer naming the page - *apply what I ticked* - is this pick |
 | **Change answers** | ask again, the current answers shown |
 | **Not now** | the report stays. Where the skill has `--apply`, a later `--apply` applies it; where it does not, a later run starts fresh |
 
@@ -71,16 +75,17 @@ number. The report holds no time anywhere.
 **What it holds.** The report as printed - one numbered list per the rules above - and, for each
 item, **the exact write it would make** and **the text it read to propose it**, so the item can be
 checked against the store later. A header names the command, the store, the date and the arguments
-the run was given. A re-entry adds `## Answers`; an apply adds `## Applied`. Nothing else
-changes in it after it is saved.
+the run was given. A publish adds a `Page: <url>` line; a re-entry, or the page's selection, adds `## Answers`; an
+apply adds `## Applied`. Nothing else changes in it after it is saved.
 
-**`--apply [<report>] [all | <numbers> | <text>]`:**
+**`--apply [<report>] [all | <numbers> | <categories> | <text>]`:**
 
 | Part | Means |
 |---|---|
 | `<report>` | a report's file name or path. **Omitted: the latest report this command saved in this store** - the latest date, then the highest `<n>` |
 | `all` | every applyable item in the report |
-| `<numbers>` | those items - `1,3,7`. A number is read against the report, so it cannot drift |
+| `<numbers>` | those items - `1,3,7`, or a range, `1-319`. A number is read against the report, so it cannot drift |
+| `<categories>` | where the report has lettered categories (`/nk:adopt`), every item in them - `A,C`; letters and numbers mix, `A,C,412` |
 | `<text>` | narrows within the report where the command accepts it - *"only the gotchas"*. It never reaches past the report |
 | nothing | walk the report's applyable items one at a time: show each write, then ask with one `AskUserQuestion` per item - *apply*, *skip* or *stop*. **With no turn to answer in, a walk cannot start** - apply nothing, and say `all` or numbers are needed |
 
@@ -98,5 +103,4 @@ has changed since the report was saved, **skip that item and say it went stale**
 blind. Applying a report twice is therefore safe: what was already written no longer matches.
 
 **After applying, append `## Applied` to the report** - the date and the items written, skipped and
-stale. `/nk:doctor --fix` empties reports that have been applied, or are more than a week old, and
-never today's. **An empty report is a removed one**: `--apply` says so and applies nothing.
+stale. Which saved reports `/nk:doctor --fix` empties is doctor's rule, never this file's. **An empty report is a removed one**: `--apply` says so and applies nothing.

@@ -2,11 +2,11 @@
 name: review
 description: Read the recorded knowledge - entries, not structure - and propose what to merge, split, retire, demote or promote; saves the report for --apply. Use when the user asks to prune, tidy, or review what has been recorded.
 argument-hint: "[project] [--since <date>] [--apply [<report>] [all | <numbers>]] [--dry-run] [--page | --no-page]"
-allowed-tools: Read, Glob, Grep, Write, Edit, Artifact
+allowed-tools: Read, Glob, Grep, Write, Edit, Artifact, ArtifactData
 ---
 
 Read the store and propose what should change. Every proposal is saved as a report, and then
-asked about once - *Apply / Apply and publish / Change answers / Not now* - per
+asked about once - *Apply / Publish as a page / Change answers / Not now* - per
 `${CLAUDE_PLUGIN_ROOT}/reference/report-apply.md`'s `## A yes applies what was shown`. An answer in
 words - *"yes, but not 3"*, *"3: merge into the auth entry"* - re-enters this skill, is written into
 the report, and is asked about again; nothing is applied from the conversation. `--apply` applies
@@ -15,7 +15,7 @@ one. Nothing is written without one or the other. Every question this skill asks
 below, the report question, the walk - follows `${CLAUDE_PLUGIN_ROOT}/reference/asking.md`.
 
 Before anything else, in order:
-1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs.
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers.
 2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
 3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
 
@@ -65,19 +65,20 @@ and say what it says out loud before reading anything.
 ## The ten findings
 
 Each one names what you read, not merely what you concluded. A proposal with no cited entries is
-not a finding; say what you looked at.
+not a finding; say what you looked at. **Ten is what exists, not a quota** - a store with two findings
+reports two.
 
 | # | Finding | Proposal |
 |---|---|---|
-| 1 | Two entries making the same claim from different sources | merge, keeping both provenance stamps |
+| 1 | Two entries making the same claim | merge into one, keeping both corrections |
 | 2 | A register past its split threshold, with a dominant topic | split into `areas/<topic>/` |
 | 3 | Three or more entries on one topic across the scope's registers, with no area for it | create that topic's area |
 | 4 | An entry marked `Unsettled` whose check is now cheap to run | propose running it - the check, verbatim |
 | 5 | Entries about code that no longer exists - the path is gone | **retire** - mark superseded, never delete |
-| 6 | A wide entry whose provenance names one project | demote to that project |
-| 7 | The same fact in two projects | promote to the workspace |
+| 6 | A wide entry whose text names one project, or one workspace inside its own | demote to that project or workspace |
+| 7 | The same fact in two projects | promote to the narrowest store enclosing both - the workspace, or one enclosing it - where it passes *Worth recording* |
 | 8 | A `decisions.md` entry whose `Would reopen if:` has plausibly fired | **flag it for a human** - never reopened automatically |
-| 9 | A work item with no activity and no closure for months | close it, or say why it is open |
+| 9 | A work item with no session block for longer than `staleness_warn_days`, and no closing block | close it, or say why it is open |
 | 10 | `NOTES.md` holding something needed on one task in ten | demote it to the file it belongs to |
 
 Before reporting a finding, apply its test in `${CLAUDE_PLUGIN_ROOT}/skills/review/references/findings.md`
@@ -107,8 +108,8 @@ Number the findings as you print them, and the count is the last number - one li
 reported outside it, and any split into categories printed as arithmetic that reconciles to it.
 `${CLAUDE_PLUGIN_ROOT}/reference/report-shape.md`.
 
-The report can be a page. Where there is enough to choose between, offer it at the very
-end, per `${CLAUDE_PLUGIN_ROOT}/reference/report-pages.md` - which owns the offer, the two
+The report can be a page - the report question's *Publish as a page*, before anything is applied,
+per `${CLAUDE_PLUGIN_ROOT}/reference/report-pages.md` - which owns the offer, the two
 flags, and what the page may carry. The terminal report is printed either way.
 
 ## `--apply`
@@ -119,16 +120,3 @@ definitions per `${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md` for a spl
 answer in, and the rules under every form. Read it before the first write.
 A write that leaves a file with a numeric `budget:` at or past `budget_notice_pct` of it says so, per
 `${CLAUDE_PLUGIN_ROOT}/reference/schema/budget-notice.md`.
-
-## Never
-
-- **Never delete anything**, under any flag. Superseding is how this design retires a fact, in every
-  file, and this command is not the exception.
-- **Never rewrite an entry's claim** while merging. A merge joins two records of one fact; it does
-  not restate the fact in your own words.
-- **Never invent a finding to fill a category.** Ten types is what exists, not a quota - a store
-  with two findings has two. **A proposal you cannot cite the entries for is a fabrication**, and
-  this command reads the user's own knowledge, so a wrong proposal costs more than a missed one.
-- Never report on anything outside the store, **beyond the path finding 5 verifies against the project's repository.**
-- Never touch `requirements.md` bodies, which are write-once evidence, or `decisions.md` entries,
-  which are append-only.

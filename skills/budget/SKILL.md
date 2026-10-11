@@ -8,7 +8,7 @@ allowed-tools: Read, Glob, Grep
 Report what is actually being spent. **Reads only - this command writes nothing.**
 
 Before anything else, in order:
-1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs.
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers.
 2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
 3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
 
@@ -19,14 +19,17 @@ file already being charged. Nothing else outside the store is read. The targets 
 `${CLAUDE_PLUGIN_ROOT}/reference/projections.md` (with `${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md`) - read which exist
 there rather than assuming.
 
-Every byte figure is an estimate. Nothing granted here returns an exact byte count, so a size is
-read from the text and rounded. Entry counts, below, are exact.
+**Every byte figure is measured** - the file-facts rule's *size*
+(`${CLAUDE_PLUGIN_ROOT}/reference/store/file-facts.md`), every file in one batch. Where it cannot be
+had, the figure is read from the text and rounded, and marked an estimate. Entry counts, below, are
+exact.
 
 ## Three sections
 
 **Always loaded** - charged on every prompt. Each scope costs its read line plus what the read pulls
 in: `NOTES.md`, and what `NOTES.md` reads on to - `instructions.md` and `areas/INDEX.md`. For global
-it is `~/.claude/rules/notekeeping.md` and the files it imports. `NOTES.md` still counts as
+it is `~/.claude/rules/notekeeping.md` and the files it imports. **Each enclosing workspace is a scope
+of its own here** - every session beneath it loads its `NOTES.md` - so it gets its own rows. `NOTES.md` still counts as
 always loaded, because the read happens. No total line: a sum across the scopes
 is a number the reader can see for themselves. A scope whose file does not exist is reported as
 absent, not as zero.
@@ -36,9 +39,8 @@ harness's own always-loaded memory index where its path is known. Name those num
 plugin's; report a missing one as unmeasured rather than as zero.
 
 **Source documents** - read on demand, not charged unless read. Every definition whose resolved
-`budget:` is a byte ceiling, at each scope in reach: the `NOTES.md` files, the `instructions.md`
-files, global's `environment.md`, `overview.md`, and the active work item's `summary.md` where one
-exists. Derive the set from
+`budget:` is a byte ceiling and that is not always loaded, at each scope in reach: `overview.md`, and
+the current work item's `instructions.md` and `summary.md` where they exist. Derive the set from
 the definitions rather than from this sentence - an overlay can add a budget, and the row it adds
 belongs here.
 
@@ -108,7 +110,7 @@ one carries the marker for that, `unmeasured` or an empty render, and never sile
 
 | Form | Does |
 |---|---|
-| `/nk:budget` | every budgeted file for the current project, plus workspace and global |
+| `/nk:budget` | every budgeted file for the current project, plus the workspace, each enclosing workspace, and global |
 | `/nk:budget <project>` | one project |
 | `/nk:budget --all` | every project in the store |
 

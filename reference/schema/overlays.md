@@ -27,8 +27,7 @@ declaration**, and it is one line of frontmatter:
 
 **A named part is replaced, never blended.** A fragment that gives `## Admission` replaces that whole
 section; it does not add a line to the shipped one. **The unit of override is the field or the
-section** - a half-merged admission test is worse than either version of it, and that is what this
-rule still forbids.
+section** - a half-merged admission test is worse than either version of it.
 
 **Only the shipped definition of the same `file` and `scope` can be extended.** There is one overlay
 path per definition, so there is one thing to extend and no chain to resolve. **An `extends:` naming
@@ -50,8 +49,8 @@ anything else is an error**: report it, name the file, and resolve nothing.
   | `enabled` | the file is taken out of the store entirely |
   | `budget` | the file is uncapped, as `budget: none` - no ceiling, no budget notice, and a register never splits |
 
-- **In a fragment, omitting one inherits it** - a whole replacement omitting `schema:` still switches
-  migration off silently for that file, which is the hazard `extends:` exists to avoid.
+- **In a fragment, omitting one inherits it** - which is why `extends:` is the safe form for changing
+  one field.
 
 `/nk:doctor` reports both, and they are different findings.
 
@@ -65,12 +64,10 @@ error.
 (the migration rules). Without one a file is known to be outstanding and there is
 no way to convert it. `/nk:doctor` reports a missing one as an error too.
 
-`pairs_with` is the pair pattern, for a definition the overlay adds.
-
 ## A schema upgrade
 
 **A schema upgrade does not touch the overlay either.** `/nk:upgrade` migrates the store's content
-and names the overlay files a new version affects, leaving each byte-identical, as the schema-version rule says. An overlay is the user's decision, and this
+and names the overlay files a new version affects, leaving each byte-identical, as the migration rules say. An overlay is the user's decision, and this
 layer is the one thing a plugin update is promised never to change.
 
 **Where a migration step moves the exact part a fragment overrides, the fragment still wins, and the

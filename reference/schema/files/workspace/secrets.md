@@ -3,7 +3,6 @@ file:        secrets.md
 scope:       workspace
 schema:      1
 enabled:     true
-tier:        extended
 shape:       register
 owner:       nk:save, only on the user's request
 trigger:     the user asks for a credential to be kept

@@ -3,10 +3,9 @@ file:        index.md
 scope:       workspace
 schema:      1
 enabled:     true
-tier:        core
 shape:       bookkeeping
 owner:       nk:save
-trigger:     every save that touches a work item; /nk:index on demand
+trigger:     every mint, and a save that changes an item's identity, relations or tags; /nk:index on demand
 authority:   derived
 budget:      none
 ---

@@ -62,7 +62,7 @@ uses, not the shipped default - and say when the answer came from the user's own
 
 Knowledge moves one way: a work item promotes into a project, a project into the workspace or global.
 Promotion moves outward; review can propose a move back, and nothing moves on its own. Files are
-markdown in a directory the user owns, and every index is derived - it can be deleted and rebuilt.
+markdown in a directory the user owns, and `index.md` is derived - it can be deleted and rebuilt.
 
 Nothing is captured automatically: notes exist because `/nk:save` ran - typed, or started by Claude
 when asked.

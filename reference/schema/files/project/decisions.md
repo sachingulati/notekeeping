@@ -3,7 +3,6 @@ file:        decisions.md
 scope:       project
 schema:      1
 enabled:     true
-tier:        core
 shape:       ledger
 owner:       promotion
 trigger:     always
@@ -27,7 +26,7 @@ old one by name and date; both stay visible.
 
 ```markdown
 - **Chose X over Y.** Rejected: Y, Z. Because <the reason that actually decided it>.
-  **Would reopen if:** <the condition that would make this wrong>. `(source - date)`
+  **Would reopen if:** <the condition that would make this wrong>.
 ```
 
 **`Would reopen if:` is required.** A decision with no reopening trigger cannot be revisited

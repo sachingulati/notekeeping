@@ -46,18 +46,13 @@ Under `--apply`, *Apply* and a re-entry, steps 5-8 do not run: the saved report 
 **Re-run the survey after the go-ahead and before the first write, and compare it against the
 report.** It is two globs and a grep per file, it costs almost nothing, and it is the only thing
 standing between a survey that was wrong and a store rewritten on its numbers. An item whose count
-disagrees is stale: skip it, say which definition moved, and give both counts - the report shape's
+disagrees is stale: skip it, say which definition moved, and give both counts - the report-apply rule's
 per-item check, the same rule `--apply` follows. The items that agree go ahead. An approval answers
 the counts that were on the screen, so counts that have changed are not approved - and the likeliest
 reason they changed is that one of the two surveys is wrong rather than that the store moved
 underneath you. A later bare run proposes the skipped ones again.
 
 The unit of consent is the migration, not the file.
-
-Expect the outstanding count to be lower than the file count, and say so. Where a step is *on
-write*, ordinary work has already converted the files the user has touched since the release - so
-this command is the sweep for what nobody opened, not the thing standing between them and their
-notes.
 
 **Never hold the store in context to migrate it.** A file is read, converted, written and let go. The
 survey in step 6 is what tells you the size of the job, and the stamps are what carry the progress -
@@ -101,8 +96,8 @@ this is the bare command's proposal without its question.
 
 ## Report - a run that migrated, or proposed to
 
-1. **Each store, its version before and after**, by absolute path - the resolved workspace store and
-   global, said separately.
+1. **Each store, its version before and after**, by absolute path - every resolved store, said
+   separately.
 2. **Each definition that moved: files found, then converted, already done, outstanding and skipped
    - and the four accounting for the files found.** Counts derived from the survey and from what you
    actually wrote, never estimated, and the arithmetic printed rather than asserted. A file that is
@@ -120,6 +115,6 @@ this is the bare command's proposal without its question.
    converted count comes from the files you actually wrote, never from the survey that proposed
    them. The gap between proposed and done is what the number exists to expose.
 
-The report can be a page - the report question's *Apply and publish*, per
+The report can be a page - the report question's *Publish as a page*, before anything is converted, per
 the report-pages rule, which owns the two flags and what the page may
 carry. The terminal report is printed either way.

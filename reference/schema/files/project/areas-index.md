@@ -3,7 +3,6 @@ file:        areas/INDEX.md
 scope:       project
 schema:      1
 enabled:     true
-tier:        core
 shape:       register
 owner:       nk:review creates it; promotion appends to it
 trigger:     an area is created

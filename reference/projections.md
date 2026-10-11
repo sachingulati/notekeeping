@@ -28,7 +28,7 @@ file in no work tree, or one the repository ignores by its exact path.
 **The path is absolute, with forward slashes** - `/abs/path/to/ws/.notekeeping/projects/app/NOTES.md`,
 with the drive letter in front on Windows. **Nothing else goes between the markers.** **A target
 that delivers two scopes carries both lines in its one block** - a workspace root that is itself a
-registered repository, the monorepo below: the workspace's line first, then the project's. It is
+registered repository - a monorepo: the workspace's line first, then the project's. It is
 still one `notes:begin` block per file. The content stays in the store; a repo's or the workspace's `NOTES.md`
 reads on to that scope's `instructions.md` and `areas/INDEX.md` itself, by lines its definition
 carries. Global imports its `instructions.md` directly, below. **The line does not change when the notes do**, so nothing rewrites it after registration

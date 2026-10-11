@@ -3,7 +3,6 @@ file:        NOTES.md
 scope:       workspace
 schema:      1
 enabled:     true
-tier:        core
 shape:       document
 owner:       nk:init creates it; promotion writes to it
 trigger:     always
@@ -20,7 +19,7 @@ context. Plus a pointer to what is read on demand, and the read lines, as a proj
 
 ## Exclusion
 True of one project -> that project's NOTES.md. True whatever you are working on, in any workspace ->
-global. Current work state -> `## Where things stand` in the active work item's resume.md, pointed at
+global. Current work state -> the work item's resume.md, reached by `/nk:load`
 and never copied. **Something to do rather than something that is true** -> `instructions.md` at this
 scope, which this file's read line points at.
 
@@ -30,7 +29,7 @@ The same shape as a project's NOTES.md, the read lines included, with `<store>/`
 makes **every** session under the workspace root read this file, including ones working on no
 project at all.
 
-**A write past this file's own ceiling triggers the budget notice**, per
+**A write that leaves this file at or past `budget_notice_pct` of its ceiling says so**, per
 the budget-notice rule.
 
 **`/nk:init` creates this file with the workspace store** - the title and header only, so the

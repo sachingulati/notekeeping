@@ -3,7 +3,6 @@ file:        areas/
 scope:       global
 schema:      1
 enabled:     true
-tier:        extended
 shape:       container
 owner:       nk:review creates it; promotion appends to it
 trigger:     three or more entries on one topic across this scope's registers, or a register past its split threshold with one topic dominating it
@@ -33,5 +32,5 @@ always loaded.
 **An area here is reachable through its row in `~/.notekeeping/areas/INDEX.md`**, as a project's
 is; a split writes both in the same pass.
 
-**Extended, not core.** Global is the tightest scope in the store: a register that reaches a split
+Global is the tightest scope in the store: a register that reaches a split
 threshold here is unusual, and is worth a second look at whether its entries were really global.

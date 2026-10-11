@@ -25,13 +25,11 @@ that are not table rows (do not start with `|`). If there is any, **stop and rep
 destroying it. Regenerating from frontmatter deletes anything that exists only here, which is why
 narrative must never live in this file.
 
-## What is not here
+## No other column
 
-| Not a column | Why |
-|---|---|
-| `status` | Not in frontmatter. A work item holds no workflow state, and a cached live status carries an authoritative look while going stale the moment somebody *else* acts |
-| `updated` | **Recency is derived, not stored** - below. Stored, it makes the file churn on every save to move one date |
-| `created`, `type` | Neither resolves, and neither is needed to choose between candidates |
+**Only the seven columns the index shape names.** A work item holds no workflow state, so there is
+no `status`; recency is derived, so there is no `updated`; `created` and `type` stay in
+`requirements.md`, found by grep.
 
 ## When it changes
 

@@ -8,7 +8,7 @@ allowed-tools: Read, Glob, Grep
 Resume where you left off. **This command reads. It never writes anything, anywhere.**
 
 Before anything else, in order:
-1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs.
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers.
 2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
 3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
 
@@ -25,10 +25,15 @@ matched; a resolution that cannot say how it matched is one nobody can check.
 
 ## 2. Read the bundle
 
-- `requirements.md` in `active` mode - the amendment chain resolved to current.
+- `requirements.md`, with its amendments applied - the ask as it stands now. Each amendment's
+  `Invalidates` goes to *discrepancies*: the amendment's date and kind, and the file or section it
+  names.
 - **`resume.md` whole.** It is the synthesis - position, the story, why each decision was made, and
   what has already been ruled out - and it is what makes a cold session continuous rather than
-  merely informed.
+  merely informed. **An item with no `resume.md` is under its fifth saving session**
+  (`${CLAUDE_PLUGIN_ROOT}/reference/schema/files/work/resume.md`, *When it starts*): read
+  `session.md` whole instead, whatever the depth, and take the position from the latest block's
+  `next:` line. Say which you read.
 - **`session.md`, how much depending on the depth** - see *Depth* below. On `--quick`, the latest
   block alone - `Grep` `^## session ` with line numbers and take the last match - read from there to the next `## ` heading or
   the end. On `--full`, the file. Every block names its kind, so the part wanted is addressable
@@ -90,7 +95,8 @@ already has, and a tracker it cannot reach is named, never guessed.
 
 For each project in the item's `project:` list and their declared dependencies, ask git, per
 `${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md`: **the branch**, and **the commits since the
-last save** - `--since` the date on `resume.md`'s *Covers* line, the save's own day included. A detached `HEAD`
+last save** - `--since` the date on `resume.md`'s *Covers* line, or with no `resume.md` the latest
+session block's date, the save's own day included. A detached `HEAD`
 names no branch: say so. **Nothing else of git is read** - no stashes, no diff, no remote. Git
 unavailable: the branch from the fallback, and the commits not listed - say so.
 
@@ -100,24 +106,25 @@ Find children from the index's `parent` column - grep it for this item's `id`. T
 column's second job, and it is what spares the roll-up a tree-wide scan.
 
 If the item has children, one screen: each child's `## Where things stand` region only, bounded
-by the heading. **Never a child's whole `resume.md`** - that file is a full summary, and a parent
+by the heading - or, for a child with no `resume.md`, its latest block's `next:` line. **Never a
+child's whole `resume.md`** - that file is a full summary, and a parent
 with five children would pull five of them to render one screen.
 
-## 6. MR and pipeline state
+## 6. Merge request and pipeline state
 
-Only when one is already known, and only through access this session already has. **No speculative
-lookups**, and nothing is fetched on this plugin's behalf.
+Only when one is already known, and only through access this session already has, reported on the
+`code state` lines. **No speculative lookups**, and nothing is fetched on this plugin's behalf.
 
 ## Output
 
 One screen, in this order, filled from the run and never copied from here. It is
-rendered from `resume.md`, which already holds the story; this is the shape it is reported in, not a
+rendered from `resume.md`, which already holds the story - or from `session.md` where there is none; this is the shape it is reported in, not a
 second act of synthesis:
 
 ```
 <id> - <title>  (<project>)
 resolved          <store path>; matched by <id | ids | title | tags | folder>
-where it stands   <where the handover left it>
+where it stands   <the position resume.md, or the latest next: line, gives>
 next actions      <the next thing, and the one after>
 blockers          <what is in the way> | none
 code state        branch <branch> | detached | unknown | no repository
@@ -134,7 +141,7 @@ apart from a missing line.
 
 The discrepancies section is the point. The notes, the tracker and the branch each hold a version
 of the truth and they drift. Naming the drift is worth more than any one of them: say plainly where
-the handover disagrees with the branch, where the tracker disagrees with the notes, and which you
+the record disagrees with the branch, where the tracker disagrees with the notes, and which you
 think is right.
 
 ## Asking

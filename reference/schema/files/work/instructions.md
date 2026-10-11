@@ -3,7 +3,6 @@ file:        instructions.md
 scope:       work
 schema:      1
 enabled:     true
-tier:        extended
 shape:       document+append
 owner:       nk:save
 trigger:     the item has standing behaviour of its own

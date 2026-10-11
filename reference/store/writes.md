@@ -42,7 +42,7 @@ asks for fails.
 every other entry and the order of what is there stay exactly as they were. **Write absolute paths**,
 forward slashes, the same form the projections use.
 
-The same add-never-replace rule also covers three more entries: `Skill(nk:*)` in `permissions.allow`; the plugin's version-independent folder, `<plugin cache>/<marketplace>/nk`, in `permissions.additionalDirectories`; and `Edit(<absolute store path>/**)` in `permissions.allow`, one per store, written in the `//c/...` form on Windows.
+The same add-never-replace rule also covers three more entries: `Skill(nk:*)` in `permissions.allow`; the plugin's version-independent folder, `<plugin cache>/<marketplace>/nk`, in `permissions.additionalDirectories`; and `Edit(//<absolute store path>/**)` in `permissions.allow`, one per store. **The `//` prefix is required on every platform**: in user settings a single leading `/` anchors the rule at `~/.claude/`, not at the filesystem root. The absolute path follows the `//` without its own leading slash - `//abs/path/to/ws/.notekeeping/**`, with the drive letter first on Windows, `//c/...`.
 
 **If the file does not parse, write nothing to it.** Report that, and print the one line to add by
 hand - a settings file the plugin cannot read is one it must not rewrite.
@@ -84,6 +84,8 @@ an unresolvable project.
 
 ## Store-wide write rules
 
-- **Never delete** - retiring is marking superseded.
+- **Never delete** - retiring is marking superseded. Two exceptions: a credential the user asks to
+  forget, which `secrets.md`'s definition deletes with its entry, and a saved report in `tmp/` older
+  than ten days, which only `/nk:doctor --fix` removes (the file-facts rule).
 - **No stubs** - a target with no admitted entry is not created, and an empty heading is never written.
 - **Nothing changed, nothing written** - compare the rendered file to the file; this is the *Every run* paragraph above, not restated here.

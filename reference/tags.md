@@ -29,7 +29,7 @@ not rewrite it. Touch the `tags:` key and nothing else in the file.
 **Read `index.md`'s `tags` column first, and prefer what is already there.** If the session's subject
 matches an existing tag, apply **that spelling**.
 
-**A genuinely new subject may be minted**, and this is the one place this command names something the
+**A genuinely new subject may be minted**, and this is the one place a command names something the
 user did not type. Three rules make that safe enough to be worth it:
 
 1. **Never mint a variant of something that exists.** `auth` when `authentication` is in the column,

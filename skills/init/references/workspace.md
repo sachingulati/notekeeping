@@ -24,6 +24,18 @@ The store's other knowledge files - `domain.md`, `gotchas.md`, `decisions.md` an
 directly in `.notekeeping/` when promotion creates them. **A store's own scope is not a subdirectory
 of itself**, so do not create a `workspace/` or `global/` folder inside it.
 
+**A workspace may sit inside another, or around others** - workspaces nest (the store-resolve
+rule). Before the path confirm, walk up from the named path and probe its direct children with
+`<workspace>/*/.notekeeping/config.md`:
+
+- **Workspaces below it** stay as they are and become inner workspaces; nothing in them is read or
+  written. Say which, by path.
+- **A workspace above it** - read its `config.md`'s `## Projects`. **A project registered there whose
+  folder is the named path or lies beneath it is a refusal**, naming the project and its folder:
+  sessions in that folder would resolve to the new store, which does not hold it. Moving a project
+  between stores is by hand; say so, and write nothing.
+- **A probe that errors** is named as unprobed, and the run stops before writing.
+
 **Confirm the path once, before anything is written**, and say which directory you will use. Never
 ask again on later runs. **Find the repositories below first - it is only reading - and ask the path
 and the pick in the same question.**
@@ -62,6 +74,9 @@ already in front of you. **Ask git about the named path; list its children.**
    step. An empty workspace is not a failure.
 6. **Reached from the automatic form, the directory you started in is already being registered** by
    its step 5 - do not offer it twice, and do not register it twice.
+
+**A child holding its own `.notekeeping/` is an inner workspace, not a repository to offer** - its
+store holds its projects - so it is left out of the list and named as such.
 
 **This stays inside the no-scanning rule.** It lists directory entries one level below a path the
 user just named, asks about each, and reads nothing inside any of them but the `.git` the listing matched. Reading a user's material and inferring a project map from it is `/nk:adopt`'s job.

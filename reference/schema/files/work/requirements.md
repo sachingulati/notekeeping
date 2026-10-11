@@ -3,7 +3,6 @@ file:        requirements.md
 scope:       work
 schema:      1
 enabled:     true
-tier:        core
 shape:       document+append
 owner:       nk:work
 trigger:     always - the bundle is this file
@@ -95,11 +94,9 @@ Two amendment kinds, because two different things change:
 ```
 
 `Invalidates` is required in both forms. It is the only mechanical link between a change and the
-files that quietly became wrong because of it, and doctor reads it.
-
-## Read modes
-`active` resolves the chain to current, and is the only mode anything reads.
+files that quietly became wrong because of it, and `/nk:load` names each one under *discrepancies*.
 
 ## Who writes it
-`/nk:work` creates the body. `/nk:save` also writes this file - amending `tags:` per its own rules,
-never touching the body.
+Whichever command mints the item - `/nk:work`, or `/nk:save` with nowhere to write - creates the
+body, per the bundle shape. `/nk:save` appends the amendments, and amends `tags:` per its own
+rules - never touching the body.

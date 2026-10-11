@@ -3,7 +3,6 @@ file:        baseline.md
 scope:       workspace
 schema:      1
 enabled:     true
-tier:        extended
 shape:       bookkeeping
 owner:       nk:doctor
 trigger:     /nk:doctor --baseline

@@ -3,7 +3,6 @@ file:        config.md
 scope:       workspace
 schema:      1
 enabled:     true
-tier:        core
 shape:       bookkeeping
 owner:       nk:init
 trigger:     when the store is created
@@ -16,7 +15,8 @@ What does this store run with, and which projects does it hold?
 
 ## Admission
 `schema_version`, the settings the user has set - only keys the config defaults name - and the
-`## Projects` registry, one line per registered project.
+`## Projects` registry, one line per registered folder - a project in several repositories has one
+line each, its main folder first.
 
 ## Exclusion
 Knowledge of any kind -> the scope's own files. A file's budget -> that file's definition, through

@@ -43,11 +43,14 @@ root whose store `/nk:init` has created on this machine:
 - /abs/path/to/ws
 ```
 
-A store config's own `## Projects` is the same shape, one line per registered project:
+A store config's own `## Projects` is the same shape, **one line per registered folder**. A project
+spanning several repositories - a private repository and its public mirror, two clones - has a line
+for each, under the same name, **its main folder first**: the one its work happens in.
 
 ```
 ## Projects
 - **repo-a** - dirs: /abs/path/to/ws/repo-a
+- **repo-a** - dirs: /abs/path/to/ws/repo-a-public
 ```
 
 Both are written at creation, for the same reason, and neither is **a setting**.
@@ -86,19 +89,21 @@ directory up. Say so, naming both files.
 **What `dirs:` is still for.** A folder that resolves by its read line needs no registry entry to be
 worked in, but a project you are not standing in - a dependency's branch, a read line `/nk:doctor`
 checks, a repository `/nk:project` reports on - is reachable only through its registered path.
-Finding it any other way would mean scanning.
+Finding it any other way would mean scanning. **Where a project has several, a dependency's branch
+and any other single fact come from its main folder, the first line; `/nk:doctor` and
+`/nk:project` go through every line.**
 
 ## A folder the registry has lost
 
 **Renaming or moving a repository inside its workspace leaves its `dirs:` entry behind.** The read
 line moved with the folder, so the read line still resolves it; the registry still names the old
 path. When the read line resolves the project and the working directory is under none of the store's
-`dirs:` entries, probe that project's entry - `Read` `<dir>/.git/HEAD`, then `<dir>/.git`:
+`dirs:` entries, probe each of that project's entries - `Read` `<dir>/.git/HEAD`, then `<dir>/.git`:
 
-| The registered directory | Say |
+| The registered directories | Say |
 |---|---|
-| **holds no `.git`** | one line: *`<name>`'s registered folder `<dir>` is gone, and this folder carries its read line - `/nk:init` here updates it.* |
-| **still holds one** | nothing - a second folder for one project is not handled |
+| **one holds no `.git`** | one line: *`<name>`'s registered folder `<dir>` is gone, and this folder carries its read line - `/nk:init` here updates it.* Several gone: name each |
+| **each still holds one** | one line: *this folder carries `<name>`'s read line and is not one of its registered folders - `/nk:init` here adds it.* |
 
 **It is information, not a question**, so it repeats until `/nk:init` runs and asks nothing.
 **Nothing is written**: an absent path is as likely to be an unmounted volume as a renamed folder,

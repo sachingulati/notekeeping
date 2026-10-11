@@ -3,7 +3,6 @@ file:        session.md
 scope:       work
 schema:      1
 enabled:     true
-tier:        core
 shape:       ledger
 owner:       nk:save
 trigger:     work actually starts
@@ -15,7 +14,8 @@ budget:      none - a ledger is never trimmed
 What happened, in order?
 
 ## Admission
-Anything that happened, dated. **Current state does not live here** - that is `resume.md`.
+Anything that happened, dated. **Current state does not live here** - that is `resume.md`, once the
+item has one. Before then the one exception is the `next:` line below.
 
 ## Exclusion
 A fact that outlives this item -> promote it. A conclusion about where the work now stands ->
@@ -33,12 +33,17 @@ session: <session id>
 ```
 
 **One `session:` line per session the block covers**, added once when that session first writes the
-block. It is recorded, never read.
+block. Save counts them to know when `resume.md` starts (`work/resume.md`, *When it starts*).
+
+**Before the item has `resume.md`, a save ends the block it writes with one line** -
+`next: <the next step>` - rewritten in place when the same day's block is extended. It is where the
+work stopped, as of that block: the latest block's line is the position, and an earlier one is
+history. Once `resume.md` exists, blocks carry none.
 
 Re-running save on the same day extends today's block rather than opening a second one.
 
-**Every block names its kind first, and that is what makes this file greppable.** Two kinds share it
-- the sessions and the closing blocks. **The last `^## session ` match, from `Grep` with line
+**Every block names its kind first, and that is what makes this file greppable.** Three kinds share it
+- `session`, `closed` and `open`. **The last `^## session ` match, from `Grep` with line
 numbers, is the latest session block.**
 
 ## Closing, and staying open

@@ -3,7 +3,6 @@ file:        decisions.md
 scope:       global
 schema:      1
 enabled:     true
-tier:        core
 shape:       ledger
 owner:       promotion
 trigger:     always

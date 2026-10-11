@@ -3,8 +3,7 @@ file:        plan.md
 scope:       work
 schema:      1
 enabled:     true
-tier:        extended
-shape:       document+append
+shape:       document
 owner:       nk:plan
 trigger:     there is a design decision worth recording before execution
 authority:   original

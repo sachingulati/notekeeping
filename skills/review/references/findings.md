@@ -1,9 +1,9 @@
 # What each finding requires before you may report it
 
-- **1 - merge.** The two entries must make *the same claim*, not cover the same topic. Different
-  sources is what makes it worth merging; **same source is one entry written twice**, which is a
-  duplicate, not a merge. **Quote both claims and both provenance stamps side by side** - the source
-  is the test, so it is shown rather than asserted, in a refusal exactly as in a proposal.
+- **1 - merge.** The two entries must make *the same claim*, not cover the same topic - written twice,
+  in one file or two. **Quote both claims side by side** - the sameness is the test, so it is shown
+  rather than asserted, in a refusal exactly as in a proposal. **Applying keeps the claim's own words** - a
+  merge joins two records of one fact, with both corrections, and never restates it.
 - **2 - split.** The split test in the content tests. **Applying writes the area and its row in `areas/INDEX.md`** - one row, in the index definition's entry format.
 - **3 - area.** **Three or more entries on one topic**, across any of the scope's registers, and no
   area for it yet. Quote each entry's claim and the file it sits in, and name the keys the row would
@@ -25,7 +25,8 @@
 - **8 - flag.** The *Would reopen if* test in the content tests.
   **You never reopen a decision**, and you never write the reversal - both halves stay visible and
   that is a human's call - a ledger records reversals, it does not overwrite them.
-- **9 - close.** No activity and no closure. **A work item explicitly marked open with a stated
+- **9 - close.** The newest session block is older than `staleness_warn_days` (the config
+  defaults), and no closing block follows it. **A work item explicitly marked open with a stated
   reason is not stale**, however old - that is the `## open <date>` block in its `session.md`, and the
   closing block is its twin. **Both shapes are defined in that file's definition**
   (`session.md`, *Closing, and staying open*):

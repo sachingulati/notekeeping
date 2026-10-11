@@ -20,7 +20,7 @@ are **errors**.
   shipped definition of the same `file` and `scope`. Anything else - another overlay, a definition
   at a different scope, a name that does not exist - is an error: name the file and resolve nothing.
 - **A fragment naming a field the definition format does not have.** Its table is closed
-  (`resolution.md`, *What a definition carries*, plus `pairs_with` in `overlays.md`), and a typo in a fragment is silent in a way a typo
+  (`resolution.md`, *What a definition carries*), and a typo in a fragment is silent in a way a typo
   in a whole replacement is not: the misspelt field is ignored and the inherited value stands, so
   the override the user wrote does nothing. Name the field, and the one it was probably meant to be.
 - **A definition whose `schema:` is above 1 with no `## Migration` section.** The files are known to

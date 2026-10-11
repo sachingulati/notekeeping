@@ -10,12 +10,13 @@ buckets before the date's period hold no newer work item. **The changed set** - 
 inside a repository, git names the files changed since the date: the repo-facts rule's *files
 changed since*, run `-C` on the store, kept to paths under it. Only those are read. **Not a
 repository, or git unavailable: every file in the window's buckets is read - say so before the
-pass.** A register's entries
-carry their dates *inside* it, so narrowing to recent entries still costs the whole file. **Say what
+pass.** A register's entries carry no date, so a changed register is read whole and every entry in
+it is in the subject; without the changed set, nothing tells a register's recent entries from its
+old ones, and every register in scope is read. **Say what
 was skipped and what still had to be read**, and never report a narrowed pass as though it were
 cheap when it was not.
 
-**Second, and this is the sharper half: `--since` changes which findings are possible.** Five of the
+**Second: `--since` changes which findings are possible.** Five of the
 ten need more than the subject set, so a narrowed pass **cannot** produce them:
 
 | # | Why a recency filter cannot see it |

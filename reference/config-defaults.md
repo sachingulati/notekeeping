@@ -32,10 +32,12 @@ with a default to fall back to.
 | `local_id_pattern` | `^[a-z0-9][a-z0-9._-]*$` | store |
 | `work_bucket` | `month` - `quarter` and `year` also valid | store |
 | `staleness_warn_days` | `90` - days since a stamp's date, on the repo and env axes alike; the only staleness threshold | store |
-| `context_window_tokens` | `1000000` | store |
-| `load_depth` | `quick` - `/nk:load` reads `resume.md` and the latest session block. `full` reads all of `session.md`, which lets the next save re-derive rather than carry forward | store |
+| `context_window_tokens` | `1000000` - the window current models run with. Set `200000` where the session is capped at 200K | store |
+| `load_depth` | `quick` - `/nk:load` reads `resume.md` and the latest session block, or `session.md` whole where there is no `resume.md` yet. `full` reads all of `session.md`, which lets the next save re-derive rather than carry forward | store |
 | `budget_notice_pct` | `80` | store |
-| `dirs:` | **no default** - written by `/nk:init` from the repository root git gave it, or the folder the user named - never inferred. **How a project is reached from outside its folder**; a folder you stand in resolves by its read line first, per the store-resolution rule | project |
+| `max_parallel_subagents` | `3` - the most subagents any skill has running at once, per the store-resolution rule | store |
+| `adopt_max_bytes` | `5000000` - the most one `/nk:adopt` run reads; what it found past that is left pending, and the next run continues | store |
+| `dirs:` | **no default** - written by `/nk:init` from the repository root git gave it, or the folder the user named - never inferred; **one line per folder**, the main one first, where a project spans several repositories. **How a project is reached from outside its folder**; a folder you stand in resolves by its read line first, per the store-resolution rule | project |
 | `depends_on:` | none | project |
 
 **`local_id_pattern` bounds a hand-chosen id, and only that.** An explicit `--id` that matches this

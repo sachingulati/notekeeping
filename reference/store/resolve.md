@@ -6,30 +6,36 @@ title: Resolving a store, and the project inside it
 # The store boundary
 
 **Resolve the store first, before reading or writing anything. Every read and every write stays
-inside it.** A heading in *italics* below - *Probing by name* - is a case, kept in the cases file the
+inside the stores it resolves** - the workspace, any workspace enclosing it, and global. A heading in *italics* below - *Probing by name* - is a case, kept in the cases file the
 skill names; read it when it occurs.
+
+**No skill has more than `max_parallel_subagents` subagents running at once** - the store config's
+value, 3 where it sets none. Start the next only when one returns.
 
 A **store** is a `.notekeeping/` directory. There are two kinds and no others:
 
 | Store | Where | Its scope |
 |---|---|---|
 | **global** | `~/.notekeeping/` - a fixed path, always | your working life, not any codebase |
-| **workspace** | `<workspace>/.notekeeping/` | the projects that sit in that workspace |
+| **workspace** | `<workspace>/.notekeeping/` | everything beneath `<workspace>` - its projects, and the workspaces inside it |
 
 **A store's own scope sits at its root; every narrower scope is a subdirectory.** So a workspace
 store holds `projects/<name>/` and `work/<bucket>/<id>/` beneath it, and its own files - `NOTES.md`,
 `instructions.md`, `domain.md`, `gotchas.md`, `decisions.md`, `process.md` and `areas.md` - sit
 directly in `.notekeeping/`. There is no `global/` directory: `~/.notekeeping/` **is** global scope.
 
-**`config.md`, `index.md` and `baseline.md` at a store's root are the plugin's own bookkeeping rather
-than knowledge** - each has a definition of shape `bookkeeping`, so a release can migrate it like any
-other file, and nothing that sweeps the store for knowledge files treats one as knowledge. **`tmp/`**
+**`config.md`, `index.md`, `baseline.md` and `adopted.md` at a store's root are the plugin's own
+bookkeeping rather than knowledge** - each has a definition of shape `bookkeeping`, and nothing that
+sweeps the store for knowledge files treats one as knowledge. **`tmp/`**
 holds copies and saved reports, and no definition governs it.
 
 ## Resolving it
 
-1. **Walk up** from the working directory to the nearest `.notekeeping/`. That is the workspace
-   store. **Test the exact path at each level** - does `<dir>/.notekeeping` exist - rather than
+1. **Walk up** from the working directory, and **collect every `.notekeeping/`** on the way. The
+   nearest is **the workspace store** - its projects, `work/`, `index.md` and `config.md` are the
+   ones every skill uses. **The ones above it are enclosing workspaces**, named outermost first: they
+   are read for context and written only by promotion (the promotion rule), never as a home for a
+   session's projects or work items. **Test the exact path at each level** - does `<dir>/.notekeeping` exist - rather than
    listing a directory and reading what comes back: **`Glob` the exact path `<dir>/.notekeeping/*`,
    or `Read` a file you expect inside it.** Existence is proved by a hit, never by a name's absence
    from a listing - which patterns fail, and how, is *Probing by name*.
@@ -47,10 +53,10 @@ holds copies and saved reports, and no definition governs it.
    ancestor, and it is worth exactly as much as the walk behind it - so make the walk visible and
    the claim checkable. **Do not report an absence you did not look for.**
 
-4. **Found more than one below `~/`?** Workspaces do not nest. **Use the nearest**, and say that the
-   outer one exists and is being ignored, naming both paths. Do not refuse - running against the
-   obviously-intended store and saying so beats not running at all. `/nk:doctor` reports it as an
-   error.
+4. **Found more than one below `~/`?** Workspaces nest. **The nearest is the workspace**; name each
+   enclosing one by its path, outermost first. Which encloses which is read from the paths and stored
+   nowhere. Each delivers itself: its read line sits in `CLAUDE.local.md` at its own root, which
+   Claude Code loads in every session beneath it.
 
 **Other stores on this machine** are listed in global's `config.md`, for enumeration only - never for
 resolution: *Knowing that other stores exist*.
@@ -99,8 +105,8 @@ path in the registry does not.
    matching entry wins.
 3. No match -> the working directory is in no registered project. Resolve only through `--project <name>` or the item's `project:` field, never by the directory's name; a skill that needs a project and has none refuses and points at `/nk:init`.
 
-**A project you are not standing in** is reached only through its `dirs:` entry: *Reaching a project
-from outside its folder*. **Step 1 resolved the project, and the working directory is under none of
+**A project you are not standing in** is reached only through its `dirs:` entries, its main folder
+first: *Reaching a project from outside its folder*. **Step 1 resolved the project, and the working directory is under none of
 the store's `dirs:` entries?** The folder was renamed or moved: *A folder the registry has lost*.
 
 Directories, listings and sizes come from `Glob` and `Read`. A repository fact comes from git, per the repo-facts rule; nothing else needs a shell. `Write` creates the directories it needs on the way to a file.

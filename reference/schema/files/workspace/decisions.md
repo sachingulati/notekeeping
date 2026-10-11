@@ -3,7 +3,6 @@ file:        decisions.md
 scope:       workspace
 schema:      1
 enabled:     true
-tier:        core
 shape:       ledger
 owner:       promotion
 trigger:     always
@@ -25,7 +24,7 @@ on -> global. A trap rather than a choice -> gotchas.md.
 ## Entry format
 ```markdown
 - **Chose X over Y.** Rejected: Y, Z. Because <the reason that actually decided it>.
-  **Would reopen if:** <the condition that would make this wrong>. `(source - date)`
+  **Would reopen if:** <the condition that would make this wrong>.
 ```
 
 **A ledger is never edited.** A decision that changes gets a **new** entry that supersedes the old one

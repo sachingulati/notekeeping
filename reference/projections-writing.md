@@ -37,8 +37,7 @@ Search the whole file for `notes:begin`; that, and only that, decides between ca
 the markers, and write only if they differ** -
 unchanged, it writes nothing; a moved store or a renamed project lands.
 
-**The third case appends rather than refusing, and the rule it protects is unchanged: never clobber
-a file this plugin did not create.** Every byte above the block stays untouched, and the block
+**The third case appends, and never clobbers a file this plugin did not create.** Every byte above the block stays untouched, and the block
 converts the file into an ordinary case-2 target from then on.
 
 **The notice goes in the header comment, not the body.** The body is the read line and nothing else; the header is where

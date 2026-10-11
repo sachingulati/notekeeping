@@ -3,7 +3,6 @@ file:        config.md
 scope:       global
 schema:      1
 enabled:     true
-tier:        core
 shape:       bookkeeping
 owner:       nk:init
 trigger:     when global is created
@@ -15,12 +14,11 @@ budget:      none
 What does global run with, and which workspaces exist?
 
 ## Admission
-`schema_version`, the settings the user has set at global scope - only keys the config defaults
-name - and the `## Workspaces` registry, the absolute path of every workspace root.
+`schema_version` and the `## Workspaces` registry, the absolute path of every workspace root.
 
 ## Exclusion
 Knowledge of any kind -> global's own files. A project -> its workspace store's `## Projects`, never
-here. A key the config defaults do not name -> refused, never written.
+here. Any other setting -> the workspace store's `config.md`, per the config defaults' resolution order.
 
 ## Entry format
 The keys and their defaults are the config defaults' table. The `## Workspaces` line is the

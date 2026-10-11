@@ -9,14 +9,14 @@ Show or change configuration. Writes only to the config files, and to the store'
 for `set budget`.
 
 Before anything else, in order:
-1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs.
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers.
 2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
 3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
 
 ## Bare invocation
 
-Print every setting, its effective value, and where that value came from - machine config,
-store config, or the shipped default.
+Print every setting, its effective value, and where that value came from - the store config or
+the shipped default; `schema_version` from each store's own config.
 
 The shipped defaults are `${CLAUDE_PLUGIN_ROOT}/reference/config-defaults.md` (with `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` for `schema_version`), and that file is
 also the list of settings that exist. Read it: *every setting* means every row there, including the
@@ -40,7 +40,7 @@ value was.
 
 Refuse an unknown key rather than writing it. **`schema_version` is refused too**: `/nk:init` writes
 it and only `/nk:upgrade` moves it. `${CLAUDE_PLUGIN_ROOT}/reference/config-defaults.md` is what
-"known" means; refusing a key listed there would refuse a setting the product documents.
+"known" means.
 
 ### `set budget`
 
@@ -65,9 +65,6 @@ Budgets
   <definition>            <ceiling>           <origin>
 ```
 
-It is a separate form because it resolves every definition; bare `/nk:config` reads two config
-files and one defaults table.
-
 ## The two levels
 
 **Machine** - `~/.notekeeping/config.md`, inside global's store. One setting, `schema_version`, plus the `## Workspaces` registry
@@ -84,7 +81,5 @@ directory holding that store's `.notekeeping/`. One walk produces both -
 
 ## Delivery
 
-Delivery follows registration - what makes a project, a workspace or global delivered is
-`${CLAUDE_PLUGIN_ROOT}/reference/projections.md`, the contract for what each one writes. Nothing about
-it is configurable. **A command never
-alters delivery unasked**, in either direction.
+Delivery follows registration, per `${CLAUDE_PLUGIN_ROOT}/reference/projections.md`, and has no
+setting.

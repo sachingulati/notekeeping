@@ -10,7 +10,7 @@ that needs the number reads this file.
 
 | | |
 |---|---|
-| **The schema release this plugin ships** | **2** |
+| **The schema release this plugin ships** | **3** |
 
 **It versions the store's shape on disk** - which files exist, what frontmatter they carry, what the
 resolver's columns are, and what a config file holds. **It is not the plugin's version**, which
@@ -69,4 +69,5 @@ skills that need them, never read here.
 **written in the same write as the content it describes**, never in a pass of its own. **Find it
 with a search anchored at the start of the line and never at the end**, matching the version as a
 number: a file whose lines end `\r\n` carries a byte before the end of the line. **An absent stamp is
-release 1.** Projections, `index.md` and `config.md` carry none - they are regenerated, not migrated.
+release 1.** Projections, `index.md` and `config.md` carry none: projections and `index.md` are
+regenerated rather than migrated, and `config.md`'s own `schema_version` stands for its stamp.

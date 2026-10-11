@@ -18,7 +18,7 @@ working folder - the root, branch, commit, origin and *commits since* forms belo
 
 **Which repository.** For a project, start from the working folder when it resolves to that project
 - by its read line or a `dirs:` match, per the store-resolution rule's *Resolving a project inside
-the store* - **and from the project's `dirs:` entry when it does not**: a project you are not
+the store* - **and from the project's main `dirs:` entry, its first, when it does not**: a project you are not
 standing in is reachable only through its registered path. Where no project is involved -
 `/nk:init` finding the root it will register - start from the folder it was given.
 

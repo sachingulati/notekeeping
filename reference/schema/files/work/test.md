@@ -3,13 +3,11 @@ file:        test.md
 scope:       work
 schema:      1
 enabled:     true
-tier:        extended
 shape:       register
 owner:       nk:test
 trigger:     verification was designed or run
 authority:   original
 budget:      none
-pairs_with:  test-manual.md
 ---
 
 ## Question
@@ -25,7 +23,7 @@ domain or architecture file. How to run the suite at all -> runbook.md.
 
 ## Entry format
 - **What is being checked.** How to check it, precisely enough to repeat cold. What the correct
-  result is. `(source - date)`
+  result is.
 
 Record the outcome of the run that was actually performed, with its date and the environment it ran
 in. The environment axis is required here for the same reason it is required on a runbook: a check

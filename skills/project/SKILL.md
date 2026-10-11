@@ -6,10 +6,11 @@ allowed-tools: Read, Glob, Grep, Write, Edit
 ---
 
 Report the store's projects, or rebuild one project's documents. It owns exactly two files -
-`NOTES.md` and `overview.md` - and writes no other file in any project.
+`NOTES.md` and `overview.md` - and writes no other file in any project. Git is only read - the
+commit and the origin, per the repo-facts rule - and nothing is committed.
 
 Before anything else, in order:
-1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs.
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers.
 2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
 3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
 
@@ -39,7 +40,7 @@ Two documents, and being owned is what makes them safe to be documents at all.
 
 | | |
 |---|---|
-| `NOTES.md` | the always-loaded digest. `/nk:save` maintains its Active pointer and its stamp at each checkpoint; this command rebuilds the file |
+| `NOTES.md` | the always-loaded digest. `/nk:save` maintains its stamp at each checkpoint; this command rebuilds the file |
 | `overview.md` | orientation in fields, assembled from sources. Rebuilt on request, and never appended to by promotion |
 
 **A rebuild writes no read line in the repository.** The line in its `CLAUDE.local.md` points at
@@ -52,9 +53,8 @@ but is written the same way. They are appended to by promotion and edited in pla
 re-promotion. A rebuild that touched one would destroy accumulated knowledge to refresh a stamp,
 so read them freely and write none of them.
 
-What a rebuild does pick up from them is the rendering - the areas that now exist, and the
-standing instructions that now sit beside `NOTES.md`. That is the whole of why this command is what
-finishes a split.
+What a rebuild does pick up from them is the rendering - the read lines to `instructions.md` and
+`areas/INDEX.md`, where each exists.
 
 ## Bare - the report
 
@@ -80,15 +80,12 @@ The shape, filled from the run and never copied from here:
 One block per project, in the order the store registers them, and every line present for every
 project - a project with nothing to report carries the empty render, not a gap.
 
-The authority check runs one way only. Never flag a file for being un-derived. That inverted
-check fires on every `overview.md` and `architecture.md` in a store on day one, with no recipe
-available for any of them, and a report nobody can get to green teaches that the report is optional.
+The authority check runs one way only: a file that is not derived is never a finding.
 
 ## `<name>` - the rebuild
 
 Rebuild both files per `${CLAUDE_PLUGIN_ROOT}/reference/overview.md` (with
-`${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md` for the sha and the origin, and
-`${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md` for `## Active`) - which sections are derived and
+`${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md` for the sha and the origin) - which sections are derived and
 which preserved, the repository link, the stamp, and the no-op. The stamp's date is today's, the
 day it is written.
 
@@ -96,12 +93,3 @@ After writing, say which files were rewritten - or `no-change` - and name every 
 across verbatim and a link left out. Nothing outside the store is written.
 
 **`--dry-run`** prints the diff for both files and the staleness lines, and writes nothing.
-
-## Never
-
-Write any file in the project other than `NOTES.md` and `overview.md`. Write outside the store at
-all - **and nothing this command writes is a file
-anyone else reads.** Commit anything. Regenerate a register. Invent a project, a setting name, an environment, or a repo root. Report on anything
-outside the store **beyond the commit and the origin git gives for the stamp and the link** -
-everything else outside `.notekeeping/` belongs to the user. Run a git command that changes
-anything, or any command but the repo-facts rule's reads.

@@ -28,9 +28,10 @@ hazard when a stamp was raised by hand, which silently freezes one file at a sha
 convert. **`/nk:doctor` reports it and never repairs it**: lowering a stamp schedules a rewrite of
 the user's own file, which is not a repair anyone can make on their behalf.
 
-**Projections, `index.md` and `config.md` carry no stamp** (the schema-version rule): regenerate
-them after a migration; never convert them. A derived file that is migrated rather
-than rebuilt can disagree with the source it is derived from.
+**Projections, `index.md` and `config.md` carry no stamp** (the schema-version rule). Regenerate
+projections and `index.md` after a migration rather than converting them - a derived file that is
+migrated rather than rebuilt can disagree with its source. `config.md` changes only where a step
+names it, and its `schema_version` is written last.
 
 ## The history
 
@@ -38,6 +39,7 @@ than rebuilt can disagree with the source it is derived from.
 |---|---|---|
 | **1** | the initial shape | all of them, at birth - every definition ships at `schema: 1` |
 | **2** | `overview.md`'s fields gain a bold label | **one** - `project/overview.md`. Every register and every ledger is untouched, because an entry's file and path already name it |
+| **3** | a project's `NOTES.md` loses `## Active` - the current item is derived | **one** - `project/NOTES.md` |
 
 ## Writing a migration
 

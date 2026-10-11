@@ -3,7 +3,6 @@ file:        NOTES.md
 scope:       global
 schema:      1
 enabled:     true
-tier:        core
 shape:       document
 owner:       nk:save
 trigger:     always
@@ -36,8 +35,7 @@ Instructions are not knowledge, and they have their own file here: `instructions
 beside this one - so this file carries **no read line to it**, only the two area lines, where
 `areas/INDEX.md` exists. Neither file replaces or absorbs your harness
 instructions file; `/nk:adopt` moves both out of it - facts that are *looked up* rather than
-*obeyed* come here, and what you must *do* goes to `instructions.md`, whose exclusion states the
-trim rule.
+*obeyed* come here, and what you must *do* goes to `instructions.md`.
 
 **`/nk:save` writes this file when promotion first reaches it, and maintains it after.**
 `/nk:adopt` writes it while building the store, and `/nk:review` can demote an entry out of it.

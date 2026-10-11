@@ -3,7 +3,6 @@ file:        instructions.md
 scope:       workspace
 schema:      1
 enabled:     true
-tier:        core
 shape:       document+append
 owner:       promotion
 trigger:     always

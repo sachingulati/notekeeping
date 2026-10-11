@@ -3,13 +3,11 @@ file:        test-manual.md
 scope:       work
 schema:      1
 enabled:     true
-tier:        extended
 shape:       document
 owner:       nk:test
 trigger:     the same trigger as test.md - a pair by policy
 authority:   original
 budget:      none
-pairs_with:  test.md
 ---
 
 ## Question

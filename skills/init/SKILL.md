@@ -12,7 +12,7 @@ never mines your material for content. What it needs from a repository it asks g
 `${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md`.
 
 Before anything else, in order:
-1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. No store yet is
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers. No store yet is
    this skill's normal case - it is the one that creates them.
 2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
 3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
@@ -31,7 +31,7 @@ creating and what is already there.
 
 **It does not guess a project map, and it reads no notes.** A notes folder, a wiki export, another
 tool's store, the knowledge sitting in a `CLAUDE.md`: none of it is read here. Bringing that material
-in is `/nk:adopt`'s job. This skill is not a substitute for it and must not improvise one.
+in is `/nk:adopt`'s job.
 
 ## The three forms
 
@@ -85,7 +85,7 @@ first.
 
 Run it again later and the same path does less. Inside a repository under a workspace that
 already exists, steps 1, 3 and 4 all find their work done and it simply registers the project. That
-is the *"once per repository cloned later"* case, and it needs no flag.
+is how a repository cloned later is added, with no flag.
 
 ### `$HOME` cannot be a workspace
 
@@ -124,9 +124,9 @@ Do not create a store around material nobody has looked at.
 ## The config files
 
 **Write exactly one setting: `schema_version`** - in a workspace store config and in global's alike.
-Take its value from `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (with `${CLAUDE_PLUGIN_ROOT}/reference/report-shape.md` and `${CLAUDE_PLUGIN_ROOT}/reference/store/walk.md`), where the shipped
+Take its value from `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md`, where the shipped
 version is stated; a number typed into this file drifts the first time the schema moves.
-Every other setting has a documented default and is edited by hand; a wall of commented settings is
+Every other setting has a documented default and is set with `/nk:config`; a wall of commented settings is
 unreadable. **Never invent a setting name**: a plausible key the plugin does not read looks
 configured.
 
@@ -167,8 +167,12 @@ State every level you created, the exact path of each, and every file written - 
 project registered by the offer. The automatic form routinely creates three at once, so report them
 as a list rather than a sentence.
 
-Then the single next step: `/nk:work` to start something, `/nk:init` inside a repository cloned
-later to add it, or `/nk:help` to see what exists.
+Then the single next step. **A run that created a store or registered a project names
+`/nk:adopt`**: it brings in what your `CLAUDE.md` files and notes already hold, and it places each
+entry by the projects registered, so register every workspace and project first - an entry for one
+that is not registered stays where it is. Name the order: the bare `/nk:adopt`, which starts from your `CLAUDE.md` files,
+run again until it says nothing is left. Otherwise: `/nk:work` to start something, `/nk:init`
+inside a repository cloned later to add it, or `/nk:help` to see what exists.
 
 Say which `/nk:init` runs are still needed. After the automatic form there are none for what
 already exists - global, the workspace and its repositories are done - so the user does not think

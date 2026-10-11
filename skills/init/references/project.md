@@ -17,12 +17,18 @@ directory's basename.
    | It resolves | Do |
    |---|---|
    | by a `dirs:` entry | nothing to register - say which project, and stop |
-   | by its read line, **the project's registered folder gone** (that rule's *A folder the registry has lost*) | **this is that project, moved.** Propose replacing its `dirs:` entry with this root, naming the old path and the new; on a yes, rewrite that one entry and nothing else - its `NOTES.md`, `overview.md` and read line already exist. Never create a second project for it |
-   | by its read line, the registered folder still there | a second folder for one project is not handled - say so, and that registering this one as its own project replaces the line with the new project's. Go on only on a yes |
+   | by its read line, **the project's registered folder gone** (that rule's *A folder the registry has lost*) | **this is that project, moved.** Propose replacing the entry that is gone with this root, naming the old path and the new; on a yes, rewrite that one entry and nothing else - its `NOTES.md`, `overview.md` and read line already exist. Never create a second project for it |
+   | by its read line, the registered folders still there | **another folder of that project** - a mirror, a second clone. Ask: *Add it to `<name>` / Register it as its own project / Stop*. *Add* is step 5 alone - its read line already exists |
 
    **Propose the name and confirm it.** The repository's directory name is a *proposal*, not an
    answer - say which name you will use and let them correct it. The name is what `--project <name>`
-   will name, not a resolution path in itself.
+   will name, not a resolution path in itself. **A name the store already holds is not a new
+   project**: ask *Add this folder to `<name>` / Choose another name*. *Add* skips step 4 - the
+   project's files exist - and does steps 5 and 6, so the folder reads that project's notes.
+
+   **Joining never merges two projects.** A folder that resolves to a project of its own is that
+   project's, and init does not move it to another: say so, and that the two projects' notes are
+   combined by hand.
 4. **Create the directory, `NOTES.md` and `overview.md`.** Those are the two documents `/nk:project`
    owns. **Resolve both definitions before writing either** - the user's overlay wins over the
    shipped ones. Write the structure each definition specifies and nothing beyond it.
@@ -34,7 +40,8 @@ directory's basename.
    **Report only what you actually wrote.** If a definition could not be resolved, say so and create
    nothing rather than describing a file that is not there.
 5. **Register the repo root** - its `dirs:` in the store config's `## Projects` - so later sessions
-   resolve without asking again.
+   resolve without asking again. **Append the line; never rewrite another.** A folder joining a
+   project goes after that project's last line, so its main folder stays first.
 6. **Write the repo read line**, per the projections and projection-writing rules - the file, and the ignore entry it orders.
    **Registration is what writes the line, not the first save**, so a project that has just been
    registered is already delivering. **Never report a file you did not write.**

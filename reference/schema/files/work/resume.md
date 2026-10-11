@@ -3,10 +3,9 @@ file:        resume.md
 scope:       work
 schema:      1
 enabled:     true
-tier:        core
 shape:       document
 owner:       nk:save
-trigger:     work actually starts
+trigger:     the item's fifth saving session
 authority:   original
 budget:      notice at 30000 bytes - read on demand, never capped
 ---
@@ -22,6 +21,17 @@ here, why it was done this way, and what has already been ruled out.
 Raw narrative of what happened -> `session.md`, which is the record this file is derived from. A
 fact that outlives this item -> promote it. **What the code is** -> the code; a summary that
 restated the repository would be a second, worse copy of it.
+
+## When it starts
+
+**At the item's fifth saving session, and not before.** Until then `session.md` is short enough to
+read whole, and it is the record: a summary of four sessions would restate them. The count is the
+sessions the record names - the distinct ids on its `session:` lines, `Grep` `^session: ` and
+counted by value, so a session that saved on two days counts once; or its `## session` blocks where
+those are more. Derived at each save, never
+stored. The save that reaches five writes the first one, re-derived,
+and every save after rewrites it. Until it exists, the position is the latest session block's
+`next:` line (`work/session.md`). **An item that already has one keeps it**, whatever its count.
 
 ## Entry format
 
@@ -39,7 +49,7 @@ save because it is only ever about now. Everything below it is the story, and it
 **Verify**    the command that proves it works
 
 ## Covers
-`## session` blocks <first>-<last>, through <date> - re-derived | carried forward
+`## session` blocks <first>-<last>, through <date> - re-derived in <session id> | carried forward since <session id>
 
 ## The story so far
 <what this set out to do, what exists now, and how it got here>
@@ -57,17 +67,19 @@ save because it is only ever about now. Everything below it is the story, and it
 <what remains, in the order it should be taken>
 ```
 
-**The branch is read per the repo-facts rule**, `unknown` when it could not be. No dirty count and
-no commits-ahead count are recorded. A position block that carries either is left
-as it is - the next save rewrites the position.
+**The branch is read per the repo-facts rule**, `unknown` when it could not be. The branch alone is
+recorded - no dirty count, no commits ahead.
 
 ## Rules
 
-**1 · `Covers` names its range and how it was built.** `re-derived` means this save rebuilt the
-story from `session.md`, which it had in context; `carried forward` means it did not, and the
-previous text was extended instead. A file that says *carried forward* **five saves running** is a file
-drifting from the record - that is the threshold, and `/nk:doctor` warns at it - and `/nk:doctor` compares this line against `session.md`'s last session
-block rather than trusting it.
+**1 · `Covers` names its range and how it was built.** `re-derived in <id>` means this save, in
+session `<id>`, rebuilt the story from `session.md`, which it had in context. `carried forward since
+<id>` means it did not, and the previous text was extended instead; `<id>` is the session that last
+re-derived it, copied from the previous `Covers`. **Five sessions carried forward is the threshold**:
+the distinct ids, other than `<id>`, on `session.md`'s `session:` lines below `<id>`'s first one -
+`Grep` `^session: ` with line numbers, the count *When it starts* uses. At five, `/nk:doctor` warns.
+`/nk:doctor` also compares this line against `session.md`'s last session block rather than trusting
+it.
 
 **2 · The rejected list may be reworded, never shortened, while the item is open.** A dead end is
 the most expensive thing in here and the easiest to lose in a rewrite. It is numbered, and **the

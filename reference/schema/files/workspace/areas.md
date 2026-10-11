@@ -3,7 +3,6 @@ file:        areas/
 scope:       workspace
 schema:      1
 enabled:     true
-tier:        extended
 shape:       container
 owner:       nk:review creates it; promotion appends to it
 trigger:     three or more entries on one topic across this scope's registers, or a register past its split threshold with one topic dominating it
@@ -32,5 +31,5 @@ split leaves, the no-nesting rule, the slug reused from an existing tag, and the
 `gotchas.md`, `domain.md` and `process.md`, which sit directly in `.notekeeping/`, so an area sits
 at `.notekeeping/areas/<topic>/`.
 
-**Extended, not core.** A workspace register reaches a split threshold far later than a project's,
+A workspace register reaches a split threshold far later than a project's,
 because what is admitted here has already had to hold across more than one project.

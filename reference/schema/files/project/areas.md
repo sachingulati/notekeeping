@@ -3,7 +3,6 @@ file:        areas/
 scope:       project
 schema:      1
 enabled:     true
-tier:        core
 shape:       container
 owner:       nk:review creates it; promotion appends to it
 trigger:     three or more entries on one topic across this scope's registers, or a register past its split threshold with one topic dominating it
@@ -56,11 +55,11 @@ spelling** - a `tags` value and an area name for one subject that differ by a ch
 threads to everyone who comes later.
 
 **A split moves entries and leaves a pointer.** The parent register keeps a line naming the area and
-what went into it. **Nothing is deleted and nothing is reworded**: entries move with their provenance
-stamps and their corrections intact, which is what makes a split reversible by hand.
+what went into it. **Nothing is deleted and nothing is reworded**: entries move with their
+corrections intact, which is what makes a split reversible by hand.
 
-**Areas do not nest.** `areas/<topic>/areas/` is not a thing - a topic that has outgrown its area is
-a sign the topic was drawn too wide, and the answer is a second area beside it.
+**Areas do not nest.** A topic that has outgrown its area was drawn too wide: the answer is a second
+area beside it.
 
 **An area is reachable through its row in `areas/INDEX.md`** - the keys that send a session into
 it, per the area-index definition. **A split writes the area and its row in the same pass**; an area

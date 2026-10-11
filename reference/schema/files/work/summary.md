@@ -3,7 +3,6 @@ file:        summary.md
 scope:       work
 schema:      1
 enabled:     true
-tier:        core
 shape:       document
 owner:       nk:summary
 trigger:     only when /nk:summary is typed

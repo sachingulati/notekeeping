@@ -3,10 +3,9 @@ file:        overview.md
 scope:       project
 schema:      2
 enabled:     true
-tier:        core
 shape:       document
 owner:       nk:project
-trigger:     always, per active project
+trigger:     always, per registered project
 authority:   derived when every field came from a recorded source; original otherwise
 budget:      5000 bytes
 ---
@@ -54,8 +53,7 @@ honest.
 It is rebuilt on request and is never appended to by promotion. `/nk:init` creates it and `/nk:adopt`
 writes it where the material supports its fields; `/nk:project <name>` is what rebuilds it.
 
-A repository's committed instructions file is a legitimate **source** for these fields, and is never
-a deletion criterion for anything.
+A repository's committed instructions file is a legitimate **source** for these fields.
 
 **Where a field's content did not come from a recorded source it is carried across verbatim**, label
 added and wording untouched, and the report names each one. Those are the lines that make this file
@@ -67,12 +65,5 @@ rebuild sets the header's `authority:` to match**: `original` when it carried an
 
 **1 -> 2 - rebuild** - the fields gain their bold labels. **It is rebuilt rather than converted**:
 `/nk:upgrade`, or `/nk:project <name>`, reassembles it from the sources named in its header, in the
-shape above, and the stamp goes on that write.
-
-**This file is `derived` only where every field came from a recorded source**, which is what its
-`authority:` says and what makes the rebuild safe. **Where any field did not, the file is `original`
-in that line and the rebuild must carry it** - above. A rebuild that treats the whole file as derived
-drops exactly the lines nothing else holds.
-
-**It rides along because the rebuild was happening anyway** - `/nk:project` rewrites the whole of
-this file every time it runs; `/nk:upgrade` converts a copy the rebuild has not reached.
+shape above, and the stamp goes on that write - carrying across every field no recorded source
+supplies, as above.
