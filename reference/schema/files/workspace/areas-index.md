@@ -4,7 +4,7 @@ scope:       workspace
 schema:      1
 enabled:     true
 shape:       register
-owner:       nk:review creates it; promotion appends to it
+owner:       nk:review, nk:adopt or nk:save creates it; promotion appends to it
 trigger:     an area is created
 authority:   original
 budget:      none

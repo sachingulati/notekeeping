@@ -3,13 +3,14 @@ name: config
 description: Show or change Notekeeping settings, and set a store file's budget, naming the file each value came from. Use when the user asks to see or change a Notekeeping setting.
 argument-hint: "[set <key> <value>] [set budget <scope>/<file> <value>] [budgets]"
 allowed-tools: Read, Glob, Write, Edit
+effort: low
 ---
 
 Show or change configuration. Writes only to the config files, and to the store's schema overlay
 for `set budget`.
 
 Before anything else, in order:
-1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers.
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store at it is not mentioned; one behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers.
 2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
 3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
 
@@ -71,7 +72,7 @@ Budgets
 `/nk:init` appends to - which is not a setting, and which `set` never writes.
 
 **Store** - `<store>/config.md`, one per workspace. Everything else, so it travels with the notes:
-thresholds, `schema_version`, `context_window_tokens`, tracker patterns. A
+thresholds, `schema_version`, tracker patterns. A
 file's own budget is not here - it is on its definition, and `set budget` writes the overlay.
 
 Both store locations are resolved, never configured. A store is `.notekeeping/` at the root of

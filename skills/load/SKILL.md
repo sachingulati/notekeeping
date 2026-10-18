@@ -1,16 +1,34 @@
 ---
 name: load
-description: "Resume a work item - read its record and say where things stand and what is next. Reads only. Use when the user asks to resume or pick up earlier work, or what they were last doing on it."
+description: "Resume a work item, or task - read its record and say where things stand and what is next. Reads only. Use when the user asks to resume or pick up a task, a work item or earlier work, or what they were last doing on it."
 argument-hint: "[query] [--full] [--quick]"
 allowed-tools: Read, Glob, Grep
+effort: low
 ---
 
 Resume where you left off. **This command reads. It never writes anything, anywhere.**
 
 Before anything else, in order:
-1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers.
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store at it is not mentioned; one behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers.
 2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
 3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
+
+## Five turns
+
+**A load is five turns of parallel calls, and the fifth renders.** Each turn sends every call it
+names in one message. The sections below are how each answer is read; they add no calls of their own.
+
+| Turn | Sends, all at once |
+|---|---|
+| **A - the rules** | `Read` `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`, `${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md`, `${CLAUDE_PLUGIN_ROOT}/reference/item.md` and `${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md` |
+| **B - the store and the query** | resolving, per `resolve.md`, *In one turn*; at each level of the walk, `Grep` the query in `<level>/.notekeeping/index.md`; `Grep` the read line in `~/.claude/rules/notekeeping.md`; and in the working folder **`git branch --show-current` and the *recent commits* form, each its own call** |
+| **C - the bundle** | in the matched folder, `Read` `requirements.md`, `resume.md`, `instructions.md`, `plan.md` and `test.md`, and `Grep` `^## session ` in `session.md` with line numbers; `Grep` the `parent` column of `index.md` for the id; the tracker for each `ids:` entry; the branch and *recent commits* by `git -C` for each project the working folder is not in |
+| **D - the record** | `Read` `session.md` - whole where Turn C found no `resume.md`, or on `--full`; otherwise from its last `^## session ` line |
+| **E - the screen** | the output |
+
+**A file the item does not have is a failed `Read`, and that is its answer.** Only a case the
+answers raise - several matches, no store, a run item, no query and nothing in the conversation -
+reads its rule, and spends a turn on it.
 
 ## 1. Resolve the store, then the query
 
@@ -24,6 +42,14 @@ ask which (`## Asking`). Name the column that
 matched; a resolution that cannot say how it matched is one nobody can check.
 
 ## 2. Read the bundle
+
+**A run item** - tagged `run-<command>` - is read differently, per
+`${CLAUDE_PLUGIN_ROOT}/reference/run-engine.md`: `requirements.md` (what ran), `resume.md` whole, and
+`report.md`'s states only - `Grep` `^- \*\*state\*\* ` and count by value, never a read of the
+items. It has no `session.md` to read and no tracker, and sections 3-6 do not apply - each prints
+`none` or `not checked: a run item`. *Where it stands* is the states as arithmetic; *next actions*
+come from `resume.md`; a `log.md` with a `start` and no `done` is a blocker, its remedy
+`/nk:<command> --apply <id>`.
 
 - `requirements.md`, with its amendments applied - the ask as it stands now. Each amendment's
   `Invalidates` goes to *discrepancies*: the amendment's date and kind, and the file or section it
@@ -93,10 +119,10 @@ already has, and a tracker it cannot reach is named, never guessed.
 
 ## 4. The branch and the commits
 
-For each project in the item's `project:` list and their declared dependencies, ask git, per
+For each project in the item's `project:` list, ask git, per
 `${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md`: **the branch**, and **the commits since the
-last save** - `--since` the date on `resume.md`'s *Covers* line, or with no `resume.md` the latest
-session block's date, the save's own day included. A detached `HEAD`
+last save** - the *recent commits* sent in Turn B or C, kept from the date on `resume.md`'s *Covers*
+line, or with no `resume.md` the latest session block's date, the save's own day included. A detached `HEAD`
 names no branch: say so. **Nothing else of git is read** - no stashes, no diff, no remote. Git
 unavailable: the branch from the fallback, and the commits not listed - say so.
 
@@ -123,19 +149,28 @@ second act of synthesis:
 
 ```
 <id> - <title>  (<project>)
+
 resolved          <store path>; matched by <id | ids | title | tags | folder>
+
 where it stands   <the position resume.md, or the latest next: line, gives>
+
 next actions      <the next thing, and the one after>
+
 blockers          <what is in the way> | none
+
 code state        branch <branch> | detached | unknown | no repository
                   <n> commits since <date>: <oneline, newest first, at most ten> | none | not checked
+
 instructions      <n> arrived by the read line | <n> read from the store | none
+
 children          <child id - one line each> | none
+
 discrepancies     <source> disagrees with <source>: <what>, and <which you think is right>
                   none found
 ```
 
-Every label is printed every run. A section with nothing in it carries `none`, because
+**A blank line separates every section**, and a value that wraps stays indented under its label, so
+the eye finds each label without reading the value above it. Every label is printed every run. A section with nothing in it carries `none`, because
 *no blockers* and *blockers not checked* are different answers and the reader cannot tell them
 apart from a missing line.
 

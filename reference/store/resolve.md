@@ -5,6 +5,11 @@ title: Resolving a store, and the project inside it
 
 # The store boundary
 
+**Notekeeping runs on 1M-context models only.** On a Haiku model, refuse before reading or
+writing anything, and say in one line that Notekeeping needs a model with a 1M context window.
+**Every brief a skill gives a subagent carries the same rule**, so a subagent running on Haiku
+refuses before its task, and the skill reports that refusal as the subagent's result.
+
 **Resolve the store first, before reading or writing anything. Every read and every write stays
 inside the stores it resolves** - the workspace, any workspace enclosing it, and global. A heading in *italics* below - *Probing by name* - is a case, kept in the cases file the
 skill names; read it when it occurs.
@@ -24,10 +29,10 @@ store holds `projects/<name>/` and `work/<bucket>/<id>/` beneath it, and its own
 `instructions.md`, `domain.md`, `gotchas.md`, `decisions.md`, `process.md` and `areas.md` - sit
 directly in `.notekeeping/`. There is no `global/` directory: `~/.notekeeping/` **is** global scope.
 
-**`config.md`, `index.md`, `baseline.md` and `adopted.md` at a store's root are the plugin's own
-bookkeeping rather than knowledge** - each has a definition of shape `bookkeeping`, and nothing that
-sweeps the store for knowledge files treats one as knowledge. **`tmp/`**
-holds copies and saved reports, and no definition governs it.
+**`config.md` and `index.md` at a store's root are the plugin's own bookkeeping rather than
+knowledge** - each has a definition of shape `bookkeeping`, and nothing that sweeps the store for
+knowledge files treats one as knowledge. **A run item** - a work item tagged `run-<command>` - **is
+the plugin's record of one run**, never knowledge either: no sweep for knowledge reads it.
 
 ## Resolving it
 
@@ -60,6 +65,22 @@ holds copies and saved reports, and no definition governs it.
 
 **Other stores on this machine** are listed in global's `config.md`, for enumeration only - never for
 resolution: *Knowing that other stores exist*.
+
+## In one turn
+
+**Resolving is one turn of parallel calls, sent in the same message as the skill's own first
+calls.** The walk's levels follow from the working directory alone, so no call in it waits on
+another's answer:
+
+| For each level of the walk | Once |
+|---|---|
+| `Read` `<level>/.notekeeping/config.md` - every store has one, so a hit is the store, with its `schema_version` and `## Projects`, and a failed read is no store at that level | `Read` `~/.notekeeping/config.md` |
+| `Read` `<level>/CLAUDE.local.md` - the project read line, read as the project section below says | `Grep` the shipped release, per the schema-version rule |
+| `Glob` `schema/files/**` with `path` `<level>/.notekeeping` - an overlay | `git branch --show-current` in the working folder, when the skill reads the branch |
+
+**A failed call in that turn is an answer, not an error to recover from** - a file that is not
+there - except a probe that errors or times out, which is *unprobed*, as above. A case the answers
+raise is read from its rule then, and costs a turn of its own.
 
 ## Never infer a store from the filesystem
 

@@ -1,21 +1,22 @@
 ---
 name: doctor
 description: Check the Notekeeping setup and store for what is broken, drifting or worth doing, and repair the unambiguous with --fix. Use when the user asks to check, diagnose or repair the notes setup.
-argument-hint: "[--fix [<text>]] [--baseline] [--page | --no-page]"
+argument-hint: "[--fix [<text>]] [--page | --no-page]"
 allowed-tools: Read, Glob, Grep, Write, Edit, Artifact
 ---
 
-Check the store. Reports by default, saves the report, then asks once whether to repair what is
-unambiguous - *Apply / Publish as a page / Change answers / Not now*. `--fix` repairs only the
-unambiguous, in the same run, and `--baseline` records the findings as acknowledged; nothing else
-writes to the store. Every run saves its report to `.notekeeping/tmp/`, per
-`${CLAUDE_PLUGIN_ROOT}/reference/report-apply.md`'s *The report is saved* - output, not a store write.
-What it needs from a repository it asks git, per
+Check the store. Reports by default, then asks once whether to repair what is unambiguous - *Apply /
+Publish as a page / Change answers / Not now*. `--fix` repairs only the unambiguous, in the same run;
+nothing else writes to the store. **A run with a finding is a run item** - its report, its answers,
+its log - per `${CLAUDE_PLUGIN_ROOT}/reference/run-engine.md` (with
+`${CLAUDE_PLUGIN_ROOT}/reference/bundle-shape.md`, `${CLAUDE_PLUGIN_ROOT}/reference/index-writing.md` and the
+work definitions it names, through `${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md`); a clean run
+mints nothing. What it needs from a repository it asks git, per
 `${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md`; git unavailable, each check that needs it is
 reported *not checked* with the reason - never passed.
 
 Before anything else, in order:
-1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers.
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store at it is not mentioned; one behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers.
 2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
 3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
 
@@ -26,10 +27,10 @@ no reply. That run, not you, carries out the answer. This holds while this file'
 the conversation, and when the command was typed.
 
 **A re-entry? Decide before any check.** Where the conversation holds this skill's report question
-with an answer typed after it, and the report that question named has no `## Applied`, **no check
-runs**: read that report, append the answer as `## Answers` keyed by finding number, show each
-finding's resolved repair, and ask the report question again - the report-apply rule's re-entry, with
-the findings as the items. Otherwise the run is fresh.
+with an answer typed after it, and the run it named still has an open finding, **no check runs**:
+read that run's `report.md`, write each answer onto its finding, show each finding's resolved repair,
+and ask the report question again - the report-apply rule's re-entry, with the findings as the items.
+Otherwise the run is fresh.
 
 Check only what is inside the resolved store. A store you found rather than resolved is the wrong store.
 
@@ -51,9 +52,50 @@ Four prohibitions bound it whatever else is said, and none of them is a severity
 migrate a store**, **never lower a schema stamp**, **never merge tags**, **never remove a registry
 entry.**
 
+## The checks
+
+**Every check - its key, its severity and what it looks for - is in
+`${CLAUDE_PLUGIN_ROOT}/skills/doctor/references/checks.md`.** Read it before the first check, and
+again when the conversation has been compacted since. Each check names the rule it follows; read
+that rule when its check runs:
+
+| Rule | File |
+|---|---|
+| the store-resolution rule | `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` |
+| the resolution cases | `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md` |
+| the projections rule | `${CLAUDE_PLUGIN_ROOT}/reference/projections.md` |
+| the projection-writing rule | `${CLAUDE_PLUGIN_ROOT}/reference/projections-writing.md` |
+| the store-writes rule | `${CLAUDE_PLUGIN_ROOT}/reference/store/writes.md` |
+| the schema-version rule | `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` |
+| the migration rules | `${CLAUDE_PLUGIN_ROOT}/reference/migration.md` |
+| the store walk rules | `${CLAUDE_PLUGIN_ROOT}/reference/store/walk.md` |
+| the config defaults | `${CLAUDE_PLUGIN_ROOT}/reference/config-defaults.md` |
+| the file-facts rule | `${CLAUDE_PLUGIN_ROOT}/reference/store/file-facts.md` |
+| the repo-facts rule | `${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md` |
+| the staleness rule | `${CLAUDE_PLUGIN_ROOT}/reference/staleness.md` |
+| the drain rule | `${CLAUDE_PLUGIN_ROOT}/reference/drain.md` |
+| the promotion rule | `${CLAUDE_PLUGIN_ROOT}/reference/promotion.md` |
+| the content tests | `${CLAUDE_PLUGIN_ROOT}/reference/content-tests.md` |
+| the run engine | `${CLAUDE_PLUGIN_ROOT}/reference/run-engine.md` |
+| `overlay-checks.md` - every `overlay-*` check, where step 2 found an overlay | `${CLAUDE_PLUGIN_ROOT}/skills/doctor/references/overlay-checks.md` |
+
+### Findings across runs
+
+**Every check has a key**, and a finding's fingerprint is `<key> · <subject>` - the subject
+being the path, config key, tag pair, project or store it names - with no change part: the same
+check on the same subject is the same finding. **A finding declined in an earlier doctor run is
+carried, not reported again**, per the run engine's *Carried decisions*; the report lists what it
+carried and from which runs, as items, and the arithmetic says how many - *14 findings - 9 new, 5
+carried*. A carried decision that quietly absorbs a new finding is the failure this command exists
+to prevent, happening inside it.
+
 ### The report question
 
-Where the saved report holds a repairable finding, end with the report question -
+**Before the question, the run item exists**: mint it and write its `report.md`, per the run engine -
+the question names the run, and an answer to it is written there. A re-entry that finds no run
+named is a fresh run, never an apply from the conversation.
+
+Where the run's report holds a repairable finding, end with the report question -
 `${CLAUDE_PLUGIN_ROOT}/reference/report-apply.md`'s `## A yes applies what was shown` - so list each
 repair as what it will write, not only as what is wrong. It is asked per
 `${CLAUDE_PLUGIN_ROOT}/reference/asking.md`. There is no
@@ -61,15 +103,16 @@ repair as what it will write, not only as what is wrong. It is asked per
 
 | Pick | Do |
 |---|---|
-| **Apply** | the in-run repair over exactly the report's repairable findings, as its `## Answers` leave them - read from the report, never the conversation; each finding re-checked before its write; `## Applied` appended |
+| **Apply** | the in-run repair over exactly the run's open repairable findings, as their answers leave them - read from `report.md`, never the conversation; each finding re-checked before its write, and logged |
 | **Publish as a page** | the page, per `${CLAUDE_PLUGIN_ROOT}/reference/report-pages.md`, before anything is repaired; then ask again, without this pick |
 | **Change answers** | ask again, the current answers shown |
-| **Not now** | the report stays, and nothing applies it later: a later session runs `--fix` fresh |
+| **Not now** | the run stays, and nothing applies it later: a later session runs `--fix` fresh |
 
-An answer in words narrows or disambiguates, as `--fix <text>` does - so it can make a finding
-that was *reported and left alone* repairable, and it is bounded exactly as that flag is, below.
-No repairable finding, or no turn to answer in: no question - the report is the output, and the
-page is offered as a line of its own where `report-pages.md` says there is enough to choose between.
+An answer in words narrows or disambiguates, as `--fix <text>` does - so it can make a finding that
+was *reported and left alone* repairable - and it is bounded exactly as that flag is, below. **It can
+also decline** - *decline 7*, *decline all* - which is how a finding stops being reported. No
+repairable finding, or no turn to answer in: no question - the report is the output, and the page is
+offered as a line of its own where `report-pages.md` says there is enough to choose between.
 
 ### `--fix <text>`
 
@@ -77,198 +120,16 @@ The flag takes free text, bounded by the report this run just printed - it narro
 disambiguates, and never reaches past the finding list. With text, or an answer in words, follow
 `${CLAUDE_PLUGIN_ROOT}/skills/doctor/references/fix-text.md`.
 
-## Errors
-
-- The store resolves, exists, and is readable - naming the directories the walk actually covered.
-- **Each registered folder is a real directory** - every `dirs:` line, a project with several
-  checked once per folder. A registered directory that is gone, or that git
-  says is not a repository, is reported, never removed - and `--fix` writes nothing into it, per
-  `${CLAUDE_PLUGIN_ROOT}/reference/projections-writing.md`. Where this run stands in a folder whose read line
-  names that project, say so and name `/nk:init` here, per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`,
-  *A folder the registry has lost*.
-- **A read line resolution would not follow** - one naming another store, or a project the store
-  does not hold - on the path from the working directory up, per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`,
-  *Resolving a project inside the store*. Name the file and the line.
-- **Each workspace in global's `## Workspaces` registry has a store at that path** - probed, per
-  `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, *Knowing that other stores exist*. **Report a stale entry; never remove one, and
-  `--fix` must not**: an absent path is as likely to be an unmounted volume as a deleted store, and
-  the two cannot be told apart from here. A workspace store with no entry is also a finding,
-  filed as an error.
-- **A project shadowed by a nearer workspace** - for each enclosing workspace the walk named
-  (`${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`), a project in its `## Projects` whose folder lies
-  inside a nearer workspace. Sessions there resolve to the nearer store, which does not hold it. Name
-  the project, its folder and both stores. **`--fix` writes nothing**: moving a project between stores
-  is the user's, by hand.
-- the store's `index.md` matches the folders on disk - no orphans, no dangling entries.
-- Every work folder has a `requirements.md` with parseable frontmatter.
-- A file declaring `authority: derived` that carries no refresh recipe.
-- **A read line or the rule file that is missing or wrong**, per
-  `${CLAUDE_PLUGIN_ROOT}/reference/projections.md`. Check all three targets: each registered
-  folder's `<repo>/CLAUDE.local.md` holds, between the markers, the line that reads that project's
-  `NOTES.md`; `<workspace-root>/CLAUDE.local.md` holds the line that reads the workspace's
-  `NOTES.md`, and each enclosing workspace's root holds its own - a workspace root that is also a registered repository holds both lines, in one block; and `~/.claude/rules/notekeeping.md` holds the fixed line and an import of each of
-  global's `NOTES.md`, `instructions.md` and `environment.md`, whether or not the file exists yet. Found by grepping for
-  the path, never by reading the file. A `CLAUDE.local.md` present without a `notes:begin` marker is
-  the same finding as an absent one - the notes are not delivered either way. The rule file has no
-  markers by design: check it by its content, never for a marker. The rule file is expected
-  wherever `~/.notekeeping/` exists. Name the remedy: `/nk:doctor --fix`, which writes each
-  one per `${CLAUDE_PLUGIN_ROOT}/reference/projections-writing.md` - except into a registered directory that is gone, above - the ignore step first, the no-clobber check on every target. Do not
-  say the next save will write one; a save writes none.
-- **An unfinished migration.** A file whose stamp is below its own definition's `schema:` while
-  the store's `schema_version` already claims that release, or a store left mid-run. Name
-  `/nk:upgrade` and say that re-running resumes it, with the outstanding count per definition.
-  Found by resolving each definition and grepping the stamp - never by reading the files -
-  `${CLAUDE_PLUGIN_ROOT}/reference/migration.md` (with `${CLAUDE_PLUGIN_ROOT}/reference/store/walk.md`). **`--fix` does not finish it**: a migration
-  takes a person's confirmation.
-- **A file stamped above its definition's version.** It is excluded from migration by the only
-  test there is, so it will never be converted again. Two causes and you do not guess between them:
-  the plugin is older than the store, or the stamp was raised by hand. **Report both, and repair
-  neither** - lowering a stamp schedules a rewrite of the user's own file, and `--fix` must not.
-- **Store `schema_version` that is not the version this plugin ships.** Check each resolved store,
-  and report each. Older -> name `/nk:upgrade`. Newer -> name the plugin update.
-  Absent -> report it as absent, never as current. The version and the four answers are
-  `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md`; read the number there rather than assuming
-  one. **`--fix` does not migrate** - a migration rewrites knowledge and takes a person's
-  confirmation.
-- **The store is not readable from where the read lines point.** Every read line
-  carries an absolute path above the repository root, and Claude Code reads outside the working
-  directory only where `additionalDirectories` in `~/.claude/settings.json` allows it. Test it by
-  reading a file you know is there - the resolved store's `config.md` and `~/.notekeeping/config.md`
-  - rather than by parsing settings; where the working directory is under the root being tested, the
-  read proves nothing, so check the settings entry for that root instead. A refusal is this finding:
-  the read line points at notes the session cannot read. The repair adds each missing root, under the rule in `${CLAUDE_PLUGIN_ROOT}/reference/store/writes.md`, *The read permission*.
-- **The overlay checks**, where step 2 found an overlay - every overlay definition, per
-  `${CLAUDE_PLUGIN_ROOT}/skills/doctor/references/overlay-checks.md`.
-
-- **A `secrets.md` that would be committed** - inside a repository, git's *ignored* says no; outside
-  one, or git unavailable, no `.gitignore` beside it names it, since a store put under git later would
-  commit every secret in it. `--fix` adds the line, to a `.gitignore` that exists or a new one.
-  **Check it by the file's path; never read `secrets.md`'s content**, here or anywhere in this
-  run, and never quote it.
-
-## Warnings
-
-- A registered folder whose read line git does not ignore - the repo-facts rule's *ignored* on its
-  `CLAUDE.local.md`; `--fix` appends the entry as
-  `${CLAUDE_PLUGIN_ROOT}/reference/projections-writing.md`'s ignore step does. Say why it matters: the read line is there and unignored, so a
-  `git add -A` would commit it. The repository's `.gitignore` is never a finding - the plugin writes none there.
-- **A key in a store's `config.md` that `${CLAUDE_PLUGIN_ROOT}/reference/config-defaults.md` does not
-  list** - a retired setting or a typo. It does nothing,
-  silently. Name the key and the nearest known one; never remove it or rename it, and `--fix`
-  must not - which key was meant is the user's call. `schema_version` and the `## Projects` and
-  `## Workspaces` registry rows are known.
-- **Two project lines on the path** from the working directory up - a block in a subfolder as well
-  as at the repository root - so a session there reads both projects' notes. Name both files; the
-  nearer resolves, per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, *Two project lines on the path*. Repair neither.
-- `NOTES.md` missing for a registered project or for the workspace, or over budget. **A byte budget is
-  checked against the file-facts rule's *size*** (`${CLAUDE_PLUGIN_ROOT}/reference/store/file-facts.md`),
-  every budgeted file in one batch; an estimate where it cannot be had, said so.
-- A knowledge file past `staleness_warn_days`, on the repo or the env axis - days since the stamp
-  are the only trip, per `${CLAUDE_PLUGIN_ROOT}/reference/staleness.md` (with `${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md`). *HEAD moved* is never a
-  warning.
-  Resolve it per `${CLAUDE_PLUGIN_ROOT}/reference/config-defaults.md`; do not assume a threshold.
-- **A memory store this project's directories resolve to that still holds items** - an empty file
-  is an item already cleared, not one - per `${CLAUDE_PLUGIN_ROOT}/reference/drain.md`, which also says why a save run
-  from a subdirectory - or a project that has moved - drains one store while another accumulates
-  items nothing has read. Name the paths; the remedy is a save run from the directory that slug
-  belongs to.
-- **`instructions.md` past its own budget.** Say it in those words rather than
-  as the slice being over: the remedy is retiring an entry or moving a conditional one into its
-  area, not trimming `NOTES.md`.
-- **A global instruction that duplicates or contradicts your harness instructions file**
-  (`~/.claude/CLAUDE.md`). The harness file and the global rule file that imports
-  `~/.notekeeping/instructions.md` both load in every session. A duplicate is what a move
-  that was never trimmed leaves behind - the copy in `~/.notekeeping/instructions.md` is the one to
-  keep, and the remedy is applying the saved adopt report's trim items by number
-  (`/nk:adopt --apply <report> <numbers>`), or removing the lines by hand. A contradiction is two
-  rules and no way to tell which wins. Report either as the pair, quoting each; **never edit either,
-  and `--fix` must not** - which one is right is the user's call.
-- **An item with five or more saving sessions and no `resume.md`** - the count and threshold are
-  `work/resume.md`'s, *When it starts*. A warning: the record is whole, and the next `/nk:save` writes
-  it. **An item under five with none is the shape, never a finding.**
-- **A `resume.md` whose `Covers` line is behind `session.md`.** Compare the last session it names
-  against the latest block in `session.md` - `Grep` `^## session ` with line numbers and take the last match. Behind means the summary was not brought up
-  to the record, and what a later session resumes from is missing whole sessions. Two greps, no
-  reading.
-
-- **A `resume.md` carried forward for five sessions** - `Covers` says `carried forward since <id>`,
-  and five distinct session ids follow `<id>` in `session.md`, counted per `work/resume.md`'s rule 1 -
-  one grep, no reading. The summary has been extended from itself five times over. A warning, since
-  `session.md` still holds the record; the remedy is one `/nk:load --full` before the next save. A
-  `Covers` line with no id is not counted - the next save writes one.
-
-- **An area directory with no row in that scope's `areas/INDEX.md`.** No key sends a session into
-  it, so it is never read.
-- **A `secrets.md` its scope's `NOTES.md` does not list under `## Read on demand`** - a session
-  would ask the user for a login it already has. `--fix` adds the line, per `secrets.md`'s definition.
-- **A read line missing from `NOTES.md`**: the scope has `instructions.md` or `areas/INDEX.md` and its
-  `NOTES.md` carries no line reading it (global: no area lines, where `areas/INDEX.md` exists) - per
-  that scope's `NOTES.md` definition. Nothing points a session at the file, so it is never read.
-  `--fix` adds the line.
-- Content *outside* the block at any read-line target - hand-written, or another tool's - is
-  never a finding. It is expected: the block is appended below it and nothing above it is
-  touched.
-- **An `Unsettled` note** on any entry - a contradiction whose check has not been run
-  (the form in `${CLAUDE_PLUGIN_ROOT}/reference/promotion.md`). Quote the check; never run it here.
-
-## Info
-
-- **More than two workspace levels** - the walk named two or more enclosing workspaces. Allowed;
-  usually a sign that one of them wants to be a project or nothing.
-- **The harness memory store holding old, unfiled items.** Some of this is expected and is not a
-  defect: an item the drain could not place is reported and deliberately left where it is. Report
-  the count and the oldest date.
-- **The content tests, as far as structure shows them** (`${CLAUDE_PLUGIN_ROOT}/reference/content-tests.md`): a register
-  past its split threshold (propose `areas/<topic>/`), the same fact in two projects (a workspace
-  promotion), a workspace or global entry whose text names one project (a demotion candidate).
-- A `decisions.md` entry whose `Would reopen if:` trigger has plausibly fired (same file), and an
-  `instructions.md` entry whose `Retire when:` has - one finding, because they are the same
-  question asked of the two files that carry a trigger. An instruction with no `Retire when:` is a
-  standing one and never a finding. **Report it; never retire one.** An
-  instruction still in force is obeyed on every task, so removing one on inference is the class of
-  act this design forbids everywhere else.
-- **Near-duplicate tags in `index.md`** - two tag values differing only by case, punctuation or
-  plural, or obvious synonyms for one thread (`a11y` and `accessibility`). **Report both spellings
-  with their item counts; never merge them, and this is never an error.** `/nk:save` may mint a tag
-  from the session, so a variant can enter the store without anyone typing it - this is the repair
-  path for that. Merging is a hand edit: only the user knows which spelling they meant, and `--fix`
-  must not touch a label they chose.
-- A work-item tree nested more than two deep.
-- **Saved reports in `.notekeeping/tmp/` more than ten days old**, by the date in the file name
-  (`${CLAUDE_PLUGIN_ROOT}/reference/report-apply.md`, *The report is saved*). **Age decides, not use**:
-  an `## Applied` section is not a reason, because a report applied in part is still the only list
-  of the items it has not applied, and a recent one may still be read or applied. **The newest
-  report of each command is never one of them**, whatever its age: it is the one that command's
-  `--apply` reads when none is named. **`--fix` removes each one** - the file-facts rule's *remove a saved
-  report*, the one removal the plugin makes, or the report written empty where it cannot - and leaves
-  `tmp/.gitignore`. An empty report is a removed one: never count it here. The files themselves the user may delete by hand. **The sweep never reaches
-  `tmp/adopt-*/`** - those are adopt's trim copies, below.
-- **Adopt's trim copies** - one folder per adopt run under `.notekeeping/tmp/adopt-*/`, each holding
-  the files that run trimmed, whole, so a trim can be reverted by copying one back. Report how many
-  runs' copies exist, found by `Glob` on `tmp/adopt-*/**` and counted by folder - a glob never
-  returns a folder itself. **Never empty or delete one, and `--fix` must not**: they are the only
-  way back from a trim.
-
 The report can be a page - the report question's *Publish as a page*, or the line of its own
 where there is no question - per `${CLAUDE_PLUGIN_ROOT}/reference/report-pages.md`, which owns the
 offer, the two flags, and what the page may carry. The terminal report is printed either way.
-
-## The baseline
-
-`--baseline` records the current findings as acknowledged, so day-one noise does not drown day-two
-findings. Write it to the store's `baseline.md`. Report new findings against it by default, and say how
-many are baselined rather than hiding the count.
-
-Both numbers follow `${CLAUDE_PLUGIN_ROOT}/reference/report-shape.md`: the findings are one
-numbered list, the count is its last number, and *new* plus *baselined* is printed as arithmetic that
-reconciles to it. A baseline that quietly absorbs a finding is the failure this command exists to
-prevent, happening inside it.
 
 ## Outside the store
 
 **Report on nothing outside the store beyond the targets this command is given to check.** Those
 targets: the three read-line targets, the `CLAUDE.local.md` files project resolution reads on the
-path from the working directory up, the ignore entry, a registered project's directory, a registry
+path from the working directory up, the ignore entry, a registered project's directory - its
+`AGENTS.md`, and a `CLAUDE.md` there that may import it, read for the hidden-`AGENTS.md` check - a registry
 path being probed, the harness memory stores this project's directories resolve to, the harness
 instructions file (read for the contradiction check and never written),
 `~/.claude/settings.json` (read and added to by the read-permission repair), and **a registered

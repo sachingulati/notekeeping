@@ -5,9 +5,9 @@ title: Minting a work item - its id, its folder, and what makes it a bundle
 
 # A work item's shape
 
-> **Two commands mint, and they mint the same thing.** `/nk:work` opens the space up front;
-> `/nk:save` mints when it has nowhere to write. Each owns **when**. This file owns **what**, and
-> both follow it.
+> **Three mint, and they mint the same thing.** `/nk:work` opens the space up front;
+> `/nk:save` mints when it has nowhere to write; a run of adopt, doctor, review or upgrade mints its
+> run item (the run-engine rule). Each owns **when**. This file owns **what**, and all three follow it.
 
 ## The id
 

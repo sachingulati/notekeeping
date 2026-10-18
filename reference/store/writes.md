@@ -20,12 +20,23 @@ even there nothing a teammate can see is touched; the drain is below the table, 
 | the global rule file | `~/.claude/rules/notekeeping.md` - plugin-owned whole | `init` when it creates global; `doctor --fix` |
 | the ignore step | `<repo>/.git/info/exclude` - never `.gitignore`, and written **before** the read line | the repo read line's writers |
 | the read permission | `~/.claude/settings.json` - **only adding** the entries below | `init`, and `doctor`'s repair |
-| the context-file trim | a `CLAUDE.md` or `CLAUDE.local.md` - **only one in no work tree, or ignored inside one; only lines whose content is in the store; the file copied whole to the store's `tmp/` first**, and only on the yes to a proposal that showed every line | `adopt` |
+| idle compaction off | `~/.claude/settings.json` - **only adding** `"idleCompaction": false`, and only on a yes | `init`, when it creates a store |
+| the context-file trim | a `CLAUDE.md` or `CLAUDE.local.md` - **only one in no work tree, or ignored inside one; only lines whose content is in the store; the file copied whole into the run's `copies/` first**, and only on the yes to a proposal that showed every line | `adopt` |
 
 **The trim is one of two writes that remove rather than generate - the drain is the other -**
 which is why it is bounded twice
 over: by where the file is, and by the content already existing somewhere else.
 The adopt command's trim rule holds the invariant.
+
+### The drain
+
+**The drain clears items from one harness memory store: the one keyed by this session's own working
+directory**, `~/.claude/projects/<slug>/memory/`. Clearing an item is its line removed from that
+store's `MEMORY.md` and its file written empty - nothing is deleted. **An item is cleared only once
+its content is in the store, or in a registered repository's files read in that run**; one with
+neither home stays, and the report names it. No other directory's memory store is written, by any
+command. `save` drains, and `adopt` clears the same store as one of its trims, copying its files into
+the run's `copies/` first - the drain rule holds the rest.
 
 **No read line is written by `save`, `project`, `adopt` or `upgrade`** - the read line does not change
 when the notes do. The projections rule holds what each line says; the projection-writing rule, how it is written without clobbering.
@@ -50,6 +61,22 @@ hand - a settings file the plugin cannot read is one it must not rewrite.
 **Only the user's own settings, never a project's.** `.claude/settings.json` in a repository is
 committed and the team's; this entry is personal, like every other write on this list.
 
+### Idle compaction
+
+**Claude Code compacts a long session left idle** - past its context threshold, about an hour
+after the last request, shortly before the prompt cache expires - and a save after that records only
+what the summary kept. `idleCompaction` turns it off; it is on by default.
+
+**Asked, never set.** A run that creates a store, where `~/.claude/settings.json` does not set
+`idleCompaction`, asks once: turn it off, or keep it. The question says what each costs - on, a long
+session you step away from is summarised before you save it; off, the first message after a long
+break sends the whole conversation uncached - and that `/config` changes it at any time. **A key
+already present, either value, is the user's answer**: it is not asked about and never changed.
+
+**On a yes, add `"idleCompaction": false` at the top level**, by the same rules as the read
+permission: add, never replace; if the file does not parse, write nothing and print the line to add
+by hand. On *Keep it*, nothing is written.
+
 ### The one thing that can leave this machine
 
 **A report, or a summary, can be published as a page** - the report-page rule. It is
@@ -59,8 +86,8 @@ leaves the machine at all.
 **Four properties bound it, and they are the reason it is allowed:** it happens **only on an
 explicit pick** in the run that offers it; it carries **only what that run already printed** to the
 terminal; **it never writes store content** - where publishing fails, the fallback is one local
-file, `.notekeeping/tmp/<command>-<YYYYMMDD>-<n>.html`, bookkeeping rather than knowledge, exactly as a
-saved report is; and **the terminal report stands whether it happens or not**, so nothing depends on
+file, the run item's `report.html`, bookkeeping rather than knowledge, exactly as the
+run's report is; and **the terminal report stands whether it happens or not**, so nothing depends on
 it. **A page published without being asked for is a defect**, exactly as a write outside a store is.
 
 **Nothing else, ever. A write outside a store that is not on this list is a defect, not a judgment
@@ -85,7 +112,8 @@ an unresolvable project.
 ## Store-wide write rules
 
 - **Never delete** - retiring is marking superseded. Two exceptions: a credential the user asks to
-  forget, which `secrets.md`'s definition deletes with its entry, and a saved report in `tmp/` older
-  than ten days, which only `/nk:doctor --fix` removes (the file-facts rule).
+  forget, which `secrets.md`'s definition deletes with its entry, and a source a release's gather step
+  has converted, which only `/nk:upgrade` removes, once it is copied into that run (the file-facts
+  rule, *move a converted source*).
 - **No stubs** - a target with no admitted entry is not created, and an empty heading is never written.
 - **Nothing changed, nothing written** - compare the rendered file to the file; this is the *Every run* paragraph above, not restated here.

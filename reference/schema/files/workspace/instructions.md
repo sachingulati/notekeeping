@@ -7,7 +7,7 @@ shape:       document+append
 owner:       promotion
 trigger:     always
 authority:   original
-budget:      2000 bytes
+budget:      5000 bytes
 ---
 
 ## Question
@@ -25,7 +25,7 @@ register it belongs to. True of every workspace on the machine -> the global `in
 ## Entry format
 The same shape as a project's `instructions.md`, and **the same ceiling**.
 
-**Every scope that admits an instruction gets the same 2000 bytes.** The workspace's `NOTES.md`
+**Every scope that admits an instruction gets the same 5000 bytes.** The workspace's `NOTES.md`
 reads on to this file, so it is charged in
 **every** session under that root, including ones working on no project at all.
 

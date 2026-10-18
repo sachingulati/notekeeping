@@ -47,7 +47,7 @@ resolved the store already produced it. It is never configured and never guessed
 no markers and no header block; it is rewritten entire. It holds, in order:
 
 ```
-Notes are kept with Notekeeping. When the user asks in plain words to save, resume, record something or look it up in the notes, use the matching /nk: command. Never write a notekeeping file directly when a command covers it - run the command.
+Notes are kept with Notekeeping. When the user asks in plain words to start a task or work item, save, resume, record something or look it up in the notes, use the matching /nk: command. Never write a notekeeping file directly when a command covers it - run the command.
 
 @<abs home>/.notekeeping/NOTES.md
 @<abs home>/.notekeeping/instructions.md

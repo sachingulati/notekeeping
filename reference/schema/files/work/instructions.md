@@ -7,7 +7,7 @@ shape:       document+append
 owner:       nk:save
 trigger:     the item has standing behaviour of its own
 authority:   original
-budget:      2000 bytes
+budget:      5000 bytes
 ---
 
 ## Question

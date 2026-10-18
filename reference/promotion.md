@@ -37,10 +37,42 @@ routing: a candidate that touches a row's keys goes to that area's file of the s
 where the area has none** - never to the scope's register, where the area's keys would not send a
 session. A candidate touching no row goes
 to the register; one touching two rows goes to the closer, and the report names the other.
-***Already there* checks the area's file too.** **A promotion that gives a topic its third entry at a
-scope with no area for it says so in one report line** - *3 entries on refunds - `/nk:review` would
-make it an area* - and files the entry as usual. **Count across every register at that scope**,
-whatever the entries' kind: a gotcha and a pattern on refunds are two.
+***Already there* checks the area's file too.**
+
+### Organising as it writes
+
+**Entries are kept organised when they are written** - by `/nk:save` and `/nk:adopt` as they write,
+and by `/nk:review` over what is already there (its findings 1 to 3) - because a register left to
+grow loose is read loose by every session until someone tidies it.
+
+**Related entries are merged.** Where a candidate and an entry already there - or two candidates -
+each say part of one thing, write one entry that combines them: what each says and how it says it,
+**dropping nothing either records**, both corrections kept. The merged entry keeps the file's entry
+format; one that would outgrow it is a topic, below. The report names each merge and the entries it
+joined. Entries that only share a subject are not merged.
+
+**A topic that has earned a shelf gets an area.** Count a topic's entries in **every register at
+that scope** - `gotchas.md`, `patterns.md`, `runbook.md`, `domain.md` and the rest, not only the file
+the candidate goes to - with the candidates included. An entry counts when it is about the topic,
+whatever its kind and whatever else it names: a gotcha on retrying refunds and a pattern on refund
+idempotency keys are two refund entries. **Report the count with where each entry sits.** Where
+there is no area for it yet:
+
+| Writer | Creates the area when |
+|---|---|
+| `/nk:adopt`, `/nk:review` | the topic has **three or more entries** - proposed in the report, created when the report is applied |
+| `/nk:save` | the topic reaches three entries **and at least two of them were already there before this save** - in the registers the count reads anyway, so no work item is read. One save's entries never make an area on their own |
+
+**Creating one**: move the topic's entries, unchanged, into `areas/<topic>/` - each into the file of
+its own type, which keeps that register's shape and threshold - leave one pointer line in each
+register they left, *See `areas/<topic>/gotchas.md` - <what it covers> (<n> entries)*, and write the
+topic's row in `areas/INDEX.md`. **Where `areas/INDEX.md` did not exist, the same write adds
+`NOTES.md`'s two area lines**, per the `NOTES.md` definition: an index nothing reads is never read.
+**The report names every area created** and the entries it took. A save does not ask first: nothing
+is lost, and the report shows it.
+
+**A topic short of that test** is filed as usual, and the report says it is building - *2 entries on
+refunds, 1 from this save*.
 
 ### Worth recording
 

@@ -1,9 +1,11 @@
 # What each finding requires before you may report it
 
-- **1 - merge.** The two entries must make *the same claim*, not cover the same topic - written twice,
-  in one file or two. **Quote both claims side by side** - the sameness is the test, so it is shown
-  rather than asserted, in a refusal exactly as in a proposal. **Applying keeps the claim's own words** - a
-  merge joins two records of one fact, with both corrections, and never restates it.
+- **1 - merge.** The entries must make *the same claim*, or **each say part of one thing** - not
+  merely cover the same topic - in one file or two. **Quote the claims side by side** - the relation
+  is the test, so it is shown rather than asserted, in a refusal exactly as in a proposal. **Applying
+  a same-claim merge keeps the claim's own words**, with both corrections, and never restates it;
+  **applying a part-of-one-thing merge writes one combined entry**, per the promotion rule's
+  *Organising as it writes*, and the proposal shows it.
 - **2 - split.** The split test in the content tests. **Applying writes the area and its row in `areas/INDEX.md`** - one row, in the index definition's entry format.
 - **3 - area.** **Three or more entries on one topic**, across any of the scope's registers, and no
   area for it yet. Quote each entry's claim and the file it sits in, and name the keys the row would

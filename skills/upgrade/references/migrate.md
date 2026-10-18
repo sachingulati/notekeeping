@@ -8,12 +8,13 @@ title: Migrating a store that is behind - the survey, the proposal, the conversi
 **Read this when a store is older than the plugin, or the run is `--apply`, *Apply* or a re-entry.**
 A store at the plugin's version has nothing here to do.
 
-Under `--apply`, *Apply* and a re-entry, steps 5-8 do not run: the saved report is the proposal.
+Under `--apply`, *Apply* and a re-entry, steps 5-8 do not run: the run's report is the proposal.
 *Apply* and `--apply` check each chosen item for staleness, then go to step 10 with those items.
 
 5. Resolve every definition and read its `schema:`. The definitions that moved are
    the only ones with anything to do; a definition still at the store's release is finished before
-   you start, and is never globbed.
+   you start, and is never globbed. **A step marked *gather*** takes its sources from its step, not
+   from the definition's own files - `migration.md`, *Writing a migration*.
 6. **Survey those definitions without reading the store**, per `migration.md`'s *finding what
    is outstanding*: glob each moved definition's files, grep each file for the stamp, and count how
    many sit below the definition's version. A glob and a grep per file and nothing more - so the
@@ -22,11 +23,14 @@ Under `--apply`, *Apply* and a re-entry, steps 5-8 do not run: the saved report 
    as one with nothing to do - `migration.md` says which is which, and why the two look
    identical.
 7. **Propose the work with those counts**, before writing anything: each definition that moved, its
-   step or steps, how many files are outstanding and how many are already done.
-8. **Save the proposal as a report, then ask the report question.** Under `--dry-run` save nothing
-   and stop; with no turn to answer in, stop here - the saved report is the output.
-9. *Apply* - or `--apply` on the saved report - is the go-ahead for the migration as the report
-   holds it, its `## Answers` included; work the steps in order. It is answered after the counts
+   step or steps, how many files are outstanding and how many are already done. **An item is a
+   definition with at least one file outstanding.** A moved definition with none - a gather that
+   found no source, a step with nothing to convert - is counted in the arithmetic line, never
+   numbered as an item.
+8. **Write the proposal as the run's report, then ask the report question.** Under `--dry-run`
+   mint nothing and stop; with no turn to answer in, stop here - the run is the output.
+9. *Apply* - or `--apply` on the run - is the go-ahead for the migration as the report holds it,
+   its items' answers included; work the steps in order, each logged per the report-apply rule. It is answered after the counts
    are on the screen, which is what makes it an approval of them.
 10. **Convert the outstanding files one at a time**, following the `## Migration` section of the
     resolved definition - the user's overlay wins here as everywhere, so a migration converts
@@ -41,7 +45,8 @@ Under `--apply`, *Apply* and a re-entry, steps 5-8 do not run: the saved report 
 11. **Regenerate what is derived rather than migrating it** - `index.md` per
     the index-shape rule and the index-writing rule. Store first, derived last.
 12. **Write `schema_version` last**, once no definition has an outstanding file.
-13. **Report**, per below, and append `## Applied` to the report that was applied.
+13. **Report**, per below, and finish the run - its states, `summary.md` and `resume.md`, per the
+    run engine's phase 7.
 
 **Re-run the survey after the go-ahead and before the first write, and compare it against the
 report.** It is two globs and a grep per file, it costs almost nothing, and it is the only thing
@@ -53,6 +58,15 @@ reason they changed is that one of the two surveys is wrong rather than that the
 underneath you. A later bare run proposes the skipped ones again.
 
 The unit of consent is the migration, not the file.
+
+## Nothing outstanding
+
+**A store behind the plugin whose survey finds no file outstanding** - every moved definition a
+gather with no source or a step with nothing to convert - **is a clean run**: it mints nothing (the
+run engine), writes `schema_version` at once, and its reply names the store, the release before and
+after, and the definitions surveyed. Nothing is converted, so nothing waits on an answer. A
+definition whose glob returned zero where its files would live is a finding, not nothing
+outstanding: it is reported, and `schema_version` stays where it is. `--dry-run` writes nothing.
 
 **Never hold the store in context to migrate it.** A file is read, converted, written and let go. The
 survey in step 6 is what tells you the size of the job, and the stamps are what carry the progress -
@@ -86,7 +100,7 @@ finish it.
 
 **Anything outside the store**, and nothing is ever
 deleted - not an entry, not a file, not a directory. A field is removed only where a step names that
-field.
+field, and a source only where a gather step converted it and its copy is in this run's `copies/`.
 
 ## `--dry-run`
 
@@ -96,7 +110,7 @@ this is the bare command's proposal without its question.
 
 ## Report - a run that migrated, or proposed to
 
-1. **Each store, its version before and after**, by absolute path - every resolved store, said
+1. **Each store, its version before and after**, by absolute path - every store surveyed, said
    separately.
 2. **Each definition that moved: files found, then converted, already done, outstanding and skipped
    - and the four accounting for the files found.** Counts derived from the survey and from what you

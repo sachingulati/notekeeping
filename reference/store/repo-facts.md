@@ -14,7 +14,10 @@ never worked around.
 working folder - the root, branch, commit, origin and *commits since* forms below, and
 `git status --porcelain`, run there without asking; the others may ask. **Any other repository is
 `git -C <dir> <command>`** - it asks the user once, and their answer can cover later calls. Never
-`cd` into a repository to avoid `-C`, and never point git elsewhere with `--git-dir`.
+`cd` into a repository to avoid `-C`, and never point git elsewhere with `--git-dir`. **One bare git
+command per call, and nothing after it** - no `; echo $?`, no `&&`, no pipe: the tool result already
+carries the exit code, and a compound command is one no rule for git covers, so it asks, and refused
+it reads as *git unavailable*.
 
 **Which repository.** For a project, start from the working folder when it resolves to that project
 - by its read line or a `dirs:` match, per the store-resolution rule's *Resolving a project inside
@@ -31,6 +34,7 @@ standing in is reachable only through its registered path. Where no project is i
 | the exclude file | `git rev-parse --git-path info/exclude` | a path, relative to where git ran - a worktree's resolves to the shared one |
 | the origin | `git config --get remote.origin.url` | the URL; exit 1 is *no origin* |
 | commits since | `git log --since=<date> --oneline` | one line each, newest first |
+| recent commits | `git log -10 --format="%h %cs %s"` | the ten newest, each with its commit date. *Commits since* for a run that sends git before it knows the date: keep the lines dated on or after it, and ten kept is *at least ten* |
 | files changed since | `git log --since=<date> --name-only --format=` plus `git status --porcelain` | the union, each path once |
 
 **A branch or commit you did not read from git or the fallback below is not known** - say there is

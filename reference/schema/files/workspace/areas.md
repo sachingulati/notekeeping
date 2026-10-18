@@ -4,8 +4,8 @@ scope:       workspace
 schema:      1
 enabled:     true
 shape:       container
-owner:       nk:review creates it; promotion appends to it
-trigger:     three or more entries on one topic across this scope's registers, or a register past its split threshold with one topic dominating it
+owner:       nk:review, nk:adopt or nk:save creates it; promotion appends to it
+trigger:     three or more entries on one topic across this scope's registers - for nk:save, two of them already there before it - or a register past its split threshold with one topic dominating it
 authority:   original
 budget:      none - each file inside keeps the budget of the register it came from
 ---

@@ -96,7 +96,22 @@ Two amendment kinds, because two different things change:
 `Invalidates` is required in both forms. It is the only mechanical link between a change and the
 files that quietly became wrong because of it, and `/nk:load` names each one under *discrepancies*.
 
+## A run's ask
+**A run item's body is the command it ran** (the run-engine rule) - `type: run`, `tags:` its
+`run-<command>`, and in place of the ask:
+
+```markdown
+**Ran**        /nk:doctor --fix "only the read lines"
+**Arguments**  --fix only the read lines
+**Scope**      the platform workspace store, and global
+**Continues**  0031 | none
+```
+
+The command as typed, the arguments as the run resolved them, the stores and projects it covered,
+and the run it continues. **No rationale, acceptance or boundaries**: a command line has none, and
+none is invented for it. Written once at the mint, and never amended.
+
 ## Who writes it
-Whichever command mints the item - `/nk:work`, or `/nk:save` with nowhere to write - creates the
-body, per the bundle shape. `/nk:save` appends the amendments, and amends `tags:` per its own
-rules - never touching the body.
+Whichever command mints the item - `/nk:work`, `/nk:save` with nowhere to write, or a run - creates
+the body, per the bundle shape. `/nk:save` appends the amendments, and amends `tags:` per its own
+rules - never touching the body, and never a run item's.

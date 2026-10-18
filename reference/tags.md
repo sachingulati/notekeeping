@@ -9,6 +9,10 @@ title: Tags - reuse, mint and announce
 carries any number. The field is `tags:` and the resolver's column is `tags`, the same word on both
 sides; the index shape defines the column.
 
+**`run-` is reserved.** A run item carries `run-<command>` - `run-adopt`, `run-doctor`, `run-review`,
+`run-upgrade` - written by the run engine at the mint, and nothing else carries a tag that starts
+`run-`: neither `--tag` nor the session mints one. A typed one is refused by name.
+
 **Two sources, and both write the same field.**
 
 | Source | Does |

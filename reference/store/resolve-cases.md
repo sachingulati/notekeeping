@@ -87,10 +87,10 @@ directory up. Say so, naming both files.
 ## Reaching a project from outside its folder
 
 **What `dirs:` is still for.** A folder that resolves by its read line needs no registry entry to be
-worked in, but a project you are not standing in - a dependency's branch, a read line `/nk:doctor`
-checks, a repository `/nk:project` reports on - is reachable only through its registered path.
-Finding it any other way would mean scanning. **Where a project has several, a dependency's branch
-and any other single fact come from its main folder, the first line; `/nk:doctor` and
+worked in, but a project you are not standing in - the branch of another project an item names, a
+read line `/nk:doctor` checks, a repository `/nk:project` reports on - is reachable only through its
+registered path. Finding it any other way would mean scanning. **Where a project has several, its
+branch and any other single fact come from its main folder, the first line; `/nk:doctor` and
 `/nk:project` go through every line.**
 
 ## A folder the registry has lost

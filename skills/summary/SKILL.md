@@ -1,6 +1,6 @@
 ---
 name: summary
-description: Write the work item's summary.md - what happened, in plain language, for someone not involved - and offer it as a page. Use when the user asks to write up a tracked piece of work for others.
+description: Write the work item's summary.md - what happened, in plain language, for someone not involved - and offer it as a page. Use when the user asks to write up a task or work item for others.
 argument-hint: "[id] [--dry-run] [--page | --no-page]"
 allowed-tools: Read, Glob, Grep, Write, Edit, Artifact
 ---
@@ -8,7 +8,7 @@ allowed-tools: Read, Glob, Grep, Write, Edit, Artifact
 Generate `summary.md` for a work item. Writes inside the store only.
 
 Before anything else, in order:
-1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers.
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store at it is not mentioned; one behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers.
 2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
 3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
 

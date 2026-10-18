@@ -31,8 +31,8 @@ before anything is applied, so it is read and ticked first, and the question com
 decision. *Apply* publishes nothing. Where the offer would not be made - one finding, `--no-page` -
 the question has no *Publish as a page*.
 
-**`/nk:adopt` asks it as a question of its own** - its view question's *Publish as a page*, the other
-pick printing the items in the terminal (its skill) - because its terminal report is the category
+**`/nk:adopt` offers it in a question of its own** - its first question's *Review as a page*, beside
+*Show here* and its two apply-all picks (its skill) - because its terminal report is the category
 summary, not the items.
 
 **`--page` skips the question and goes straight to it**, for anyone who wants that; **`--no-page`
@@ -48,7 +48,7 @@ infrastructure.
 the session signed in, and the organisation's own settings, and there is no way to ask in advance. So:
 
 - **Offer only when a publishing tool is in your tool list.** If the attempt still fails, or falls
-  back to a local file, **say so in one line - naming `.notekeeping/tmp/<command>-<YYYYMMDD>-<n>.html`
+  back to a local file, **say so in one line - naming the run item's `report.html`
   where that is the file - and stop.** The terminal report is untouched and the user has lost
   nothing.
 - **Never make the page a prerequisite.** No command routes a decision through it, and every
@@ -62,11 +62,11 @@ the session signed in, and the organisation's own settings, and there is no way 
 | **The findings** | each one as the report printed it - same text, same order, same grouping |
 | **Per-item selection** | a control per finding, for the ones this command can act on, **kept by the page** so a refresh shows it - *The selection comes back*, below. **`/nk:doctor`'s page carries none** - it has no `--apply`, so its repairs are picked at its report question |
 | **Per-category selection** | where the report has lettered categories, one control per category that selects or clears its items; the line below names a whole category by its letter |
-| **The `--apply` line** | the exact command for the current selection, shown as text to copy - `/nk:review --apply review-20260928-2 3,7,9`. It works in every session, including one that cannot read the page |
+| **The `--apply` line** | the exact command for the current selection, shown as text to copy - `/nk:review --apply 0034 3,7,9`. It works in every session, including one that cannot read the page |
 | **Take all proposed** | one control, **behind a two-click confirm**, that selects every applyable finding and updates the line above |
 
 **`take all proposed` is the blanket flag's act**: `/nk:review --apply all` applies every
-applyable finding in the saved report.
+applyable finding in the run's report.
 
 ## The selection comes back
 
@@ -74,16 +74,16 @@ applyable finding in the saved report.
 it back** - on claude.ai, the page's `db` capability and the artifact data tool - the page keeps its
 selection there:
 
-- **One document, `selection/current`**, holding `report` - the saved report's name - and `items`,
+- **One document, `selection/current`**, holding `run` - the run item's id - and `items`,
   the numbers and category letters ticked. The page renders from it, so a refresh or another viewer
   sees the same ticks, and writes it on each change. It is the only thing the page writes.
-- **After publishing, write `Page: <url>`** into the saved report, below its header.
+- **After publishing, write `Page: <url>`** into the run's `report.md`, below its header.
 - **Read back only on the pick that asks for it** - *Apply the page's selection*, or a typed answer
-  naming the page - by getting that one document. **Its `report` must be the open report's name**;
+  naming the page - by getting that one document. **Its `run` must be the open run's id**;
   otherwise say whose selection it is, and apply nothing. An empty or missing selection applies
   nothing and says so.
 - **The selection is an answer, never an approval of something new**: it can only name items the
-  report holds, and it lands in `## Answers` before anything is written - the report-apply rule's
+  report holds, and it lands in the items' answers before anything is written - the report-apply rule's
   rules 1-3 apply to it unchanged.
 
 **Without stored state, or without a tool to read it back,** the page builds the `--apply` line
@@ -93,7 +93,7 @@ Say so in one line when publishing: the ticks last until the page is closed.
 ## What the page never does
 
 - **It never writes the store.** It keeps a selection, and a command performs it - through the
-  report's `## Answers`, so the saved report stays what is applied. A page that wrote directly would
+  items' answers in `report.md`, so the run's report stays what is applied. A page that wrote directly would
   put a store edit on a surface the store's own rules do not reach.
 - **It never carries more than the report did.** No finding that was not printed, no store content
   the report did not quote, and no path the report did not name.

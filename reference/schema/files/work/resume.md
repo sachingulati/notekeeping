@@ -33,6 +33,19 @@ stored. The save that reaches five writes the first one, re-derived,
 and every save after rewrites it. Until it exists, the position is the latest session block's
 `next:` line (`work/session.md`). **An item that already has one keeps it**, whatever its count.
 
+**A run item writes it at the end of every run** (the run-engine rule), and it holds
+`## Where things stand` alone, rewritten each time:
+
+```markdown
+## Where things stand
+**Items**    14 - 6 applied, 3 declined, 2 open, 3 carried
+**Next**     the next action - answer 7, apply the open items, or nothing
+**Left**     what the run left for the next one - adopt's pending set, each file with its size and what pointed at it | nothing
+```
+
+The counts are read off `report.md`'s states, as arithmetic per the report shape. A run has no story
+to carry: `report.md` and `log.md` are its record.
+
 ## Entry format
 
 **One rewritten block, then four that accumulate.** The position at the top is regenerated at every

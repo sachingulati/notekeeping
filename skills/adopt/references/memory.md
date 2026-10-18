@@ -36,7 +36,7 @@ read; the report repeats it beside every item placed through it. With no match, 
 unheld, as below, and the report names what it was tried by.
 
 **Its reach is its directory's.** A memory store loads only in sessions under its directory, so its
-items go no wider than the project or workspace holding it - the reach rule in the skill's *Context files*. **A memory store
+items go no wider than the project or workspace holding it - the reach rule in `sources.md`'s *Context files*. **A memory store
 whose directory this store does not hold** - another workspace's, or a moved project neither test above
 matched - **is reported unheld, with the directory its slug names and its item count, and is neither read nor
 touched** - its items could not be placed here, so reading them would only spend the limit: the next step is `/nk:adopt` from the store that holds it, or `/nk:init` to register it.
@@ -51,7 +51,7 @@ categories of the files they change.
 one a session writes, per the drain's *A session clears only its own directory's memory store*. It is
 one trim category - *trim · memory `<slug>`* - its items listed with the store file or work item each
 went to, and covered by *Apply and trim* or *Trim only* like any trim, per `trim.md`. **Before its first item is
-cleared, the memory store's files are copied** into the run's `tmp/adopt-<YYYYMMDD>-<n>/memory/<slug>/`,
+cleared, the memory store's files are copied** into the run's `copies/memory/<slug>/`,
 `MEMORY.md` included, and clearing is the drain's two writes. A memory store is in no work tree, so it
 is always trimmable.
 

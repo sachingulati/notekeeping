@@ -3,12 +3,13 @@ name: budget
 description: Show what the recorded notes cost in context - always loaded, read on demand, and registers - per scope and file. Use when the user asks how much context the notes use or what they cost.
 argument-hint: "[project] [--all]"
 allowed-tools: Read, Glob, Grep
+effort: low
 ---
 
 Report what is actually being spent. **Reads only - this command writes nothing.**
 
 Before anything else, in order:
-1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers.
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store at it is not mentioned; one behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers.
 2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
 3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
 
@@ -50,14 +51,10 @@ row itself.
 
 ## Always name the window
 
-A share of context is only meaningful against a window: the same store is one percentage of a small
-window and a much smaller one of a large window. Report the value of `context_window_tokens` that
-was used.
-
-**Read that value; never assume one.** Resolution order and the shipped default are in
-`${CLAUDE_PLUGIN_ROOT}/reference/config-defaults.md`. Reporting against the wrong window silently
-misstates every percentage in the section - which is why the window is printed as its own line
-before any percentage exists, rather than trusted to be remembered while the sections are written.
+A share of context is only meaningful against a window. **Notekeeping runs on 1M-context models
+only**, per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`, so every share is of 1,000,000
+tokens - printed as its own line before any percentage exists, so the reader knows what the
+percentages are of.
 
 ## The shape
 
@@ -69,7 +66,7 @@ came from, and what it costs against the window.
 
 ```
 Budget - <store scope>
-Window: <context_window_tokens> tokens (<where that value came from>)
+Window: 1,000,000 tokens
 
   File                Full     Used / limit                  Share of window
 
@@ -93,8 +90,7 @@ The column header is printed once, under the window line, and names all four col
 threshold for a register), *Share of window*. Two percentage columns side by side are unreadable
 without it: one is against the file's own limit, the other against the context window.
 
-`<ctx pct>` is always the share of the window named on line 2 - the configured value, never a
-hardcoded one.
+`<ctx pct>` is always the share of the window named on line 2.
 
 A column that does not apply carries `-`, never a blank and never a zero. A file with no ceiling
 is not a file at 0%.

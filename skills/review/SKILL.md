@@ -1,21 +1,23 @@
 ---
 name: review
 description: Read the recorded knowledge - entries, not structure - and propose what to merge, split, retire, demote or promote; saves the report for --apply. Use when the user asks to prune, tidy, or review what has been recorded.
-argument-hint: "[project] [--since <date>] [--apply [<report>] [all | <numbers>]] [--dry-run] [--page | --no-page]"
+argument-hint: "[project] [--since <date>] [--apply [<run>] [all | <numbers>]] [--dry-run] [--page | --no-page]"
 allowed-tools: Read, Glob, Grep, Write, Edit, Artifact, ArtifactData
 ---
 
-Read the store and propose what should change. Every proposal is saved as a report, and then
-asked about once - *Apply / Publish as a page / Change answers / Not now* - per
-`${CLAUDE_PLUGIN_ROOT}/reference/report-apply.md`'s `## A yes applies what was shown`. An answer in
-words - *"yes, but not 3"*, *"3: merge into the auth entry"* - re-enters this skill, is written into
-the report, and is asked about again; nothing is applied from the conversation. `--apply` applies
-a saved report - all of it, the findings you name, or one at a time - in this session or any later
-one. Nothing is written without one or the other. Every question this skill asks - the scope
+Read the store and propose what should change. **A pass with a finding is a run item** - its
+report, its answers, its log - per `${CLAUDE_PLUGIN_ROOT}/reference/run-engine.md` (with
+`${CLAUDE_PLUGIN_ROOT}/reference/bundle-shape.md`, `${CLAUDE_PLUGIN_ROOT}/reference/index-writing.md` and the
+work definitions it names), and it is asked about once - *Apply / Publish as a page / Change answers
+/ Not now* - per `${CLAUDE_PLUGIN_ROOT}/reference/report-apply.md`'s `## A yes applies what was
+shown`. An answer in words - *"yes, but not 3"*, *"decline 5"*, *"3: merge into the auth entry"* -
+re-enters this skill, is written onto the run's items, and is asked about again; nothing is applied
+from the conversation. `--apply` applies a run - all of it, the findings you name, or one at a time
+- in this session or any later one. Nothing is written without one or the other. Every question this skill asks - the scope
 below, the report question, the walk - follows `${CLAUDE_PLUGIN_ROOT}/reference/asking.md`.
 
 Before anything else, in order:
-1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers.
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store at it is not mentioned; one behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers.
 2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
 3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
 
@@ -30,8 +32,8 @@ no reply. That run, not you, carries out the answer. This holds while this file'
 the conversation, and when the command was typed.
 
 **A re-entry? Decide before the scope and before any pass.** Where the conversation holds this
-skill's report question with an answer typed after it, and the report that question named has no
-`## Applied`, **there is no pass**: follow the re-entry in
+skill's report question with an answer typed after it, and the run that question named still has an
+open finding, **there is no pass**: follow the re-entry in
 `${CLAUDE_PLUGIN_ROOT}/skills/review/references/apply.md`. Otherwise the run is fresh.
 
 ## What this is, against `/nk:doctor`
@@ -70,7 +72,7 @@ reports two.
 
 | # | Finding | Proposal |
 |---|---|---|
-| 1 | Two entries making the same claim | merge into one, keeping both corrections |
+| 1 | Entries making the same claim, or each saying part of one thing | merge into one, keeping both corrections |
 | 2 | A register past its split threshold, with a dominant topic | split into `areas/<topic>/` |
 | 3 | Three or more entries on one topic across the scope's registers, with no area for it | create that topic's area |
 | 4 | An entry marked `Unsettled` whose check is now cheap to run | propose running it - the check, verbatim |
@@ -81,15 +83,23 @@ reports two.
 | 9 | A work item with no session block for longer than `staleness_warn_days`, and no closing block | close it, or say why it is open |
 | 10 | `NOTES.md` holding something needed on one task in ten | demote it to the file it belongs to |
 
+**A finding's fingerprint** (the run engine's *Carried decisions*) is `<n> · <the files it names,
+sorted>`, and its change part one text hash over the entries it names - each entry's text, sorted,
+joined - so it comes back when an entry it names is edited, added or removed. **Finding 9's** is
+`9 · <the item's id>`, its change part the date of the item's newest session block. **A finding
+declined in an earlier review run is carried**, and the report lists it as such.
+
+**Run items are not knowledge** - nothing here reads one, and finding 9 never proposes closing one.
+
 Before reporting a finding, apply its test in `${CLAUDE_PLUGIN_ROOT}/skills/review/references/findings.md`
 (with `${CLAUDE_PLUGIN_ROOT}/reference/content-tests.md`, `${CLAUDE_PLUGIN_ROOT}/reference/promotion.md`
-for the `Unsettled` form, `${CLAUDE_PLUGIN_ROOT}/reference/schema/files/work/session.md` for finding 9,
+for the `Unsettled` form and for findings 1 to 3 - *Organising as it writes* - `${CLAUDE_PLUGIN_ROOT}/reference/schema/files/work/session.md` for finding 9,
 and the scope's `areas-index.md` definition for 2 and 3). Where one entry earns two findings, rank
 them per `${CLAUDE_PLUGIN_ROOT}/skills/review/references/overlap.md`.
 
 ## Report, and what a proposal looks like
 
-Group by finding type, most confident first. Each proposal carries:
+Group by finding type, most confident first, a blank line between proposals. Each proposal carries:
 
 ```
 <type> · <what you read>
@@ -105,7 +115,8 @@ Say what you read and found nothing in. A pass that reports four findings over 6
 say it read 60; otherwise a clean register is indistinguishable from one nobody looked at.
 
 Number the findings as you print them, and the count is the last number - one list, nothing
-reported outside it, and any split into categories printed as arithmetic that reconciles to it.
+reported outside it, carried decisions included, and any split into categories printed as arithmetic
+that reconciles to it.
 `${CLAUDE_PLUGIN_ROOT}/reference/report-shape.md`.
 
 The report can be a page - the report question's *Publish as a page*, before anything is applied,
@@ -114,8 +125,8 @@ flags, and what the page may carry. The terminal report is printed either way.
 
 ## `--apply`
 
-A re-entry, *Apply*, and `--apply` on a saved report follow `${CLAUDE_PLUGIN_ROOT}/skills/review/references/apply.md`
-(with `${CLAUDE_PLUGIN_ROOT}/reference/report-apply.md`, and the scope's `NOTES.md` and `areas-index.md`
+A re-entry, *Apply*, and `--apply` on a run follow `${CLAUDE_PLUGIN_ROOT}/skills/review/references/apply.md`
+(with `${CLAUDE_PLUGIN_ROOT}/reference/report-apply.md`, `${CLAUDE_PLUGIN_ROOT}/reference/promotion.md` for an area or a merge, and the scope's `NOTES.md` and `areas-index.md`
 definitions per `${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md` for a split) - what is applyable, the walk, no turn to
 answer in, and the rules under every form. Read it before the first write.
 A write that leaves a file with a numeric `budget:` at or past `budget_notice_pct` of it says so, per

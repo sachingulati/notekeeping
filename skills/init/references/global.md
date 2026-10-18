@@ -22,4 +22,4 @@ looks answered. Files appear when promotion first writes to them.
 projections rule: the fixed line, then an import of each of global's `NOTES.md`, `instructions.md`
 and `environment.md`, **whether or not each exists yet** - a missing import is skipped and loads once
 the file is created, so no later write touches the rule file. **Whichever route creates global
-writes it** - the automatic form's step 1, or a workspace creation that finds global missing.
+writes it** - the bare form, at `$HOME` or before its question, or a workspace creation that finds global missing.

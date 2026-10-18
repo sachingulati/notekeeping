@@ -49,6 +49,12 @@ directory's basename.
    **A repo that already holds a `CLAUDE.local.md` of the user's own is the ordinary case here.**
    Append below it, never modify a byte above it, and search the whole file for the markers first.
 
+   **A repo with an `AGENTS.md` and no `CLAUDE.md` or `.claude/CLAUDE.md` importing it** stops
+   loading that `AGENTS.md` once the read line exists - Claude Code reads `AGENTS.md` only where no
+   `CLAUDE.md` or `CLAUDE.local.md` is present. `Read` `<repo>/AGENTS.md` before the write; where it
+   exists, say so in the report, with the line that brings it back - `@AGENTS.md`, above the block in
+   that `CLAUDE.local.md` - which is the user's to add. Write nothing for it.
+
    **Only this project's line.** The repo line reads one project's notes, so several registered in
    one run get one write each and nothing is concatenated. **The one exception is a repo at the
    workspace root** - a monorepo: its file already carries the workspace's line, so the block is

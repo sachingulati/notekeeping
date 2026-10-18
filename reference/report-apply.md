@@ -1,106 +1,110 @@
 ---
 doc:   report-apply
-title: A saved report, the question it asks, and --apply
+title: A run's report, the question it asks, and --apply
 ---
 
 # Applying a report
 
-**The report itself - one numbered list, the count read off it - is the report-shape rule.** This is what happens after it is printed.
+**The report itself - one numbered list, the count read off it - is the report-shape rule. The run
+item that holds it - `report.md`, `log.md`, its states - is the run-engine rule.** This is what
+happens after the report is printed.
 
 ## A yes applies what was shown
 
-**A proposal and the write that follows it are one decision, and the saved report carries it.** What
-was shown is the report's resolved list - every item, with the answer each was given - and that list
-is what gets written. Nobody re-runs the pass to act on what they just read.
+**A proposal and the write that follows it are one decision, and the run's `report.md` carries it.**
+What was shown is the report's items - every one, with the answer each was given - and that is what
+gets written. Nobody re-runs the pass to act on what they just read.
 
-**The question.** After the report is saved (below), ask once, with `AskUserQuestion`:
+**The question.** After `report.md` is written, ask once, with `AskUserQuestion`:
 **Apply / Publish as a page / Change answers / Not now.** *Publish as a page* appears only where the
-skill offers its report as a page, and before anything is applied: it publishes the saved report and
-asks this question again, with *Apply the page's selection* in its place. An item with a question of its own - *merge into which entry?* -
-shows it in the report, numbered with its item, before the question. **`/nk:adopt` asks two
-questions instead** - a view question, then *Apply / Apply and trim / Trim only / Not now* - per its
-skill; everything below holds for its report question as for this one.
+skill offers its report as a page, and before anything is applied: it publishes the report and asks
+this question again, with *Apply the page's selection* in its place. An item with a question of its
+own - *merge into which entry?* - shows it in the report, numbered with its item, before the
+question. **`/nk:adopt` asks a question of its own** - *Apply all and trim / Apply all / Review as a
+page / Show here*, and after a review *Apply / Apply and trim / Trim only / Not now* - per its skill;
+everything below holds for its questions as for this one, except that a typed answer to its
+**first** question is carried out as the pick it names, per its skill, rather than asked again.
 
 | Pick | Do |
 |---|---|
-| **Apply** | read the report - its items and its `## Answers` - **never the conversation**; check each item before its write (below); append `## Applied` |
-| **Publish as a page** | publish the saved report, per the report-pages rule; then ask again, with the next pick in its place |
-| **Apply the page's selection** | read the selection the page kept (the report-pages rule, *The selection comes back*); write it into the report as `## Answers` - the items picked, everything else *skip* - show it, then *Apply*. A typed answer naming the page - *apply what I ticked* - is this pick |
+| **Apply** | read `report.md` - its items, their states and answers - **never the conversation**; apply every open item with something to write, checking each before its write (below) |
+| **Publish as a page** | publish the report, per the report-pages rule; then ask again, with the next pick in its place |
+| **Apply the page's selection** | read the selection the page kept (the report-pages rule, *The selection comes back*); write it into `report.md` as answers - the items picked, everything else *skip* - show it, then *Apply*. A typed answer naming the page - *apply what I ticked* - is this pick |
 | **Change answers** | ask again, the current answers shown |
-| **Not now** | the report stays. Where the skill has `--apply`, a later `--apply` applies it; where it does not, a later run starts fresh |
+| **Not now** | the run stays as it is, and a later `--apply` applies it |
+
+**Three answers an item can take, beside what it proposed:**
+
+| Answer | The item's state | Next run |
+|---|---|---|
+| **skip** - *not 4*, *skip 4* | skipped | finds it again |
+| **decline** - *decline 4*, *never 4*, *decline all* | declined | **carries it** - not proposed again until its change part moves (the run-engine rule) |
+| **its own question's answer** - *3: merge into auth* | stays open, the answer recorded | applies it as answered |
+
+**Declining is the only way a finding stops coming back**, and it is said in words: a skip is *not
+now*, never *no*.
 
 **An answer typed rather than picked is not applied in the turn it arrives in** - *yes*, *yes but
-not 4*, *3: merge into auth* alike. The skill is started again with its original arguments, and that
-run is a **re-entry** when the conversation holds this skill's question and an answer after it, **and
-the report that question named has no `## Applied`**. That report is the open one. Otherwise the run
-is fresh, and passes again.
+not 4*, *decline 7*, *3: merge into auth* alike. The skill is started again with its original
+arguments, and that run is a **re-entry** when the conversation holds this skill's question and an
+answer after it, **and the run that question named still has an open item**. Otherwise the run is
+fresh, and passes again.
 
-**On a re-entry there is no pass.** Read the open report; append the answers to it as
-**`## Answers`**, keyed by item number - *3: merge into auth*, *5: skip*, and a plain *yes* as one
-line per applyable item; show each item's resolved write; then ask the question again. A second
-re-entry appends to the same section, and the later answer to an item wins.
+**On a re-entry there is no pass.** Read the run's `report.md`; write each answer onto its item - the
+`answer` line, the later answer replacing the earlier, and the state where the answer sets one - a
+plain *yes* answering every open item with something to write; show each item's resolved write; then
+ask the question again.
 
-1. **What was approved is what gets written** - every item the answers leave in, and nothing that was
-   not in the report. **Nothing is classified, routed or numbered again**: a second derivation can
-   land somewhere defensible and different, and then what was approved and what was written are two
-   things nobody reconciled.
+1. **What was approved is what gets written** - every open item the answers leave in, and nothing
+   the report does not hold. **Nothing is classified, routed or numbered again**: a second derivation
+   can land somewhere defensible and different, and then what was approved and what was written are
+   two things nobody reconciled.
 2. **An answer can narrow the list** - *"yes, but not 4"*, *"only the store"* - and the narrowed
    list is then what gets written. **It never adds to it.**
-3. **Before the first write, check that what the proposal read has not moved** - the files it
-   quoted, the counts it printed. Where something has, write nothing: say what moved, and propose
-   again. This checks that the approval still describes the material; it is not a second decision.
-4. **No turn to answer in means nothing is written.** The report is saved, and a later `--apply` is
+3. **Before each write, check that what the item read has not moved** - the text it quoted, the
+   count it printed. Where it has, **write nothing for that item**: mark it **stale**, log it, and go
+   on to the next. This checks that the approval still describes the material; it is not a second
+   decision. Applying a run twice is therefore safe: what was already written no longer matches.
+4. **No turn to answer in means nothing is written.** The run item is kept, and a later `--apply` is
    how it gets applied. **No flag approves a proposal before it exists.**
-5. **`--dry-run` shows the proposal, does not ask, and saves no report.**
+5. **`--dry-run` shows the proposal, does not ask, and mints nothing.**
 
-## The report is saved, and `--apply` applies it
+## Each write is logged
 
-**`review`, `adopt` and `upgrade` save every proposal they make**, and `--apply` acts on a saved
-report - never on a proposal that has not been made yet. **`/nk:doctor` saves one too, every run, but
-it has no `--apply`** - `--fix` acts on what the same run just found, immediately. The report is what
-someone could read; the write carries it out. That is rule 1 above across a gap in time: nothing is
-classified, routed or numbered again, because the numbers are in the file.
+**Every write an apply makes is logged in `log.md` before it starts and after it lands**, in the
+shape the run-engine rule's *Logging a write* gives. The item's state moves to **applied** only after
+its `done`. A write outside the store
+copies its file into `copies/` first, logged too. **That is what makes a stopped apply resumable**:
+the next `--apply` on the run finds every item with a `start` and no `done`, and checks its target
+before writing.
 
-**Where it goes.** `.notekeeping/tmp/<command>-<YYYYMMDD>-<n>.md`, written before the question is
-asked, and named on the last line of the report. The
-directory is created by the first report, together with a `tmp/.gitignore` holding `*`. **A report
-is output, not store content**: writing one never counts as changing the store.
+## `--apply`
 
-**The name has a date and a counter, never a time.** The date is the session's; there is no clock to
-read, so a time would be invented. `<n>` is one more than the highest this command already has in
-`tmp/` for that date - `tmp/<command>-<YYYYMMDD>-*.md`, by Glob - and `1` when there is none. **A
-report is never overwritten**: where the name turns out to be taken when writing, take the next
-number. The report holds no time anywhere.
+**`review`, `adopt` and `upgrade` take `--apply`**, and it acts on a run that already exists - never
+on a proposal that has not been made yet. **`/nk:doctor` has none** - `--fix` acts on what the same
+run just found, immediately - but its runs are items like any other, and their answers carry.
 
-**What it holds.** The report as printed - one numbered list per the rules above - and, for each
-item, **the exact write it would make** and **the text it read to propose it**, so the item can be
-checked against the store later. A header names the command, the store, the date and the arguments
-the run was given. A publish adds a `Page: <url>` line; a re-entry, or the page's selection, adds `## Answers`; an
-apply adds `## Applied`. Nothing else changes in it after it is saved.
-
-**`--apply [<report>] [all | <numbers> | <categories> | <text>]`:**
+**`--apply [<run>] [all | <numbers> | <categories> | <text>]`:**
 
 | Part | Means |
 |---|---|
-| `<report>` | a report's file name or path. **Omitted: the latest report this command saved in this store** - the latest date, then the highest `<n>` |
-| `all` | every applyable item in the report |
+| `<run>` | a run item - its id, or anything the item rule resolves to it. **Omitted: the latest run of this command in this store** (the run-engine rule, *Finding the run*) |
+| `all` | every open item with something to write |
 | `<numbers>` | those items - `1,3,7`, or a range, `1-319`. A number is read against the report, so it cannot drift |
 | `<categories>` | where the report has lettered categories (`/nk:adopt`), every item in them - `A,C`; letters and numbers mix, `A,C,412` |
 | `<text>` | narrows within the report where the command accepts it - *"only the gotchas"*. It never reaches past the report |
-| nothing | walk the report's applyable items one at a time: show each write, then ask with one `AskUserQuestion` per item - *apply*, *skip* or *stop*. **With no turn to answer in, a walk cannot start** - apply nothing, and say `all` or numbers are needed |
+| nothing | walk the run's open items one at a time: show each write, then ask with one `AskUserQuestion` per item - *apply*, *skip*, *decline* or *stop*. **With no turn to answer in, a walk cannot start** - apply nothing, and say `all` or numbers are needed |
 
-**Say which report you are applying before anything else** - the first line, before any check or
-write: its file, when it was saved, the arguments that run was given, and how many items it holds.
-*"Applying review-20260928-2 - saved today, `/nk:review web-client`, 14 findings, 9
-applyable."* Whoever typed `--apply` - especially with no report named - sees which run they are
-approving before it is carried out.
+**Say which run you are applying before anything else** - the first line, before any check or
+write: its id and title, the command line it ran, its date, and its items by state. *"Applying 0034
+- Review run on web-client, 2026-09-28, `/nk:review web-client`: 14 items - 9 open, 3 declined, 2
+carried."* Whoever typed `--apply` - especially with no run named - sees which run they are approving
+before it is carried out.
 
-**No saved report, or the one named does not exist?** Say so, name the bare command that makes one,
-and write nothing.
+**No run of this command, or the one named is not a run of it?** Say so, name the bare command that
+makes one, and write nothing. **A run with no open item to write** says so and applies nothing.
 
-**Before each write, check the item against the store** - rule 3, per item. Where the text it read
-has changed since the report was saved, **skip that item and say it went stale**; never apply it
-blind. Applying a report twice is therefore safe: what was already written no longer matches.
-
-**After applying, append `## Applied` to the report** - the date and the items written, skipped and
-stale. Which saved reports `/nk:doctor --fix` empties is doctor's rule, never this file's. **An empty report is a removed one**: `--apply` says so and applies nothing.
+**After applying, the record is the run's own**: the states in `report.md`, the lines in `log.md`,
+and `summary.md` and `resume.md` rewritten, per the run-engine rule's phase 7. The terminal says what
+was written, skipped, declined and stale - counted from `log.md` and the states, never from the
+proposal.

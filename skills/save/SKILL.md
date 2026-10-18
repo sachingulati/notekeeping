@@ -1,6 +1,6 @@
 ---
 name: save
-description: Checkpoint the current session into the work item's record - where things stand, what was learned, the harness memory - so it survives /clear. Use when the user asks to save, checkpoint, wrap up, or keep what this session found.
+description: Checkpoint the current session into the work item's (the task's) record - where things stand, what was learned, the harness memory - so it survives /clear. Use when the user asks to save, checkpoint, wrap up, or keep what this session found.
 argument-hint: "[id...] [--project <name>] [--tag <name>] [--dry-run]"
 allowed-tools: Read, Glob, Grep, Write, Edit
 ---
@@ -9,7 +9,7 @@ The checkpoint. Idempotent and safe to run many times per session - that is the 
 the exception.
 
 Before anything else, in order:
-1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers.
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store at it is not mentioned; one behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers.
 2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
 3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
 
@@ -28,6 +28,23 @@ register a promotion would write to - **is skipped and the save goes on**: name 
 on a warn line, and list a promotion it held back as not written.
 
 Every repository fact it needs comes from git, per `${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md`.
+
+## Five turns
+
+**A save is five turns of parallel calls - the rules, the store, what the writes change, the writes,
+the report.** Each turn sends every call it names in one message. The steps below say how each
+answer is used and what each write holds; they add no calls of their own.
+
+| Turn | Sends, all at once |
+|---|---|
+| **A - the rules** | `Read` every reference the steps cite: `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`, `${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md`, `${CLAUDE_PLUGIN_ROOT}/reference/item.md`, the `resume.md` and `session.md` definitions, `${CLAUDE_PLUGIN_ROOT}/skills/save/references/resume.md`, `${CLAUDE_PLUGIN_ROOT}/reference/promotion.md`, `${CLAUDE_PLUGIN_ROOT}/reference/drain.md`, `${CLAUDE_PLUGIN_ROOT}/reference/tags.md`, `${CLAUDE_PLUGIN_ROOT}/reference/index-writing.md` and `${CLAUDE_PLUGIN_ROOT}/reference/schema/budget-notice.md` |
+| **B - the store and the targets** | resolving, per `resolve.md`, *In one turn*; in the working folder **`git branch --show-current` and `git rev-parse HEAD`, each its own call**; `Grep` `index.md` for every target - the ids given, or each item the conversation and the branch name, step 1; the memory listing, per `drain.md`, *Finding it* |
+| **C - what the writes change** | for each target, `resume.md` - a failed `Read` is an item without one - and `session.md`'s `^## ` lines by `Grep` with line numbers - nothing of it where this session already read it; each memory file; for each candidate fact, the register its route names, with that scope's `areas/INDEX.md`; and the `NOTES.md` whose stamp step 7 refreshes |
+| **D - the writes** | every write of steps 2 to 10, each its own call - `Write` for a file rewritten whole, `Edit` for one appended to |
+| **E - the report** | the report, ending in the line it earns |
+
+**Only a case the answers raise reads its rule, and spends a turn on it** - a mint, a question, a
+file behind its definition, an overlay.
 
 ## The steps, in order
 
@@ -65,7 +82,8 @@ whether to mint, never what a bundle looks like. `/nk:work` mints against the sa
 two produce identical bundles.
 
 1. **`[id...]` given?** Resolve each per `${CLAUDE_PLUGIN_ROOT}/reference/item.md`. Each that resolves
-   is a target. If one does not, ask whether to mint it as a new item, naming any close
+   is a target - **except a run item** (tagged `run-<command>`), which is the run's own record and is
+   never saved into: say so, name the run's command and `--apply`, and leave it out. If one does not, ask whether to mint it as a new item, naming any close
    match (`0012` for `12`) - an id that does not resolve is never minted unasked; `/nk:work --id <id>` mints
    it explicitly.
 2. **No `[id]`?** Infer **every item the session worked on** - wrote to, decided something for, or

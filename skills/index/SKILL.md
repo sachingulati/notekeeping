@@ -2,13 +2,14 @@
 name: index
 description: Rebuild Notekeeping's work-item index from each item's frontmatter; save and work keep it current. Use when the user asks to rebuild the work-item index, or a work item is missing from it.
 allowed-tools: Read, Glob, Grep, Write
+effort: low
 ---
 
 Force a rebuild of the store's `index.md`. This exists for repair - `/nk:save` regenerates it as a
 matter of course.
 
 Before anything else, in order:
-1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers.
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store at it is not mentioned; one behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers.
 2. **Infer before asking**: read what the conversation already states, and ask only what is still open.
 
 Enumerate work items only from inside the resolved store.

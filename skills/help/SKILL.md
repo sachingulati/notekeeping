@@ -3,6 +3,7 @@ name: help
 description: Explain how Notekeeping works - what each of its skills does, what each store file is for, what its terms mean. Use when the user asks how Notekeeping or one of its commands works.
 argument-hint: "[topic]"
 allowed-tools: Read, Glob, Grep
+effort: low
 ---
 
 Explain Notekeeping. `$ARGUMENTS` narrows to one topic - a command, a file, or a term.

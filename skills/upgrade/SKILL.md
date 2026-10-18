@@ -1,19 +1,22 @@
 ---
 name: upgrade
 description: Move a Notekeeping store to the schema version this plugin ships, converting only what is outstanding; saves the report for --apply. Use when the user asks to upgrade the notes store's format or schema.
-argument-hint: "[--apply [<report>] [all | <numbers>]] [--dry-run] [--page | --no-page]"
+argument-hint: "[--apply [<run>] [all | <numbers>]] [--dry-run] [--page | --no-page]"
 allowed-tools: Read, Glob, Grep, Write, Edit, Artifact, ArtifactData
 ---
 
-Move a store from an older schema version to the one this plugin ships. Every proposal is saved as
-a report, and then asked about once - *Apply / Publish as a page / Change answers / Not now* - per
-the report-apply rule's `## A yes applies what was shown`. An answer in
-words - *"yes, but not 2"* - re-enters this skill, is written into the report, and is asked about
-again; nothing is applied from the conversation. `--apply` applies a saved report, in this
-session or a later one. Nothing is written without one or the other. Every question this skill
-asks - the report question, the store's version where it has none, another workspace's
-confirmation, the walk - follows `${CLAUDE_PLUGIN_ROOT}/reference/asking.md`. Writes inside the store
-only.
+Move a store from an older schema version to the one this plugin ships. **A proposal is a run
+item** - its report, its answers, its log, and `copies/` for what a migration moves - per
+`${CLAUDE_PLUGIN_ROOT}/reference/run-engine.md` (with `${CLAUDE_PLUGIN_ROOT}/reference/bundle-shape.md`
+and the work definitions it names), and it is asked about once - *Apply / Publish as a page / Change
+answers / Not now* - per the report-apply rule's `## A yes applies what was shown`. An answer in
+words - *"yes, but not 2"* - re-enters this skill, is written onto the run's items, and is asked about
+again; nothing is applied from the conversation. `--apply` applies a run, in this session or a later
+one. Nothing is written without one or the other - except in a store with nothing outstanding, whose
+one write is its `schema_version` (the migration reference, *Nothing outstanding*). **One run covers
+every store on the machine, from wherever it is typed** - *Every store on the machine*, below. Every
+question this skill asks - the report question, a store's version where it has none, the walk -
+follows `${CLAUDE_PLUGIN_ROOT}/reference/asking.md`. Writes inside the stores only.
 
 Before anything else, in order:
 1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs.
@@ -27,40 +30,44 @@ write, no reply. That run, not you, carries out the answer. This holds while thi
 still in the conversation, and when the command was typed.
 
 **A re-entry? Decide before any survey.** Where the conversation holds this skill's report question
-with an answer typed after it, and the report that question named has no `## Applied`, **there is no
-survey**: read that report, append the answer as `## Answers` keyed by item number, show each item's
+with an answer typed after it, and a run that question named still has an open item, **there is no
+survey**: read each named run's `report.md`, write each answer onto its item, show each item's
 resolved conversion, and ask the report question again - the report-apply rule's re-entry, with
 the definitions as the items. Otherwise the run is fresh.
 
-The bare command surveys, proposes the work with its counts, saves the proposal as a report, and
-asks. *Apply* migrates exactly what the report holds; with no turn to answer in, it writes nothing -
-not a stamp, not `schema_version`. `--dry-run` proposes, saves nothing and does not ask.
-`--apply [<report>] [all | <numbers>]` applies a saved report - the latest when none is named -
-per the report-apply rule's *The report is saved*; with no selection it walks the items, one
-`AskUserQuestion` each. Each item is one definition that moved, so `all` is the whole migration
+The bare command surveys, proposes the work with its counts, writes the proposal as the run's
+report, and asks. *Apply* migrates exactly what the report holds; with no turn to answer in, it writes nothing -
+not a stamp, not `schema_version`. `--dry-run` proposes, mints nothing and does not ask.
+`--apply [<run>] [all | <numbers>]` applies a run - a named one resolved in the store you stand in;
+none named, the latest upgrade run with an open item in each store on the machine - per the
+report-apply rule's `## --apply`; with no selection it walks the items, one
+`AskUserQuestion` each. Each item is one definition that moved and has a file outstanding, so `all` is the whole migration
 and numbers are part of it; a partial migration is safe, because re-running is already how a
 migration resumes. An item is stale when its definition's version, or its count of outstanding
-files, has moved since the report - skip it and say so.
+files, has moved since the report - mark it stale and say so. **An item's fingerprint** (the run engine's
+*Carried decisions*) is `<step> · <scope>/<file>`, its change part the definition's `schema:`: a
+declined step comes back when the definition moves again.
 
 The version
 this plugin ships, the four answers, and the file stamp are
 `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` - **read the number there and never state one
 from here.**
 
-## Every resolved store, its own version
+## Every store on the machine
 
-The workspace store, each workspace enclosing it, and global are separate stores and carry separate
-versions. All resolve from where you are standing, so check and report each, and migrate each on its
-own answer.
+**The stores are global, every workspace in global's `## Workspaces` registry, and any store the
+walk resolved from here that the registry lacks** - the registry is the list, per
+`${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, *Knowing that other stores exist*. Each is a
+separate store with its own version and its own overlay: probe that it is there, read its
+`schema_version`, survey it against its own definitions, and
+report it by absolute path. Where you stand changes nothing about which stores a run covers.
 
-Then name the machine's other workspaces. Global's `## Workspaces` registry lists them -
-`${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, *Knowing that other stores exist*. For each one that is not the store you resolved:
-probe that its store is actually there, read its `schema_version`, and report where it stands.
-
-Offer to migrate them, one `AskUserQuestion` each, by absolute path. A store you are not standing
-in is a bigger action than the one you are, so it is never folded into the first question and never
-assumed. Each store migrated gets its own report, saved in that store's `tmp/`, and its own
-report question. Decline is a normal answer - each is reachable by running this command from inside it.
+**One survey, one report, one question.** Each store with an item gets its own run item, minted in
+that store; the report shows every store's items under its path, and the one report question answers
+them all. **Each store is lettered in the report, in the order surveyed, global last**, so an item is
+named by its store's letter and its number in that store's run - *not B2* - and a letter alone names
+the store's whole run - *only C*, *not A*. A store left out keeps its run for a later `--apply`. A store with nothing outstanding is raised per the
+migration reference's *Nothing outstanding*, and named.
 
 A path that does not probe is reported, not repaired. It may be an unmounted volume. Say which
 entries could not be reached and move on.
@@ -69,7 +76,7 @@ entries could not be reached and move on.
 
 Under `--apply`, *Apply* and a re-entry, go straight to step 5.
 
-1. **Read `schema_version` from each resolved store's `config.md`**, and compare per
+1. **Read `schema_version` from each store's `config.md`**, and compare per
    `schema-version.md`'s table.
 2. **Equal, in both?** Report `no-change` and write nothing. This is the ordinary outcome and it
    should cost nothing to ask for.
@@ -88,5 +95,5 @@ Under `--apply`, *Apply* and a re-entry, go straight to step 5.
 
 ## Report - a store with nothing to do
 
-**Each store, its version**, by absolute path - every resolved store, said separately - and `no-change` for each one at the plugin's version. A newer store's refusal names the
+**Each store, its version**, by absolute path - every store surveyed, said separately - and `no-change` for each one at the plugin's version. A newer store's refusal names the
 plugin update; an absent version is the question in step 4, never a guess.

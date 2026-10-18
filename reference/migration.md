@@ -40,6 +40,7 @@ names it, and its `schema_version` is written last.
 | **1** | the initial shape | all of them, at birth - every definition ships at `schema: 1` |
 | **2** | `overview.md`'s fields gain a bold label | **one** - `project/overview.md`. Every register and every ledger is untouched, because an entry's file and path already name it |
 | **3** | a project's `NOTES.md` loses `## Active` - the current item is derived | **one** - `project/NOTES.md` |
+| **4** | every run of adopt, doctor, review and upgrade is a work item; `tmp/` reports, trim copies, `adopted.md` and `baseline.md` move into run items | **three, all new** - `work/report.md`, then `work/inventory.md`, then `work/log.md`, in that order. `adopted.md` and `baseline.md` lose their definitions |
 
 ## Writing a migration
 
@@ -89,6 +90,20 @@ the new shape directly; there is nothing to convert in place.
 **A register or a ledger can never declare this**, because its entries exist nowhere else. The test
 is whether the file's content is recoverable from something other than itself.
 
+**A new file can declare a gather as its migration** - its step takes content a release-older store
+kept somewhere else and moves it into files of this definition. The step names its **sources** - a
+path pattern, never a definition - and they replace the stamp test: **a source still there is
+outstanding, and a source gone is done**. Before a source is removed, it is copied byte for byte into
+the upgrade run's `copies/`, at its path from the store - the file-facts rule's *move a converted
+source*, the one removal a migration makes. A gather that stops between writing and removing leaves the
+source, and re-running converts it into the same place again, which the step makes safe.
+
+```markdown
+## Migration
+**3 -> 4 - gather.** Each `tmp/<command>-<YYYYMMDD>-<n>.md` becomes a run item ... It is
+outstanding while its source is still there.
+```
+
 **A step is idempotent**, and the stamp is what makes it so: a file already at its definition's
 version is skipped without being read.
 
@@ -108,8 +123,8 @@ afterwards.
 migration then reads as *store still at the old release, some files stamped at the new one* - which
 is exactly the state the next section resolves.
 
-**A migration removes only a field its step names**, and removes nothing else. **Never delete an
-entry, a file or a directory** - the store's own rule holds here more than anywhere, because a
+**A migration removes only a field its step names, or a gather's converted source**, and removes
+nothing else. **Never otherwise delete an entry, a file or a directory** - the store's own rule holds here more than anywhere, because a
 migration is the one kind of write that touches content the user did not just write.
 
 **The user's overlay is never rewritten by a migration**, exactly as a plugin update never touches
@@ -123,21 +138,24 @@ about to be converted.
 
 1. **Resolve every definition** per the file-definition rule, and take its `schema:`. **A definition whose
    `schema:` is at or below the store's `schema_version` is finished before you start** - skip it without globbing.
-2. **Glob that definition's files** inside the resolved store, and **count what came back.** That
+2. **Glob that definition's files** inside the store being surveyed, and **count what came back.** That
    count is carried through the rest of the survey and into the report. **Shape the pattern as
    `<store>/**/<filename>`** and keep the hits at the definition's scope - never `projects/*/<filename>`,
    which can return zero with the files present (*A pattern that matches nothing*, in
    the store walk rules).
 3. **Grep each for the stamp** - **anchored at the start of the line and never at the end.** A file is
    never read whole to find out whether it needs work.
-4. **Stamp below the definition's `schema:` is outstanding. At or above is done.**
+4. **Stamp below the definition's `schema:` is outstanding. At or above is done.** **A gather** globs
+   its sources instead, named in its step: each one found is outstanding, and none found is done -
+   a store that never kept that content, which is no finding.
 5. **Read and rewrite only the outstanding files**, stamping each in the same write.
 
 **Every file the glob returned is accounted for as outstanding, done, or skipped, and the three add
 up to the count from step 2.** Print the arithmetic per definition -
 per the report shape - and never adjust it by hand.
 
-**A definition that globs zero files is a finding, not a definition that is finished.** *Nothing
+**A definition that globs zero files is a finding, not a definition that is finished** - except a
+gather's sources, where none found is done. *Nothing
 matched* and *nothing is outstanding* are the same output and mean opposite things: one is a store
 with nothing to do, the other is a survey that did not look where the files are. **Say which one it
 is** - name the pattern and the path the glob ran against, and where the definition's files would

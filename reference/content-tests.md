@@ -14,9 +14,9 @@ reported until its test holds.
 - **Demote.** The entry sits at workspace or global scope and its text names exactly **one**
   project and no other - or, at an enclosing workspace or global, exactly one workspace inside it.
   An entry true of two is correctly placed.
-- **Promote.** The **same fact**, not the same subject. Where one project `depends_on` the
-  other and the shared fact is the contract between them, it is not a promotion: a contract is read
-  from the dependee's code, not kept in the store, so say that and propose nothing. The target is
+- **Promote.** The **same fact**, not the same subject. Where the shared fact is the contract
+  between the two - an interface one defines and the other uses - it is not a promotion: a contract
+  is read from the code that defines it, not kept in the store, so say that and propose nothing. The target is
   the narrowest store enclosing both, and the fact must pass *Worth recording* for every session that
   store loads (the promotion rule); failing there, propose nothing.
 - **Would reopen if.** The trigger must have *plausibly fired*, and you say what you saw that

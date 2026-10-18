@@ -12,7 +12,7 @@ never mines your material for content. What it needs from a repository it asks g
 `${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md`.
 
 Before anything else, in order:
-1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers. No store yet is
+1. **Resolve the store** per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - a case it names in *italics* is in `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve-cases.md`, read when it occurs. **Then the schema release**: read each resolved store's `schema_version` and `Grep` the release in `${CLAUDE_PLUGIN_ROOT}/reference/schema-version.md` (*The schema release this plugin ships*). A store at it is not mentioned; one behind it is said in one line on every run, naming `/nk:upgrade`, and the run carries on; newer or absent follows that file's four answers. No store yet is
    this skill's normal case - it is the one that creates them.
 2. **An overlay?** If `<store>/schema/files/` holds a definition, read `${CLAUDE_PLUGIN_ROOT}/reference/schema/overlays.md` before resolving one; otherwise every definition this run resolves is the shipped one.
 3. **Infer before asking**: read what the conversation already states, and ask only what is still open.
@@ -27,7 +27,8 @@ What it reads to fill `overview.md`'s fields - facts about what the project *is*
 repository's own orientation sources: a build file, a `README.md`, the repo's own `CLAUDE.md`.
 Nothing read for that becomes an entry in a register. It also reads `~/.claude/settings.json`, the
 workspace and global registries, and any `CLAUDE.local.md` already present, to decide what needs
-creating and what is already there.
+creating and what is already there - and whether a repository it registers has an `AGENTS.md` the
+read line would hide.
 
 **It does not guess a project map, and it reads no notes.** A notes folder, a wiki export, another
 tool's store, the knowledge sitting in a `CLAUDE.md`: none of it is read here. Bringing that material
@@ -37,7 +38,7 @@ in is `/nk:adopt`'s job.
 
 | Form | Does |
 |---|---|
-| `/nk:init [path]` | the whole setup, working outward from where you are. Below |
+| `/nk:init [path]` | stops where the path is already set up, creates global at `$HOME`, and otherwise asks *workspace or project*. Below |
 | `/nk:init --workspace [path]` | create the workspace store, and stop there - plus the offer of the repositories under it |
 | `/nk:init --project [path]` | create the project inside the workspace above it, and stop there |
 
@@ -56,17 +57,34 @@ fixed - and the report names everything written.
 
 ---
 
-## `/nk:init` - the automatic form
+## `/nk:init` - the bare form
 
-Work outward from the repository you are standing in, rather than asking for an abstraction
-first.
+**Read the path first: where it is already set up, say so and stop, writing nothing.** The first
+row that holds decides:
 
-1. **Create global if it is missing** - `~/.notekeeping/`, a fixed home, no judgment, nothing to ask.
-   **It is written before any question this run asks, even one nobody can answer**: no answer
-   changes it, so holding it back only leaves it unwritten.
+| The path | Do |
+|---|---|
+| is `$HOME` - compared per the store-resolution rule, the home path taken from a tool's answer per its *A ~ path* | **global.** Missing: create it, per the global reference, and report it. There: say global already exists at `~/.notekeeping/`, and stop |
+| resolves to a project by its read line alone - a folder moved, or another clone - per the store-resolution rule's *Resolving a project inside the store*, resolved from the path | **create global if it is missing**, then the outward walk, unasked: the project reference's step 3 decides it |
+| resolves to a project by a `dirs:` entry, the same way | say which project it is already registered as - *inside* it, where the path lies below the project's folder - and stop |
+| holds a workspace store - `<path>/.notekeeping/config.md` reads | say it is already a workspace, by path, and stop |
+| anything else | **create global if it is missing**, then ask one question: *Workspace / Project* |
+
+**Global is written before the question, even one nobody can answer**: no answer changes it, so
+holding it back only leaves it unwritten. **The question is asked alone** - everything after it
+depends on the answer.
+
+- **Workspace** runs the `--workspace` form at the path, as if it had been typed.
+- **Project** runs the outward walk below.
+
+### Project - the outward walk
+
+Work outward from the path to the workspace that will hold it.
+
+1. **Global** is already in place - written before the walk began.
 2. **Decide the project directory.** Find the repo root with git, as the project reference's step 2
-   does: a repository → that root is the project. Not a repository → ask whether to treat this
-   directory as a project, and stop if the answer is no.
+   does: a repository → that root is the project. Not a repository → the path itself is the
+   project; the answer *Project* already said so.
 3. **Resolve the workspace before creating the project.** A project cannot exist without one -
    it lives at `<workspace>/.notekeeping/projects/<name>/`, so there is nowhere to put it otherwise.
    Walk up per `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md` - **starting at the working
@@ -83,15 +101,15 @@ first.
    user come back for them.
 5. **Create the project.**
 
-Run it again later and the same path does less. Inside a repository under a workspace that
-already exists, steps 1, 3 and 4 all find their work done and it simply registers the project. That
-is how a repository cloned later is added, with no flag.
+Run it again later and the same path stops at once, naming what is already there. Inside a
+repository cloned later under a workspace that already exists, answering *Project* finds steps 1,
+3 and 4 done and simply registers it. That is how a repository cloned later is added, with no flag.
 
 ### `$HOME` cannot be a workspace
 
 A workspace store at `$HOME` would be `~/.notekeeping/` - global's fixed home - collapsing the
 two scopes into one file set. So whenever the workspace would be `$HOME` - the parent in the
-automatic form, or the path `--workspace` names or defaults to - **stop and say why**:
+outward walk, or the path `--workspace` names or defaults to - **stop and say why**:
 
 > A workspace at your home directory would be the same folder as the global store. Put your
 > repositories under a directory - `~/projects`, say - and run `/nk:init` there, or name one with
@@ -152,9 +170,9 @@ on-demand read of the store is refused, so this is part of creating the store, n
 ## Asking
 
 **Every question this skill asks follows `${CLAUDE_PLUGIN_ROOT}/reference/asking.md`** - `nk:init
-needs:` and the open questions. Its questions: the workspace path (proposed, or named), whether a directory that is not a repository is
-a project, which of the offered repositories to register, and each project's name. **Ask everything
-open at once** - in the automatic form the workspace, the offer and the name are usually known
+needs:` and the open questions. Its questions: whether the bare form's path is a workspace or a project, the workspace path (proposed, or named),
+which of the offered repositories to register, and each project's name - plus, once the report is out, the adopt offer and the idle-compaction question under `## Report`. **After the
+workspace-or-project question, ask everything open at once** - in the outward walk the workspace, the offer and the name are usually known
 together - and nothing the conversation already answers.
 
 **Each write outside the store may also be asked about by the harness** - a read line, an exclude
@@ -164,24 +182,40 @@ such, per the projection-writing rule's *Failing*, never as done.
 ## Report
 
 State every level you created, the exact path of each, and every file written - including each
-project registered by the offer. The automatic form routinely creates three at once, so report them
+project registered by the offer. The outward walk routinely creates three at once, so report them
 as a list rather than a sentence.
 
 Then the single next step. **A run that created a store or registered a project names
-`/nk:adopt`**: it brings in what your `CLAUDE.md` files and notes already hold, and it places each
-entry by the projects registered, so register every workspace and project first - an entry for one
-that is not registered stays where it is. Name the order: the bare `/nk:adopt`, which starts from your `CLAUDE.md` files,
-run again until it says nothing is left. Otherwise: `/nk:work` to start something, `/nk:init`
+`/nk:adopt`**, run from the workspace and then from each registered project that has its own
+`CLAUDE.md`: it brings in what your `CLAUDE.md` files and notes already hold, into this workspace's
+store and global, and run again until it says nothing is left. A run reads the `CLAUDE.md` files its
+folder loads, so a project's own is read only from inside that project, and each workspace is adopted
+from inside it. Otherwise: `/nk:work` to start something, `/nk:init`
 inside a repository cloned later to add it, or `/nk:help` to see what exists.
 
-Say which `/nk:init` runs are still needed. After the automatic form there are none for what
+**After `--workspace` or `--project` - typed, or picked as *Workspace* - created its store or registered its project, offer to adopt
+that path now** - one question, after the report, with `AskUserQuestion`: *Adopt `<path>` now /
+Later*. The question says, in one line each, that adopt can use a lot of usage depending on how much
+it reads, and that `/nk:adopt <path>` can be run at any time. **Adopt `<path>` now** starts the
+`Skill` call `nk:adopt` with `<path>` - the path this run was given, or the working directory where
+it was given none - and nothing else; **Later** ends the run. A re-entry whose only open question is
+this one makes that call, or ends, and repeats nothing else.
+
+**A run that created a store, where `~/.claude/settings.json` does not set `idleCompaction`, also
+asks whether to turn idle compaction off** - in the same `AskUserQuestion` as the adopt offer, or
+alone where there is none: *Turn it off / Keep it on*, with what each costs, per
+`${CLAUDE_PLUGIN_ROOT}/reference/store/writes.md` (*Idle compaction*). **Turn it off** adds the key
+by that rule, before any adopt call, and names the write; **Keep it on** writes nothing.
+
+Say which `/nk:init` runs are still needed. After the outward walk there are none for what
 already exists - global, the workspace and its repositories are done - so the user does not think
 this runs once per level forever.
 
 **Name every write outside the store, separately.** A read line is written at registration, so each
 registered repo gets a `CLAUDE.local.md` and a `.git/info/exclude` line, the workspace root gets
 a `CLAUDE.local.md` too, and `~/.claude/rules/notekeeping.md` is written when this run created global. The settings entry is
-listed too: the file, and each path added or already present. List them by absolute
+listed too: the file, and each path added or already present - and `idleCompaction`, where the
+answer added it. List them by absolute
 path, and say which were *appended to* rather than created. This
 report is the only moment the user sees the files they just agreed to in their own trees.
 

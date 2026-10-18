@@ -47,10 +47,9 @@ report says git could not be asked.
 why. Never trim on a guess.
 
 **The trim copy comes first.** Before the first line of a file is removed, copy it - the file-facts
-rule's *an exact copy*, byte for byte - into `.notekeeping/tmp/adopt-<YYYYMMDD>-<n>/` - the same `<n>` as this run's report - at its path from its
-root: `home/` for a file under `~`, `ws/` under the workspace root, `repo-<name>/` under a registered
-repository, whichever is nearest. **The report's trim section names the folder and says a revert is
-copying a file back.** No skill empties or deletes these copies. **The report quotes every line it
+rule's *an exact copy*, byte for byte - into the run's `copies/`, per the run engine's *Outside the
+store*, and logged. **The report's trim section names the folder and says a revert is copying a file
+back.** No skill empties or deletes these copies. **The report quotes every line it
 removes** as well - the copy is the way back, the quote is what the yes was given to.
 
 ## The trim is shown in full, and the same yes covers it
@@ -59,4 +58,4 @@ Everything else is a copy into a directory you can delete; this is the one thing
 you wrote. Show the lines, grouped by file, inside the proposal - never a count in their place -
 so the yes that approves the store has seen them, and with each file's trimmability from the
 table above. Leaving it out is a normal answer: *Apply* builds the store and removes nothing, and
-*Trim only* or `--apply <report> <trim items>` trims later from the same saved report.
+*Trim only* or `--apply <run> <trim items>` trims later from the same run.

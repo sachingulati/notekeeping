@@ -10,7 +10,7 @@ that needs the number reads this file.
 
 | | |
 |---|---|
-| **The schema release this plugin ships** | **3** |
+| **The schema release this plugin ships** | **4** |
 
 **It versions the store's shape on disk** - which files exist, what frontmatter they carry, what the
 resolver's columns are, and what a config file holds. **It is not the plugin's version**, which
@@ -38,7 +38,7 @@ outstanding.
 
 | The store's `schema_version` | Answer |
 |---|---|
-| **equal to this file's** | proceed |
+| **equal to this file's** | proceed, and say nothing about it - a store at the release is not news |
 | **older** | the store predates this plugin. **Say so and name `/nk:upgrade`, then carry on** - the per-file rule below decides what is actually blocked |
 | **newer** | the plugin predates the store. **Refuse, and name the plugin update.** Never downgrade a store, and never guess what an unrecognised field means |
 | **absent** | **stop and ask.** An absent version is never assumed to be the current one |

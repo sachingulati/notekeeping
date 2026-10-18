@@ -5,10 +5,11 @@
   "author": {
     "name": "Sachin Gulati"
   },
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "homepage": "https://github.com/sachingulati/notekeeping",
   "repository": "https://github.com/sachingulati/notekeeping",
+  "icon": "./assets/nk.png",
   "keywords": [
     "notes",
     "knowledge",

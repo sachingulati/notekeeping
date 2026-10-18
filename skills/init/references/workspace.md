@@ -72,7 +72,7 @@ already in front of you. **Ask git about the named path; list its children.**
    entry. **Report only what you actually wrote.**
 5. **None found, or none chosen, is a normal outcome.** Say the workspace is ready and name the next
    step. An empty workspace is not a failure.
-6. **Reached from the automatic form, the directory you started in is already being registered** by
+6. **Reached from the bare form's outward walk, the directory you started in is already being registered** by
    its step 5 - do not offer it twice, and do not register it twice.
 
 **A child holding its own `.notekeeping/` is an inner workspace, not a repository to offer** - its

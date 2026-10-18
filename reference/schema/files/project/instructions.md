@@ -7,7 +7,7 @@ shape:       document+append
 owner:       promotion
 trigger:     always
 authority:   original
-budget:      2000 bytes
+budget:      5000 bytes
 ---
 
 ## Question
@@ -56,5 +56,5 @@ file, as `**Would reopen if:**` does in `decisions.md`. **It is checked by grep,
 ## Delivery
 
 `NOTES.md` reads on to this file, so it is read before any task here. Every entry is charged **in
-every prompt in that repository**, against its own 2000-byte ceiling. An area is reached through
+every prompt in that repository**, against its own 5000-byte ceiling. An area is reached through
 `areas/INDEX.md` and `NOTES.md`'s area lines, never through an entry here.
