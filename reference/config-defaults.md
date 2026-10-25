@@ -36,6 +36,7 @@ with a default to fall back to.
 | `budget_notice_pct` | `80` | store |
 | `max_parallel_subagents` | `3` - the most subagents any skill has running at once, per the store-resolution rule | store |
 | `one_pass_max_bytes` | `700000` - the most a run reads in one pass; a larger inventory is read by subagents that leave drafts, and the drafts are merged, per the run-engine rule. Not a limit on the run, and not a size for drafts | store |
+| `summary_format` | **no default** - `md` or `html`: how `/nk:summary` writes a summary, per the summary definition. Asked at the first `/nk:summary` in a store where it is unset, and the answer written to that store's `config.md` | store |
 | `adopt_max_bytes` | `5000000` - the most one `/nk:adopt` run reads; what it found past that is left pending, and the next run continues | store |
 | `dirs:` | **no default** - written by `/nk:init` from the repository root git gave it, or the folder the user named - never inferred; **one line per folder**, the main one first, where a project spans several repositories. **How a project is reached from outside its folder**; a folder you stand in resolves by its read line first, per the store-resolution rule | project |
 
@@ -51,6 +52,10 @@ the bundle shape's. **Changing it affects only items minted after
 the change** - an existing item's bucket folder never moves, and every command that finds items
 accepts any bucket folder, so it finds items under either shape.
 
+**`summary_format` is the store's standing choice, and one run can differ from it.** A run asked for
+the other format - by its flag, or in plain words - writes that format and leaves the setting as it
+is; `/nk:config set summary_format <md|html>` changes it.
+
 **`budget_notice_pct` applies to every `budget:` in the schema** - the rule is
 stated once, beside the field, in the budget-notice rule.
 
@@ -64,7 +69,7 @@ guessed.
 typo cannot silently become a setting. A key here is real even if no command has read it yet; a key
 that is not here is not a setting.
 
-**A file's own ceiling is not here.** Every budget and every register's split threshold lives in its
+**A file's own budget is not here.** Every budget and every register's split threshold lives in its
 definition's `budget:` field, beside the admission test it bounds -
 the file-definition rule. Say that when someone asks for a budget
 setting, rather than refusing the key and stopping, and **name the form that sets one**:

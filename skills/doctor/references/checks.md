@@ -135,6 +135,12 @@ finding's fingerprint. A rule a check names is listed with its file in the skill
   `session.md` still holds the record; the remedy is one `/nk:load --full` before the next save. A
   `Covers` line with no id is not counted - the next save writes one.
 
+- `pending-old` · **A `pending.md` holding a line set aside more than `staleness_warn_days` ago** - facts a
+  `/nk:save --no-promote` wrote down that no save has promoted since, per the pending rule. `Grep`
+  `^- ` with `glob` `pending.md` under `<store>/work`, with line content; the date leads each line.
+  Name the item, the count and the oldest date, and say which lines are `held` and why. The remedy
+  is a save without `--no-promote`, or answering what held them; **`--fix` must not promote**.
+
 - `area-unindexed` · **An area directory with no row in that scope's `areas/INDEX.md`.** No key sends a session into
   it, so it is never read.
 - `secrets-unlisted` · **A `secrets.md` its scope's `NOTES.md` does not list under `## Read on demand`** - a session

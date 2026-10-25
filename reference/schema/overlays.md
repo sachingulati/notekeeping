@@ -36,7 +36,7 @@ anything else is an error**: report it, name the file, and resolve nothing.
 ## The load-bearing fields
 
 **Three fields are load-bearing**: `schema`, which is what makes the file's migration targetable;
-`enabled`; and `budget`, which is the ceiling and a register's split threshold.
+`enabled`; and `budget`, which is the size a file is reviewed against and a register's split threshold.
 
 - **In a whole replacement, omitting one switches it off.** **Say which are missing and what each one
   now means for that file**, rather than filling them in from the shipped definition - the
@@ -47,7 +47,7 @@ anything else is an error**: report it, name the file, and resolve nothing.
   |---|---|
   | `schema` | the file is taken out of every migration - nothing ever converts it |
   | `enabled` | the file is taken out of the store entirely |
-  | `budget` | the file is uncapped, as `budget: none` - no ceiling, no budget notice, and a register never splits |
+  | `budget` | the file is uncapped, as `budget: none` - no budget, no budget notice, and a register never splits |
 
 - **In a fragment, omitting one inherits it** - which is why `extends:` is the safe form for changing
   one field.

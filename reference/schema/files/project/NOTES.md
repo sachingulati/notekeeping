@@ -59,7 +59,7 @@ in full, never store-relative.** A session reads this file from the repository, 
 read line, so a store-relative path would not resolve from where it sits - and a path that does not
 resolve produces a read that is refused and then improvised around.
 
-**A write that leaves this file at or past `budget_notice_pct` of its ceiling says so**, per
+**A write that leaves this file at or past `budget_notice_pct` of its budget says so**, per
 the budget-notice rule.
 
 **`/nk:project <name>` rebuilds this file.** `/nk:init` creates it and `/nk:adopt` writes it while
@@ -68,7 +68,7 @@ promotes into `## Always needed`; `/nk:review` can demote an entry out of it. **
 outside the plugin, may edit it too**: a rebuild re-derives only the derived sections and carries
 everything else across.
 
-The governing test is content, not size. The ceiling exists only so this file cannot quietly become
+The governing test is content, not size. The budget exists only so this file cannot quietly become
 the notes.
 
 ## Migration

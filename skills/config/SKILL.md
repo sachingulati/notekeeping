@@ -45,7 +45,7 @@ it and only `/nk:upgrade` moves it. `${CLAUDE_PLUGIN_ROOT}/reference/config-defa
 
 ### `set budget`
 
-`/nk:config set budget <scope>/<file> <value>` sets one file's ceiling - on its definition's
+`/nk:config set budget <scope>/<file> <value>` sets one file's budget - on its definition's
 overlay, never in a config file. Before anything else under this form, read
 `${CLAUDE_PLUGIN_ROOT}/skills/config/references/set-budget.md` (with
 `${CLAUDE_PLUGIN_ROOT}/reference/schema/resolution.md`): where the value is written, the three cases
@@ -53,7 +53,7 @@ at that path, and the refusals.
 
 ## `budgets`
 
-`/nk:config budgets` prints every file budget: the definition, its effective ceiling, and where
+`/nk:config budgets` prints every file budget: the definition, its effective budget, and where
 that value came from - the shipped definition, or the overlay - exactly as the bare invocation does
 for settings. Each value is printed in its own unit - bytes, entries, or a notice threshold -
 and a budget stated by reference as the register it points to.
@@ -62,8 +62,8 @@ The shape, filled from the run and never copied from here:
 
 ```
 Budgets
-  <definition>            <ceiling>           <origin>
-  <definition>            <ceiling>           <origin>
+  <definition>            <budget>            <origin>
+  <definition>            <budget>            <origin>
 ```
 
 ## The two levels

@@ -79,7 +79,7 @@ by hand. On *Keep it*, nothing is written.
 
 ### The one thing that can leave this machine
 
-**A report, or a summary, can be published as a page** - the report-page rule. It is
+**A report can be published as a page** - the report-page rule. It is
 not on the table above, and it is named here because it is the only thing the plugin does that
 leaves the machine at all.
 

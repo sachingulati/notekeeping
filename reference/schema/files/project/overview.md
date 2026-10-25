@@ -44,7 +44,7 @@ Fields, not prose - **and a field is a bold label at the start of its own line**
 commit's date. `/nk:init` writes the file with no sha; the first rebuild reads one.
 
 **A label, not a heading per field.** A heading each would grep well and render badly: this file
-carries a 5000-byte ceiling, and nine headings spend it on structure rather than on the answer. **A
+carries a 5000-byte budget, and nine headings spend it on structure rather than on the answer. **A
 `Grep` for `^\*\*Stack\*\*` finds the field either way**, which is the whole job a marker has here.
 
 **The header records what it was assembled from**, and that list is what makes the authority claim

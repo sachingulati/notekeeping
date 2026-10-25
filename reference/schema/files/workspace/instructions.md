@@ -23,7 +23,7 @@ True of one project -> that project's `instructions.md`. A fact that is true -> 
 register it belongs to. True of every workspace on the machine -> the global `instructions.md`.
 
 ## Entry format
-The same shape as a project's `instructions.md`, and **the same ceiling**.
+The same shape as a project's `instructions.md`, and **the same budget**.
 
 **Every scope that admits an instruction gets the same 5000 bytes.** The workspace's `NOTES.md`
 reads on to this file, so it is charged in

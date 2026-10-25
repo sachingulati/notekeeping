@@ -24,7 +24,7 @@ that is true -> the `instructions.md` of the scope it actually holds at - work, 
 workspace or global.
 
 ## Entry format
-The same shape as a project's NOTES.md, and the same 12000-byte ceiling.
+The same shape as a project's NOTES.md, and the same 12000-byte budget.
 
 **This file is imported by the global rule file, `~/.claude/rules/notekeeping.md`**, and loads in
 every session - including every session that touches no store at all (the projection rule). That reach is what earns a place here: a fact

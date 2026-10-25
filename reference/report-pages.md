@@ -7,9 +7,8 @@ title: Offering a report as a page, and what the page may do
 
 **Four commands end in a report you have to choose from** - `/nk:adopt`'s trim list, `/nk:doctor`'s
 findings, `/nk:upgrade`'s conversion plan, and `/nk:review`'s proposals. **This file is how any of
-them offers that report as a page.** **`/nk:summary` offers its summary as a page too** - not a
-report to choose from but a document to share and comment on, so it keeps the rules below that do not
-concern choosing, and *A summary as a page* says what differs.
+them offers that report as a page.** **`/nk:summary`'s page stays local** - written in the
+item, per the summary definition.
 
 ## The terminal report comes first
 
@@ -98,26 +97,4 @@ Say so in one line when publishing: the ticks last until the page is closed.
 - **It never carries more than the report did.** No finding that was not printed, no store content
   the report did not quote, and no path the report did not name.
 - **It is not a record.** The store is the record. A page is a view of one run, and a later run
-  makes a new one rather than editing it - except a summary's page, which follows `summary.md` and
-  is updated in place (*A summary as a page*).
-
-## A summary as a page
-
-`/nk:summary` writes a document meant for people who were not involved, so its page is for reading
-and commenting on, not for choosing from. What holds from above: terminal first, one line at the end,
-nothing published until asked, `--page` and `--no-page`, and the same one-line failure. What differs:
-
-- **Ask after every write, with `AskUserQuestion`: *Publish / Not now*.** A summary has no count to
-  fall short of, and no proposal to apply, so this is its whole question. Not under `--dry-run`,
-  which writes nothing, and not under `--no-page`.
-- **The page carries the summary as written and nothing else** - its four sections, no controls. Viewers
-  comment on it with the page's own comments.
-- **Comments are the page's business, not the plugin's.** The plugin never reads a comment and never
-  replies to one. Where a comment tags Claude, the platform answers it.
-- **The link is kept.** After publishing, write one line `Page: <url>` into `summary.md`, below its
-  source line, and nothing else changes. The next `/nk:summary` on that item asks the same question
-  with *Publish* meaning **update that page** - *Publish (updates `<url>`) / Not now* - rather than
-  make a new one. If the update fails because the page is gone or cannot be reached from this
-  account, say so in one line and ask again, *Publish* now making a new page, which replaces the line.
-- **`summary.md` is the source, and the page follows it.** A change made on the page and not in
-  `summary.md` is replaced by the next update. Say so once when offering to update.
+  makes a new one rather than editing it.

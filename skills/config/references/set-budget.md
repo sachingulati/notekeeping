@@ -2,7 +2,7 @@
 
 **A file's budget is not a setting, and `set` writes it anyway.**
 
-**A file's ceiling lives on its definition**, beside the admission test that decides what earns a
+**A file's budget lives on its definition**, beside the admission test that decides what earns a
 place in it - `budget:` in the resolution rule, *What a definition carries*. A number kept away
 from its rule drifts from it, and the two are read together or not at all. So the config files
 hold no file budgets and `config-defaults.md` lists none.
@@ -25,9 +25,9 @@ the diff either way, and name the file by absolute path.
 
 **Refuse a budget key whose definition does not resolve**, and refuse one whose resolved definition
 carries no `budget:` field **or `budget: none`** - an uncapped file is uncapped by design, and a
-ceiling invented for it is a rule nobody wrote. Say which, and stop.
+budget invented for it is a rule nobody wrote. Say which, and stop.
 
-**A budget keeps the unit it is stated in.** A byte ceiling takes bytes; an entry count - `60 entries`
+**A budget keeps the unit it is stated in.** A byte budget takes bytes; an entry count - `60 entries`
 - takes entries; a notice - `notice at 30000 bytes` - takes a new threshold and stays a notice. A
 value in another unit is refused, naming the unit. **A budget stated by reference** - an `areas.md`
 file keeping the budget of the register it came from - has no value of its own to set: refuse, and

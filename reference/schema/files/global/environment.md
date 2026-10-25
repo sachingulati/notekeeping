@@ -41,6 +41,6 @@ cites it. No manual numbering.
 **Always loaded, so it is budgeted in bytes.** This file is imported by the global rule file,
 `~/.claude/rules/notekeeping.md`, beside `NOTES.md`, and loads in every session, so the agent
 never has to look up where a tool lives. It is the one register with a
-byte ceiling rather than an entry count, because an entry count cannot bound what is charged on
+byte budget rather than an entry count, because an entry count cannot bound what is charged on
 every prompt. Keep entries to the fact you come here for; a procedure goes to
 a work bundle or an area and the entry cites it.

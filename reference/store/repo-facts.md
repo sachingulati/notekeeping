@@ -36,6 +36,7 @@ standing in is reachable only through its registered path. Where no project is i
 | commits since | `git log --since=<date> --oneline` | one line each, newest first |
 | recent commits | `git log -10 --format="%h %cs %s"` | the ten newest, each with its commit date. *Commits since* for a run that sends git before it knows the date: keep the lines dated on or after it, and ten kept is *at least ten* |
 | files changed since | `git log --since=<date> --name-only --format=` plus `git status --porcelain` | the union, each path once |
+| an item's commits | `git log --since=<first session> --until=<the day after its last> --format="%h %cs %s" --name-status`; `git branch --all --list "*<id>*"`; `git show <sha>` for a commit the story needs | **candidates, never the answer** - which of them are the item's work is judged commit by commit, per the summary skill |
 
 **A branch or commit you did not read from git or the fallback below is not known** - say there is
 none; never take one from a folder name, an item or a guess.

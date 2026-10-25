@@ -1,7 +1,7 @@
 ---
 name: save
-description: Checkpoint the current session into the work item's (the task's) record - where things stand, what was learned, the harness memory - so it survives /clear. Use when the user asks to save, checkpoint, wrap up, or keep what this session found.
-argument-hint: "[id...] [--project <name>] [--tag <name>] [--dry-run]"
+description: Checkpoint the current session into the work item's (the task's) record - where things stand, what was learned, the harness memory - so it survives /clear. Use when the user asks to save, checkpoint, wrap up, or keep what this session found; a quick, light or lite save - the record only - passes --no-promote; an unattended save, one that runs without asking, passes --unattended.
+argument-hint: "[id...] [--project <name>] [--tag <name>] [--no-promote] [--unattended] [--dry-run]"
 allowed-tools: Read, Glob, Grep, Write, Edit
 ---
 
@@ -32,16 +32,17 @@ Every repository fact it needs comes from git, per `${CLAUDE_PLUGIN_ROOT}/refere
 ## Five turns
 
 **A save is five turns of parallel calls - the rules, the store, what the writes change, the writes,
-the report.** Each turn sends every call it names in one message. The steps below say how each
+the report.** Each turn sends every call it names in one message, and its letter is never said to
+the user (`${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`, *In one turn*). The steps below say how each
 answer is used and what each write holds; they add no calls of their own.
 
 | Turn | Sends, all at once |
 |---|---|
-| **A - the rules** | `Read` every reference the steps cite: `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`, `${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md`, `${CLAUDE_PLUGIN_ROOT}/reference/item.md`, the `resume.md` and `session.md` definitions, `${CLAUDE_PLUGIN_ROOT}/skills/save/references/resume.md`, `${CLAUDE_PLUGIN_ROOT}/reference/promotion.md`, `${CLAUDE_PLUGIN_ROOT}/reference/drain.md`, `${CLAUDE_PLUGIN_ROOT}/reference/tags.md`, `${CLAUDE_PLUGIN_ROOT}/reference/index-writing.md` and `${CLAUDE_PLUGIN_ROOT}/reference/schema/budget-notice.md` |
-| **B - the store and the targets** | resolving, per `resolve.md`, *In one turn*; in the working folder **`git branch --show-current` and `git rev-parse HEAD`, each its own call**; `Grep` `index.md` for every target - the ids given, or each item the conversation and the branch name, step 1; the memory listing, per `drain.md`, *Finding it* |
-| **C - what the writes change** | for each target, `resume.md` - a failed `Read` is an item without one - and `session.md`'s `^## ` lines by `Grep` with line numbers - nothing of it where this session already read it; each memory file; for each candidate fact, the register its route names, with that scope's `areas/INDEX.md`; and the `NOTES.md` whose stamp step 7 refreshes |
+| **A - the rules** | `Read` every reference the steps cite: `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`, `${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md`, `${CLAUDE_PLUGIN_ROOT}/reference/item.md`, the `resume.md` and `session.md` definitions, `${CLAUDE_PLUGIN_ROOT}/skills/save/references/resume.md`, `${CLAUDE_PLUGIN_ROOT}/reference/promotion.md`, `${CLAUDE_PLUGIN_ROOT}/reference/drain.md`, `${CLAUDE_PLUGIN_ROOT}/reference/pending.md`, `${CLAUDE_PLUGIN_ROOT}/reference/tags.md`, `${CLAUDE_PLUGIN_ROOT}/reference/index-writing.md` and `${CLAUDE_PLUGIN_ROOT}/reference/schema/budget-notice.md` - on `--no-promote`, not `promotion.md` or `drain.md`, and the `pending.md` definition beside the rule; on `--unattended`, `${CLAUDE_PLUGIN_ROOT}/reference/unattended.md` as well |
+| **B - the store and the targets** | resolving, per `resolve.md`, *In one turn*; in the working folder **`git branch --show-current` and `git rev-parse HEAD`, each its own call**; `Grep` `index.md` for every target - the ids given, or each item the conversation and the branch name, step 1; the memory listing, per `drain.md`, *Finding it*; the `Grep` for every item's `pending.md`, per `pending.md`, *Promoting what was set aside* - on `--no-promote`, neither |
+| **C - what the writes change** | for each target, `resume.md` - a failed `Read` is an item without one - and `session.md`'s `^## ` lines by `Grep` with line numbers - nothing of it where this session already read it; each memory file; each `pending.md` the search found; for each candidate fact, the register its route names, with that scope's `areas/INDEX.md`; and the `NOTES.md` whose stamp step 7 refreshes. **On `--no-promote`**, each target's `pending.md` in place of the memory files, the registers and the search's finds - a failed `Read` is nothing set aside |
 | **D - the writes** | every write of steps 2 to 10, each its own call - `Write` for a file rewritten whole, `Edit` for one appended to |
-| **E - the report** | the report, ending in the line it earns |
+| **E - the report** | the trims of `pending.md`, once the writes they wait on have landed, per `pending.md`, *Trimming*; and the report, ending in the line it earns |
 
 **Only a case the answers raise reads its rule, and spends a turn on it** - a mint, a question, a
 file behind its definition, an overlay.
@@ -54,8 +55,8 @@ file behind its definition, an overlay.
 | 2 | Rewrite `resume.md` where the item has one, or where this save is its fifth saving session (`${CLAUDE_PLUGIN_ROOT}/reference/schema/files/work/resume.md`, *When it starts*); otherwise skip it, and step 3 carries the position as its `next:` line. Rewrite it - the position, and the story below it, per `${CLAUDE_PLUGIN_ROOT}/skills/save/references/resume.md` (with the definition, `${CLAUDE_PLUGIN_ROOT}/reference/schema/files/work/resume.md`, `${CLAUDE_PLUGIN_ROOT}/reference/report-shape.md` and `${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md` for the branch) | **abort** |
 | 3 | Append or extend today's `## session <date>` block in `session.md` - re-running the same day extends it. Record this session's id under the heading as `session: ${CLAUDE_SESSION_ID}`, one line per session the block covers, added once. With no `resume.md` after step 2, end the block with its `next:` line, per `${CLAUDE_PLUGIN_ROOT}/reference/schema/files/work/session.md` | **abort** |
 | 4 | Where the session changed what was asked, or showed a requirement the item states to be wrong, append the dated amendment to `requirements.md` - *scope changed* or *understanding corrected*, with `Invalidates` filled - per `${CLAUDE_PLUGIN_ROOT}/reference/schema/files/work/requirements.md`. **Only on what the session shows** - the user changing the ask, or a finding that contradicts a stated requirement. The body is never rewritten | **warn** |
-| 5 | Promotion check - route, scope, dedupe, classify, write every verdict that writes, then report what was written, per `${CLAUDE_PLUGIN_ROOT}/reference/promotion.md`. A credential goes in only where the user asked to keep it - to `secrets.md`, and the report names the entry, never the value | **abort** |
-| 6 | Drain the harness memory store - read it, promote what survives admission, **clear every item whose content is in the store - promoted now, or already there and checked for its place; a one-off filed in a work item's record first; one already in a registered repository's files judged for the store, then cleared** - and report what could not be placed, per `${CLAUDE_PLUGIN_ROOT}/reference/drain.md` (promotion per `${CLAUDE_PLUGIN_ROOT}/reference/promotion.md`) | **warn** - name the store and what is still in it |
+| 5 | Promotion check - route, scope, dedupe, classify, write every verdict that writes, then report what was written, per `${CLAUDE_PLUGIN_ROOT}/reference/promotion.md`. The candidates include every line set aside in an item's `pending.md`, trimmed and recorded per `${CLAUDE_PLUGIN_ROOT}/reference/pending.md`. A credential goes in only where the user asked to keep it - to `secrets.md`, and the report names the entry, never the value. **On `--no-promote`, set the candidates aside in the item's `pending.md` instead**, per `${CLAUDE_PLUGIN_ROOT}/reference/pending.md`, *Setting facts aside* | **abort** |
+| 6 | Drain the harness memory store - read it, promote what survives admission, **clear every item whose content is in the store - promoted now, or already there and checked for its place; a one-off filed in a work item's record first; one already in a registered repository's files judged for the store, then cleared** - and report what could not be placed, per `${CLAUDE_PLUGIN_ROOT}/reference/drain.md` (promotion per `${CLAUDE_PLUGIN_ROOT}/reference/promotion.md`). **Not on `--no-promote`** | **warn** - name the store and what is still in it |
 | 7 | Refresh `NOTES.md`'s verified stamp if the repo or environment moved, dated today - a stamp's date is the day it is written. The repo half is the repo-facts rule's *the commit*; unreadable writes it *unverified* | **warn** |
 | 8 | Settle the item's tags - `--tag`, plus what the session named, per `${CLAUDE_PLUGIN_ROOT}/reference/tags.md` (with `${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md`) | **warn** |
 | 9 | Regenerate the store's `index.md` per `${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md` and `${CLAUDE_PLUGIN_ROOT}/reference/index-writing.md` - a save that changed no id, related id, title, project, parent or tag leaves it byte-identical | **abort** |
@@ -102,6 +103,13 @@ two produce identical bundles.
 `--project <name>` applies to a mint only. It names the project of a bundle being created; it
 never retargets one that already exists. `--tag` applies to every target. **`--dry-run`** reports
 each target it resolved or would mint, and every file it would touch, and writes nothing.
+**`--no-promote`** writes the item's record and promotes nothing - step 5 sets the session's facts
+aside in the item's `pending.md`, step 6 does not run, and the next save without it promotes them,
+per `${CLAUDE_PLUGIN_ROOT}/reference/pending.md`. **Every other step runs** - the `NOTES.md` stamp,
+the tags, the index and the repository check included.
+**`--unattended`** is the same save, run to its end without a question - an unclear item left out,
+nothing written when nothing is new, each question it did not ask just above its closing line - per
+`${CLAUDE_PLUGIN_ROOT}/reference/unattended.md`.
 
 ## Not saved
 
@@ -121,7 +129,8 @@ written.** Never report success on a partial run.
 ## Asking
 
 **Every question this skill asks follows `${CLAUDE_PLUGIN_ROOT}/reference/asking.md`** - `nk:save
-needs:` and the open questions.
+needs:` and the open questions. **On `--unattended` it asks none**: each goes just above the report's closing line, per
+`${CLAUDE_PLUGIN_ROOT}/reference/unattended.md`.
 
 **A plain-text answer is applied by this skill, never by you.** When a question this skill asked is
 answered in words rather than a pick - *yes* included - your next action is the `Skill` call:
@@ -131,14 +140,19 @@ the conversation, and when the command was typed.
 
 ## End by confirming it is safe to leave
 
-Name the command that gets them back. `/nk:load` needs no argument - it infers from the branch
-and the latest saved session, both of which survive the clear.
+Name the command that gets them back, **with the id of every target this save wrote** - one
+`/nk:load <id>` each, in id order, since a load resumes one item. A bare `/nk:load` infers its item
+from the branch and the latest saved session, and after a save of several items, or from another
+branch, that can be a different item from the one just saved.
 
-> Saved. Safe to `/clear` - resume with `/nk:load`.
+> Saved. Safe to `/clear` - resume with `/nk:load 0003`.
+
+> Saved. Safe to `/clear` - resume with `/nk:load 0003` or `/nk:load 0007`.
 
 This line is a claim about the session, and it is earned rather than printed. It says what the
 conversation held is written, so it may be written **only where every step marked *abort* completed**.
 Where one did not, the report names what was not written, in place of this line - never alongside it.
+On `--unattended`, the closing line is the one `${CLAUDE_PLUGIN_ROOT}/reference/unattended.md` gives.
 
 A step marked *warn* never withholds it - a drain that could not run, a tag not settled, a
 closing block not written, a file skipped as behind its definition, an amendment not written, an unregistered repo, a folder the registry has lost, or a promotion that found nothing to admit. Each

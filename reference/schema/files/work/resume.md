@@ -105,6 +105,6 @@ resolving.
 
 ## Budget
 
-**It is read on demand, once per load - never always-loaded**, so no always-loaded ceiling
+**It is read on demand, once per load - never always-loaded**, so no always-loaded budget
 applies; the notice threshold is **a notice, not a limit** - past it, the likely cause is narrative
 that belongs in `session.md`.

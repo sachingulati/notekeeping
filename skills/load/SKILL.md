@@ -16,13 +16,14 @@ Before anything else, in order:
 ## Five turns
 
 **A load is five turns of parallel calls, and the fifth renders.** Each turn sends every call it
-names in one message. The sections below are how each answer is read; they add no calls of their own.
+names in one message, and its letter is never said to the user (`${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`,
+*In one turn*). The sections below are how each answer is read; they add no calls of their own.
 
 | Turn | Sends, all at once |
 |---|---|
 | **A - the rules** | `Read` `${CLAUDE_PLUGIN_ROOT}/reference/store/resolve.md`, `${CLAUDE_PLUGIN_ROOT}/reference/store/repo-facts.md`, `${CLAUDE_PLUGIN_ROOT}/reference/item.md` and `${CLAUDE_PLUGIN_ROOT}/reference/index-shape.md` |
 | **B - the store and the query** | resolving, per `resolve.md`, *In one turn*; at each level of the walk, `Grep` the query in `<level>/.notekeeping/index.md`; `Grep` the read line in `~/.claude/rules/notekeeping.md`; and in the working folder **`git branch --show-current` and the *recent commits* form, each its own call** |
-| **C - the bundle** | in the matched folder, `Read` `requirements.md`, `resume.md`, `instructions.md`, `plan.md` and `test.md`, and `Grep` `^## session ` in `session.md` with line numbers; `Grep` the `parent` column of `index.md` for the id; the tracker for each `ids:` entry; the branch and *recent commits* by `git -C` for each project the working folder is not in |
+| **C - the bundle** | in the matched folder, `Read` `requirements.md`, `resume.md`, `instructions.md`, `plan.md`, `test.md` and `pending.md`, and `Grep` `^## session ` in `session.md` with line numbers; `Grep` the `parent` column of `index.md` for the id; the tracker for each `ids:` entry; the branch and *recent commits* by `git -C` for each project the working folder is not in |
 | **D - the record** | `Read` `session.md` - whole where Turn C found no `resume.md`, or on `--full`; otherwise from its last `^## session ` line |
 | **E - the screen** | the output |
 
@@ -67,6 +68,9 @@ come from `resume.md`; a `log.md` with a `start` and no `done` is a blocker, its
 - **`instructions.md` whole, if it exists** - what this item requires you to *do* while it is in
   flight. Its budget is small enough that bounding the read would cost more than it saves.
 - `plan.md` next steps and `test.md` status, if they exist.
+- **`pending.md` whole, if it has lines** - facts a `/nk:save --no-promote` set aside and no save
+  has promoted yet (`${CLAUDE_PLUGIN_ROOT}/reference/pending.md`). They are what this item has
+  learned and the registers do not hold yet, so the session reads them here.
 
 The item's `instructions.md` has no other delivery, which is why it is read whole and read first among the
 optional ones: the project's, the workspace's and global's instructions arrive through the read line, and re-reading
@@ -162,6 +166,9 @@ code state        branch <branch> | detached | unknown | no repository
                   <n> commits since <date>: <oneline, newest first, at most ten> | none | not checked
 
 instructions      <n> arrived by the read line | <n> read from the store | none
+
+set aside         <n> facts in pending.md, oldest <date> - the next save without --no-promote
+                  promotes them | none
 
 children          <child id - one line each> | none
 

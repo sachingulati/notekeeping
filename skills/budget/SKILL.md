@@ -40,8 +40,8 @@ harness's own always-loaded memory index where its path is known. Name those num
 plugin's; report a missing one as unmeasured rather than as zero.
 
 **Source documents** - read on demand, not charged unless read. Every definition whose resolved
-`budget:` is a byte ceiling and that is not always loaded, at each scope in reach: `overview.md`, and
-the current work item's `instructions.md` and `summary.md` where they exist. Derive the set from
+`budget:` is in bytes and that is not always loaded, at each scope in reach: `overview.md`, and
+the current work item's `instructions.md` where it exists. Derive the set from
 the definitions rather than from this sentence - an overlay can add a budget, and the row it adds
 belongs here.
 
@@ -71,8 +71,8 @@ Window: 1,000,000 tokens
   File                Full     Used / limit                  Share of window
 
 Always loaded
-  <path>              <pct>%   <used> / <ceiling>            <ctx pct>%
-  <path>              <pct>%   <used> / <ceiling>            <ctx pct>%
+  <path>              <pct>%   <used> / <budget>             <ctx pct>%
+  <path>              <pct>%   <used> / <budget>             <ctx pct>%
 
 For scale
   <path>               -       <bytes> / -                   <ctx pct>%
@@ -92,7 +92,7 @@ without it: one is against the file's own limit, the other against the context w
 
 `<ctx pct>` is always the share of the window named on line 2.
 
-A column that does not apply carries `-`, never a blank and never a zero. A file with no ceiling
+A column that does not apply carries `-`, never a blank and never a zero. A file with no budget
 is not a file at 0%.
 
 The window line is printed before the sections, and no percentage may be printed before it. A

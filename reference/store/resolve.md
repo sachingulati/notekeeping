@@ -82,6 +82,10 @@ another's answer:
 there - except a probe that errors or times out, which is *unprobed*, as above. A case the answers
 raise is read from its rule then, and costs a turn of its own.
 
+**A skill's turns, and the letters or names it gives them, are the skill's own and never reach the
+user.** Between turns, say nothing, or say in plain words what is being read or written - *reading
+the work item*, never *Turn C*.
+
 ## Never infer a store from the filesystem
 
 **A directory that looks like a notes store is not a store.** Do not scan the home directory, and do

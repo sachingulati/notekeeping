@@ -43,7 +43,9 @@ ends when the user changes their mind, and a trigger saying so is noise. **Never
 never write a placeholder**: with no end stated, the entry is one line. `/nk:doctor` reports an
 entry whose trigger has plausibly fired, exactly as it does for a `decisions.md` entry's
 `Would reopen if:`; an entry with no trigger is never a finding. **What stops this file accreting is
-its budget** - every byte is charged in every prompt - and `/nk:review`, which proposes what to prune.
+`/nk:review`**, which proposes what to prune, and `/nk:doctor`, which reports the file once it passes
+its budget - every byte is charged in every prompt. **A writer never holds an instruction back for
+size**, per the budget notice.
 
 ## How one is found
 
@@ -56,5 +58,5 @@ file, as `**Would reopen if:**` does in `decisions.md`. **It is checked by grep,
 ## Delivery
 
 `NOTES.md` reads on to this file, so it is read before any task here. Every entry is charged **in
-every prompt in that repository**, against its own 5000-byte ceiling. An area is reached through
+every prompt in that repository**, against its own 5000-byte budget. An area is reached through
 `areas/INDEX.md` and `NOTES.md`'s area lines, never through an entry here.

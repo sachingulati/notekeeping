@@ -29,7 +29,7 @@ The same shape as a project's NOTES.md, the read lines included, with `<store>/`
 makes **every** session under the workspace root read this file, including ones working on no
 project at all.
 
-**A write that leaves this file at or past `budget_notice_pct` of its ceiling says so**, per
+**A write that leaves this file at or past `budget_notice_pct` of its budget says so**, per
 the budget-notice rule.
 
 **`/nk:init` creates this file with the workspace store** - the title and header only, so the

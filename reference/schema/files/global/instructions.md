@@ -23,7 +23,7 @@ True of one workspace -> that workspace's `instructions.md`. True of one project
 A fact that is true -> `NOTES.md`, or the register it belongs to.
 
 ## Entry format
-The same shape as a project's `instructions.md`, and **the same ceiling** - 5000 bytes, as at every
+The same shape as a project's `instructions.md`, and **the same budget** - 5000 bytes, as at every
 scope that admits an instruction.
 
 This file is imported by the global rule file, `~/.claude/rules/notekeeping.md`, and is charged in

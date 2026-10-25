@@ -98,7 +98,7 @@ covers the projects in that workspace.
   index.md                      the list of work items - rebuilt, never hand-written
   schema/                       your own file definitions, if any
   projects/<name>/              each project's notes
-  work/<YYYY-MM>/<id>/          each work item: requirements, plan, session, test, summary …
+  work/<YYYY-MM>/<id>/          each work item: requirements, plan, session, test, summary, artifacts/ …
 ```
 
 A run of `/nk:adopt`, `/nk:doctor`, `/nk:review` or `/nk:upgrade` that finds something is kept as a
@@ -111,7 +111,7 @@ work item too, so a stopped run resumes and a finding you declined stays decline
 | | |
 |---|---|
 | `/nk:work [what]` | start a work item. Optional - `/nk:save` makes one too |
-| `/nk:save` | checkpoint - the task's record, what it taught you, and Claude Code's memory for this folder |
+| `/nk:save` | checkpoint - the task's record, what it taught you, and Claude Code's memory for this folder. `--no-promote` writes the task's record and leaves the rest to the next save; `--unattended` runs it without a question, for a save nobody starts by hand |
 | `/nk:load [query]` | resume where you left off. **Reads only** |
 
 **Write-ups**, each kept in the current work item
@@ -120,7 +120,7 @@ work item too, so a stopped run resumes and a finding you declined stays decline
 |---|---|
 | `/nk:plan` | how the work will be done |
 | `/nk:test` | how it is verified, by machine and by hand |
-| `/nk:summary` | what happened, in plain language, for someone who was not involved |
+| `/nk:summary` | what the work is, what was done and why, and what to check - one readable story, in markdown or as a page |
 
 **Knowledge**
 

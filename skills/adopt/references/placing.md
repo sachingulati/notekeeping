@@ -53,8 +53,8 @@ to, and `instructions.md` keeps one trigger line - *before cutting a release, re
 and the report says that applying it changes how the agent behaves.
 
 **The budget does not bind the run.** Every instruction from a context file is placed, and the lean
-pass, not the ceiling, decides what earns a line. The write says so per the budget notice, above,
-and the report names each file it left past its ceiling.
+pass, not the budget, decides what earns a line. The write says so per the budget notice, above,
+and the report names each file it left past its budget.
 
 ## The lean pass
 
